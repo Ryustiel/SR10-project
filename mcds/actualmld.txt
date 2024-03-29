@@ -1,0 +1,97 @@
+@startuml
+
+object Utilisateur {
+  #Email: varchar(max_mail)
+  MotDePasse: varchar(max_pwd)
+  Nom: varchar(max_small)
+  Prenom: varchar(max_small)
+  Telephone: numeric(max_small)
+  DateCreation: datetime
+  StatutCompte: varchar(len("inactif"))
+  TypeCompte: varchar(len("administrateur"))
+  IdOrganisation => Organisation:NumeroSiren
+  ---
+  StatutCompte in {"actif", "inactif"}
+  TypeCompte in {"candidat", "recruteur", "administrateur", 
+  ..."recruteur en attente", "administrateur en attente"}
+}
+
+object DemandeAjoutOrganisation {
+  #IdDemandeAjout: numeric
+  IdDemandeur => Utilisateur:Email
+  IdOrganisation => Organisation:NumeroSiren
+  ---
+  IdDemandeur => Utilisateur:TypeCompte = "recruteur"
+  IdOrganisation => Organisation:StatutOrganisation = "en attente"
+}
+
+object Organisation {
+  #NumeroSiren: varchar(len(max_length_siren))
+  Nom: varchar
+  Type: varchar
+  AdresseAdministrative: varchar
+  StatutOrganisation: varchar
+  ---
+  StatutOrganisation in {"approuvée", "en attente"}
+}
+
+object OffreEmploi {
+  #IdOffre:numeric
+  Etat: varchar
+  DateValidite: datetime
+  ListePieces: varchar
+  NombrePieces: numeric
+  IdFiche => FichePoste:IdFiche
+  IdRecruteur => Utilisateur:Email
+  ---
+  Etat in {"publié", "non publié", "expiré"}
+  IdRecruteur => Utilisateur:TypeCompte = "recruteur"
+}
+
+object FichePoste {
+  #IdFiche: numeric
+  Intitule: varchar
+  StatutPoste: varchar
+  ResponsableHiérarchique: varchar
+  TypeMetier: varchar
+  LieuMission: varchar
+  Rythme: varchar
+  Salaire: varchar
+  Description: varchar
+  IdOrganisation => Organisation:NumeroSiren
+  ---
+  IdOrganisation => Organisation:StatutOrganisation = "approuvée"
+}
+
+object Candidature {
+  #IdCandidature: numeric
+  DateCandidature: datetime
+  IdCandidat => Utilisateur:Email
+  IdOffre => OffreEmploi:IdOffre
+  ---
+  IdCandidat => Utilisateur:TypeCompte = "candidat"
+}
+
+object AssociationFichiers {
+    #IdAssociation: numeric
+    IdCandidature => Candidature:IdCandidature
+    Fichier: varchar (url?)
+}
+
+Utilisateur --> Organisation
+
+Candidature --> OffreEmploi
+Candidature --> Utilisateur
+
+OffreEmploi --> Utilisateur
+OffreEmploi --> FichePoste
+
+DemandeAjoutOrganisation --> Utilisateur
+DemandeAjoutOrganisation --> Organisation
+
+FichePoste --> Organisation
+
+AssociationFichiers --> Candidature
+
+
+@enduml
