@@ -1,7 +1,7 @@
 @startuml
 
-object Utilisateur {
-  Email: text [PK]
+class Utilisateur {
+  + Email: text
   MotDePasse: text
   Nom: text
   Prénom: text
@@ -10,35 +10,33 @@ object Utilisateur {
   StatutCompte: {"actif", "inactif"}
 }
 
-object Candidat {
+class Candidat {
 
 }
 
-object Administrateur {
+class Administrateur {
 
 }
 
-object Recruteur {
-  Organisation: Organisation
+class Recruteur {
 }
 
-object Organisation {
-  NumeroSiren: text [PK]
+class Organisation {
+  + NumeroSiren: text
   Nom: text
   Type: text
   AdresseAdministrative: text
 }
 
-object OffreEmploi {
-  NumeroUnique: numeric [PK]
+class OffreEmploi {
+  + NumeroUnique: numeric
   Etat: {"publié", "non publié", "expiré"}
   DateValidite: datetime
   ListePieces: text
   NombrePieces: int
 }
 
-object FichePoste {
-  Organisation: Organisation
+class FichePoste {
   Intitule: text
   StatutPoste: text
   ResponsableHiérarchique: text
@@ -49,7 +47,7 @@ object FichePoste {
   Description: text
 }
 
-object Candidature {
+class Candidature {
   DateCandidature: datetime
   PiecesDossier: files
 }
@@ -60,16 +58,14 @@ Administrateur <-- Utilisateur
 
 Recruteur "*" -- "1" Organisation: "Emploie" <
 
-Candidature "*" -- "1" OffreEmploi: "Recoit" <
+Candidature "*" -- "1" OffreEmploi: "A propos" >
 Candidature "*" -- "1" Candidat: "Dépose" <
 
-OffreEmploi "*" -- "1" Recruteur: "Publie" < 
-OffreEmploi "*" -- "1" Organisation: "Gère" < 
+OffreEmploi "*" -- "1" Recruteur: "Publie" <
 OffreEmploi "*" -- "1" FichePoste: "Définit" <
 
-Organisation "*" -- "1" Recruteur: "Soumet" < 
+Organisation "*" -- "1" Recruteur: "Soumet" <
 
-FichePoste "*" -- "1" Recruteur: "Rédige" <
 FichePoste "*" -- "1" Organisation: "Possède" <
 
 

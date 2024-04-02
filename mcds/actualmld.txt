@@ -1,15 +1,15 @@
 @startuml
 
 object Utilisateur {
-  #Email: varchar(max_mail)
-  MotDePasse: varchar(max_pwd)
-  Nom: varchar(max_small)
-  Prenom: varchar(max_small)
-  Telephone: numeric(max_small)
+  +Email: varchar
+  MotDePasse: varchar
+  Nom: varchar
+  Prenom: varchar
+  Telephone: numeric
   DateCreation: datetime
-  StatutCompte: varchar(len("inactif"))
-  TypeCompte: varchar(len("administrateur"))
-  IdOrganisation => Organisation:NumeroSiren
+  StatutCompte: varchar
+  TypeCompte: varchar
+  #IdOrganisation => Organisation:NumeroSiren
   ---
   StatutCompte in {"actif", "inactif"}
   TypeCompte in {"candidat", "recruteur", "administrateur", 
@@ -17,16 +17,16 @@ object Utilisateur {
 }
 
 object DemandeAjoutOrganisation {
-  #IdDemandeAjout: numeric
-  IdDemandeur => Utilisateur:Email
-  IdOrganisation => Organisation:NumeroSiren
+  +IdDemandeAjout: numeric
+  #IdDemandeur => Utilisateur:Email
+  #IdOrganisation => Organisation:NumeroSiren
   ---
   IdDemandeur => Utilisateur:TypeCompte = "recruteur"
   IdOrganisation => Organisation:StatutOrganisation = "en attente"
 }
 
 object Organisation {
-  #NumeroSiren: varchar(len(max_length_siren))
+  +NumeroSiren: varchar
   Nom: varchar
   Type: varchar
   AdresseAdministrative: varchar
@@ -36,20 +36,20 @@ object Organisation {
 }
 
 object OffreEmploi {
-  #IdOffre:numeric
+  +IdOffre:numeric
   Etat: varchar
   DateValidite: datetime
   ListePieces: varchar
   NombrePieces: numeric
-  IdFiche => FichePoste:IdFiche
-  IdRecruteur => Utilisateur:Email
+  #IdFiche => FichePoste:IdFiche
+  #IdRecruteur => Utilisateur:Email
   ---
   Etat in {"publié", "non publié", "expiré"}
   IdRecruteur => Utilisateur:TypeCompte = "recruteur"
 }
 
 object FichePoste {
-  #IdFiche: numeric
+  +IdFiche: numeric
   Intitule: varchar
   StatutPoste: varchar
   ResponsableHiérarchique: varchar
@@ -58,24 +58,24 @@ object FichePoste {
   Rythme: varchar
   Salaire: varchar
   Description: varchar
-  IdOrganisation => Organisation:NumeroSiren
+  #IdOrganisation => Organisation:NumeroSiren
   ---
   IdOrganisation => Organisation:StatutOrganisation = "approuvée"
 }
 
 object Candidature {
-  #IdCandidature: numeric
+  +IdCandidature: numeric
   DateCandidature: datetime
-  IdCandidat => Utilisateur:Email
-  IdOffre => OffreEmploi:IdOffre
+  #IdCandidat => Utilisateur:Email
+  #IdOffre => OffreEmploi:IdOffre
   ---
   IdCandidat => Utilisateur:TypeCompte = "candidat"
 }
 
 object AssociationFichiers {
-    #IdAssociation: numeric
-    IdCandidature => Candidature:IdCandidature
-    Fichier: varchar (url?)
+    +IdAssociation: numeric
+    #IdCandidature => Candidature:IdCandidature
+    Fichier: varchar
 }
 
 Utilisateur --> Organisation
