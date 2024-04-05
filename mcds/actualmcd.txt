@@ -10,6 +10,10 @@ class Utilisateur {
   StatutCompte: {"actif", "inactif"}
 }
 
+class Fichier {
+    data: bytes
+}
+
 class Candidat {
 
 }
@@ -52,9 +56,11 @@ class Candidature {
   PiecesDossier: files
 }
 
-Candidat <-- Utilisateur
-Recruteur <-- Utilisateur
-Administrateur <-- Utilisateur
+Candidat --> Utilisateur
+Recruteur --> Utilisateur
+Administrateur --> Utilisateur
+
+Fichier "*" -- "1" Candidature: "Contient" <
 
 Recruteur "*" -- "1" Organisation: "Emploie" <
 

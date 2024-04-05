@@ -56,8 +56,8 @@ object Candidature {
   #IdOffre => OffreEmploi:IdOffre
 }
 
-object AssociationFichiers {
-    +IdAssociation: numeric
+object Fichier {
+    +Id: numeric
     #IdCandidature => Candidature:IdCandidature
     Fichier: varchar
 }
@@ -70,7 +70,7 @@ OffreEmploi --> FichePoste
 DemandeAjoutOrganisation --> Utilisateur
 DemandeAjoutOrganisation --> Organisation
 FichePoste --> Organisation
-AssociationFichiers --> Candidature
+Fichier --> Candidature
 
 note right of Utilisateur : TypeCompte in {'candidat', 'recruteur', 'administrateur', 'recruteur en attente', 'administrateur en attente'} \nStatutCompte in {'actif', 'inactif'}
 note right of Organisation : StatutOrganisation in {'approuvée', 'en attente'}
