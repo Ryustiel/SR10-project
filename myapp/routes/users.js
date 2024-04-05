@@ -13,9 +13,8 @@ router.get('/userslist', function(req, res, next) {
     if (error) {
       return next(error);
     }
-    res.render('usersList', { title: 'Liste des utilisateurs', users: result || [] });
+    res.render('usersList', { title: 'Liste des Utilisateurs', users: result || [] });
   });
 });
-
 
 module.exports = router;
