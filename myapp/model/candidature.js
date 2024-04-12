@@ -1,81 +1,43 @@
-const pool = require('./db'); // Assurez-vous que ce chemin est correct
+const pool = require('./db');
 
 const Candidature = {
-    create({ idCandidat, idOffre, dateCandidature }, callback) {
+    async create({ idCandidat, idOffre, dateCandidature }) {
         const query = `
-            INSERT INTO Candidature 
-            (IdCandidat, IdOffre, DateCandidature) 
-            VALUES ($1, $2, $3)
-            RETURNING *;
-        `;
+      INSERT INTO Candidature 
+      (IdCandidat, IdOffre, DateCandidature) 
+      VALUES (?, ?, ?);
+    `;
         const values = [idCandidat, idOffre, dateCandidature];
-        pool.query(query, values, (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, results.rows[0]);
-            }
-        });
+        await pool.query(query, values);
+        return this.read(values[0]); // Assuming the ID or Unique Identifier is returned here
     },
 
-    read(id, callback) {
-        const query = `SELECT * FROM Candidature WHERE IdCandidature = $1;`;
-        pool.query(query, [id], (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, results.rows[0]);
-            }
-        });
+    async read(id) {
+        const query = `SELECT * FROM Candidature WHERE IdCandidature = ?;`;
+        const [results] = await pool.query(query, [id]);
+        return results[0];
     },
 
-    update(id, { idCandidat, idOffre, dateCandidature }, callback) {
+    async update(id, { idCandidat, idOffre, dateCandidature }) {
         const query = `
-            UPDATE Candidature 
-            SET IdCandidat = $2, IdOffre = $3, DateCandidature = $4
-            WHERE IdCandidature = $1
-            RETURNING *;
-        `;
-        const values = [id, idCandidat, idOffre, dateCandidature];
-        pool.query(query, values, (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, results.rows[0]);
-            }
-        });
+      UPDATE Candidature 
+      SET IdCandidat = ?, IdOffre = ?, DateCandidature = ?
+      WHERE IdCandidature = ?;
+    `;
+        const values = [idCandidat, idOffre, dateCandidature, id];
+        await pool.query(query, values);
+        return this.read(id);
     },
 
-    delete(id, callback) {
-        const query = `DELETE FROM Candidature WHERE IdCandidature = $1;`;
-        pool.query(query, [id], (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, true);
-            }
-        });
+    async delete(id) {
+        const query = `DELETE FROM Candidature WHERE IdCandidature = ?;`;
+        await pool.query(query, [id]);
     },
 
-    readall(callback) {
+    async readall() {
         const query = `SELECT * FROM Candidature;`;
-        pool.query(query, (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, results.rows);
-            }
-        });
-    },
-
-    areValid: function(idCandidature, callback) {
-        const sql = "SELECT * FROM Candidature WHERE IdCandidature = $1;";
-        pool.query(sql, [idCandidature], function(err, results) {
-            if (err) {
-                throw err;
-            }
-            callback(results.rows.length > 0);
-        });
+        const [results] = await pool.query(query);
+        return results;
     }
 };
 

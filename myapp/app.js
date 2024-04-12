@@ -1,17 +1,27 @@
-var createError = require('http-errors');
+// Importations
 var express = require('express');
-var path = require('path');
+var app = express();
+var sessions = require('express-session');
 var cookieParser = require('cookie-parser');
+var path = require('path');
 var logger = require('morgan');
 
+// Importations des routeurs
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var orgsRouter = require('./routes/orgs');
+var jobsRouter = require('./routes/jobs');
+var loginRouter = require('./routes/login');
+var dashboardRouter = require('./routes/dashboard');
+var registerRouter = require('./routes/register');
 
-var app = express();
-
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+// Configurations
+app.use(sessions({
+  secret: "idjijoekozkdjjsqlkdsqkd",
+  saveUninitialized: true,
+  cookie: {maxAge: 1000 * 60 * 60 * 2, httpOnly: true, sameSite: 'Strict'},
+  resave: false
+}));
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -19,24 +29,40 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+// Routage
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/orgs', require('./routes/orgs')); // Ajout de la route pour les organisations
-app.use('/jobs', require('./routes/jobs')); // Ajout de la route pour les offres d'emploi
-// catch 404 and forward to error handler
+app.use('/orgs', orgsRouter);
+app.use('/jobs', jobsRouter);
+app.use('/dashboard', dashboardRouter);
+app.use('/', loginRouter);
+app.use('/', registerRouter);
+
+// Gestion des erreurs
 app.use(function(req, res, next) {
+  var createError = require('http-errors');
   next(createError(404));
 });
 
-// error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  // Capture le statut de l'erreur ou utilisez 500 par défaut si non spécifié
+  const status = err.status || 500;
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  // Environnement de développement : on montre les détails de l'erreur
+  // En production, cache ces détails pour des raisons de sécurité.
+  const errorDetails = req.app.get('env') === 'development' ? err : {};
+
+  // Rendu de la page d'erreur avec les détails
+  res.status(status).render('error', {
+    message: err.message,
+    error: {
+      status: status,
+      stack: errorDetails.stack || 'Pas de stacktrace disponible'
+    }
+  });
 });
 
 module.exports = app;

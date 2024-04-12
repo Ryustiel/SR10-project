@@ -1,81 +1,49 @@
-const pool = require('./db'); // Assurez-vous que ce chemin est correct
+const pool = require('./db');
 
 const Organisation = {
-    create({ numeroSiren, nom, type, adresseAdministrative, statutOrganisation }, callback) {
+    async create({ numeroSiren, nom, type, adresseAdministrative, statutOrganisation }) {
         const query = `
-            INSERT INTO Organisation 
-            (NumeroSiren, Nom, Type, AdresseAdministrative, StatutOrganisation) 
-            VALUES ($1, $2, $3, $4, $5)
-            RETURNING *;
-        `;
+      INSERT INTO Organisation 
+      (NumeroSiren, Nom, Type, AdresseAdministrative, StatutOrganisation) 
+      VALUES (?, ?, ?, ?, ?);
+    `;
         const values = [numeroSiren, nom, type, adresseAdministrative, statutOrganisation];
-        pool.query(query, values, (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, results.rows[0]);
-            }
-        });
+        await pool.query(query, values);
+        return this.read(numeroSiren);
     },
 
-    read(numeroSiren, callback) {
-        const query = `SELECT * FROM Organisation WHERE NumeroSiren = $1;`;
-        pool.query(query, [numeroSiren], (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, results.rows[0]);
-            }
-        });
+    async read(numeroSiren) {
+        const query = `SELECT * FROM Organisation WHERE NumeroSiren = ?;`;
+        const [results] = await pool.query(query, [numeroSiren]);
+        return results[0];
     },
 
-    update(numeroSiren, { nom, type, adresseAdministrative, statutOrganisation }, callback) {
+    async update(numeroSiren, { nom, type, adresseAdministrative, statutOrganisation }) {
         const query = `
-            UPDATE Organisation 
-            SET Nom = $2, Type = $3, AdresseAdministrative = $4, StatutOrganisation = $5
-            WHERE NumeroSiren = $1
-            RETURNING *;
-        `;
-        const values = [numeroSiren, nom, type, adresseAdministrative, statutOrganisation];
-        pool.query(query, values, (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, results.rows[0]);
-            }
-        });
+      UPDATE Organisation 
+      SET Nom = ?, Type = ?, AdresseAdministrative = ?, StatutOrganisation = ?
+      WHERE NumeroSiren = ?;
+    `;
+        const values = [nom, type, adresseAdministrative, statutOrganisation, numeroSiren];
+        await pool.query(query, values);
+        return this.read(numeroSiren);
     },
 
-    delete(numeroSiren, callback) {
-        const query = `DELETE FROM Organisation WHERE NumeroSiren = $1;`;
-        pool.query(query, [numeroSiren], (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, true);
-            }
-        });
+    async delete(numeroSiren) {
+        const query = `DELETE FROM Organisation WHERE NumeroSiren = ?;`;
+        await pool.query(query, [numeroSiren]);
     },
 
-    readall(callback) {
+    async readall() {
         const query = `SELECT * FROM Organisation;`;
-        pool.query(query, (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, results.rows);
-            }
-        });
+        const [results] = await pool.query(query);
+        return results;
     },
 
-    areValid: function(idOrganisation, callback) {
-        const sql = "SELECT * FROM Organisation WHERE numerosiren = $1;";
-        pool.query(sql, [idOrganisation], function(err, results) {
-            if (err) {
-                throw err;
-            }
-            callback(results.rows.length > 0);
-        });
+    async areValid(idOrganisation) {
+        const sql = "SELECT * FROM Organisation WHERE NumeroSiren = ?;";
+        const [results] = await pool.query(sql, [idOrganisation]);
+        return results.length > 0;
     }
 };
 

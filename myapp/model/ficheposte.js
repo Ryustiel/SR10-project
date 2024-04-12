@@ -1,81 +1,43 @@
-const pool = require('./db'); // Assurez-vous que ce chemin est correct
+const pool = require('./db');
 
 const FichePoste = {
-    create({ intitule, statutPoste, responsableHierarchique, typeMetier, lieuMission, rythme, salaire, description, idOrganisation }, callback) {
+    async create({ intitule, statutPoste, responsableHierarchique, typeMetier, lieuMission, rythme, salaire, description, idOrganisation }) {
         const query = `
-            INSERT INTO FichePoste 
-            (Intitule, StatutPoste, ResponsableHierarchique, TypeMetier, LieuMission, Rythme, Salaire, Description, IdOrganisation) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-            RETURNING *;
-        `;
+      INSERT INTO FichePoste 
+      (Intitule, StatutPoste, ResponsableHierarchique, TypeMetier, LieuMission, Rythme, Salaire, Description, IdOrganisation)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+    `;
         const values = [intitule, statutPoste, responsableHierarchique, typeMetier, lieuMission, rythme, salaire, description, idOrganisation];
-        pool.query(query, values, (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, results.rows[0]);
-            }
-        });
+        await pool.query(query, values);
+        return this.read(values[0]); // assuming the ID or Unique Identifier is returned here
     },
 
-    read(id, callback) {
-        const query = `SELECT * FROM FichePoste WHERE IdFiche = $1;`;
-        pool.query(query, [id], (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, results.rows[0]);
-            }
-        });
+    async read(id) {
+        const query = `SELECT * FROM FichePoste WHERE IdFiche = ?;`;
+        const [results] = await pool.query(query, [id]);
+        return results[0];
     },
 
-    update(id, { intitule, statutPoste, responsableHierarchique, typeMetier, lieuMission, rythme, salaire, description, idOrganisation }, callback) {
+    async update(id, { intitule, statutPoste, responsableHierarchique, typeMetier, lieuMission, rythme, salaire, description, idOrganisation }) {
         const query = `
-            UPDATE FichePoste 
-            SET Intitule = $2, StatutPoste = $3, ResponsableHierarchique = $4, TypeMetier = $5, LieuMission = $6, Rythme = $7, Salaire = $8, Description = $9, IdOrganisation = $10
-            WHERE IdFiche = $1
-            RETURNING *;
-        `;
-        const values = [id, intitule, statutPoste, responsableHierarchique, typeMetier, lieuMission, rythme, salaire, description, idOrganisation];
-        pool.query(query, values, (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, results.rows[0]);
-            }
-        });
+      UPDATE FichePoste 
+      SET Intitule = ?, StatutPoste = ?, ResponsableHierarchique = ?, TypeMetier = ?, LieuMission = ?, Rythme = ?, Salaire = ?, Description = ?, IdOrganisation = ?
+      WHERE IdFiche = ?;
+    `;
+        const values = [intitule, statutPoste, responsableHierarchique, typeMetier, lieuMission, rythme, salaire, description, idOrganisation, id];
+        await pool.query(query, values);
+        return this.read(id);
     },
 
-    delete(id, callback) {
-        const query = `DELETE FROM FichePoste WHERE IdFiche = $1;`;
-        pool.query(query, [id], (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, true);
-            }
-        });
+    async delete(id) {
+        const query = `DELETE FROM FichePoste WHERE IdFiche = ?;`;
+        await pool.query(query, [id]);
     },
 
-    readall(callback) {
+    async readall() {
         const query = `SELECT * FROM FichePoste;`;
-        pool.query(query, (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, results.rows);
-            }
-        });
-    },
-
-    areValid: function(idFiche, callback) {
-        const sql = "SELECT * FROM FichePoste WHERE IdFiche = $1;";
-        pool.query(sql, [idFiche], function(err, results) {
-            if (err) {
-                throw err;
-            }
-            callback(results.rows.length > 0);
-        });
+        const [results] = await pool.query(query);
+        return results;
     }
 };
 
