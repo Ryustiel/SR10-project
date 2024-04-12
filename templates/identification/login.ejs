@@ -11,6 +11,11 @@
     <div class="row">
         <div class="col-md-6 offset-md-3">
             <h2 class="mb-3">Connexion</h2>
+            <% if (locals.errorMessage) { %>
+                <div class="alert alert-danger" role="alert">
+                    <%= errorMessage %>
+                </div>
+            <% } %>
             <form action="/login" method="POST">
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
@@ -25,5 +30,9 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.cookie = "userEmail=; SameSite=Strict; path=/";
+</script>
 </body>
 </html>
