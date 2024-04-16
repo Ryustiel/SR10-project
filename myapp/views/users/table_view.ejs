@@ -1,0 +1,18 @@
+<table class="table">
+    <thead class="table-dark">
+    <tr>
+        <th scope="col">Nom</th>
+        <th scope="col">Prénom</th>
+        <th scope="col">Email</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% users.forEach((user) => { %>
+        <tr>
+            <td><%= user.nom %></td>
+            <td><%= user.prenom %></td>
+            <td><%= user.email %></td>
+        </tr>
+    <% }) %>
+    </tbody>
+</table>
