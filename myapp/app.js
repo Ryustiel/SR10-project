@@ -9,7 +9,7 @@ var logger = require('morgan');
 // Importations des routeurs
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var orgsRouter = require('./routes/orgs');
+var orgsRouter = require('./routes/organizations');
 var jobsRouter = require('./routes/jobs');
 var loginRouter = require('./routes/login');
 var dashboardRouter = require('./routes/dashboard');

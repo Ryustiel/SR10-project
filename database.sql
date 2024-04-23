@@ -16,7 +16,7 @@ CREATE TABLE Utilisateur (
                              Telephone NUMERIC(10),
                              DateCreation TIMESTAMP,
                              StatutCompte VARCHAR CHECK (StatutCompte IN ('actif', 'inactif')),
-                             TypeCompte VARCHAR CHECK (TypeCompte IN ('candidat', 'recruteur', 'administrateur.ejs', 'recruteur en attente', 'administrateur.ejs en attente')),
+                             TypeCompte VARCHAR CHECK (TypeCompte IN ('candidat', 'recruteur', 'administrateur', 'recruteur en attente', 'administrateur en attente')),
                              IdOrganisation VARCHAR REFERENCES Organisation(NumeroSiren)
 );
 

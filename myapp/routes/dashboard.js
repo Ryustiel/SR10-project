@@ -14,7 +14,7 @@ router.get('/', isLoggedIn, async (req, res) => {
     try {
         const email = req.session.userEmail;
         const userDetails = await Utilisateur.read(email);
-        res.render('dashboard', { user: userDetails });
+        res.render('dashboards/dashboard', { user: userDetails });
     } catch (error) {
         res.status(500).send("Erreur de serveur.");
     }
