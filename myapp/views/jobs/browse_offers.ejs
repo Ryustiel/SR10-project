@@ -25,11 +25,11 @@
         <tbody>
         <% offres.forEach((offre) => { %>
             <tr>
-                <td><%= offre.idoffre %></td>
-                <td><%= offre.etat %></td>
-                <td><%= offre.datevalidite ? new Date(offre.datevalidite).toISOString().slice(0, 10) : 'N/A' %></td>
-                <td><%= offre.listepieces %></td>
-                <td><%= offre.idrecruteur %></td>
+                <td><%= offre.IdOffre %></td>
+                <td><%= offre.Etat %></td>
+                <td><%= offre.DateValidite ? new Date(offre.DateValidite).toISOString().slice(0, 10) : 'N/A' %></td>
+                <td><%= offre.ListePieces %></td>
+                <td><%= offre.IdRecruteur %></td>
             </tr>
         <% }) %>
         </tbody>

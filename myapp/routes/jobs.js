@@ -1,22 +1,15 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-    res.send('respond with a resource');
-});
-
 const OffreEmploi = require('../model/offreemploi'); // Ajustez le chemin selon votre structure
 
-// Route pour obtenir la liste des offres d'emploi
-router.get('/browse', function(req, res, next) {
-    OffreEmploi.readall(function(error, offres) {
-        if (error) {
-            next(error); // Passe l'erreur au gestionnaire d'erreurs d'Express
-        } else {
-            res.render('jobs/browse_offers', { title: 'Liste des Offres d\'Emploi', offres: offres || [] }); // Assurez-vous d'avoir une vue jobList configurée
-        }
-    });
+router.get('/jobslist', async function(req, res, next) {
+    try {
+        const offres = await OffreEmploi.readall();
+        res.render('jobsList', { title: 'Liste des Offres d\'Emploi', offres: offres });
+    } catch (error) {
+        next(error); // Passe l'erreur au gestionnaire d'erreurs d'Express
+    }
 });
 
 router.post('/view', function(req, res, next) {

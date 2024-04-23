@@ -1,3 +1,3 @@
-<h1><%= message %></h1>
-<h2><%= error.status %></h2>
-<pre><%= error.stack %></pre>
+<h1><%= message ? message : "Erreur non spécifiée" %></h1>
+<h2><%= error && error.status ? error.status : "Non disponible" %></h2>
+<pre><%= error && error.stack ? error.stack : "Pas de stacktrace disponible" %></pre>

@@ -1,22 +1,15 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-    res.send('respond with a resource');
-});
-
 const Organisation = require('../model/organisation'); // Ajustez le chemin selon votre structure de projet
 
-// Route pour obtenir la liste des organisations
-router.get('/browse', function(req, res, next) {
-    Organisation.readall(function(error, organizations) {
-        if (error) {
-            next(error); // Passe l'erreur au gestionnaire d'erreurs d'Express
-        } else {
-            res.render('organizations/browse_organizations', { title: 'Liste des Organisations', organizations: organizations || [] }); // Assurez-vous d'avoir une vue organizationList configurée
-        }
-    });
+router.get('/orgslist', async function(req, res, next) {
+    try {
+        const organizations = await Organisation.readall();
+        res.render('orgsList', { title: 'Liste des Organisations', organizations: organizations });
+    } catch (error) {
+        next(error); // Passe l'erreur au gestionnaire d'erreurs d'Express
+    }
 });
 
 module.exports = router;

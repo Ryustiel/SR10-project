@@ -1,83 +1,44 @@
-const pool = require('./db'); // Vérifiez que ce chemin est correct
+const pool = require('./db');
 
 const DemandeAjoutOrganisation = {
-    create({ idDemandeur, idOrganisation }, callback) {
+    async create({ idDemandeur, idOrganisation }) {
         const query = `
-            INSERT INTO DemandeAjoutOrganisation
-            (IdDemandeur, IdOrganisation)
-            VALUES ($1, $2)
-            RETURNING *;
-        `;
+      INSERT INTO DemandeAjoutOrganisation 
+      (IdDemandeur, IdOrganisation) 
+      VALUES (?, ?);
+    `;
         const values = [idDemandeur, idOrganisation];
-        pool.query(query, values, (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, results.rows[0]);
-            }
-        });
+        await pool.query(query, values);
+        return this.read(idDemandeur);
     },
 
-    read(id, callback) {
-        const query = `SELECT * FROM DemandeAjoutOrganisation WHERE IdDemandeAjout = $1;`;
-        pool.query(query, [id], (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, results.rows[0]);
-            }
-        });
+    async read(id) {
+        const query = `SELECT * FROM DemandeAjoutOrganisation WHERE IdDemandeAjout = ?;`;
+        const [results] = await pool.query(query, [id]);
+        return results[0];
     },
 
-    update(id, { idDemandeur, idOrganisation }, callback) {
+    async update(id, { idDemandeur, idOrganisation }) {
         const query = `
-            UPDATE DemandeAjoutOrganisation
-            SET IdDemandeur = $2, IdOrganisation = $3
-            WHERE IdDemandeAjout = $1
-            RETURNING *;
-        `;
-        const values = [id, idDemandeur, idOrganisation];
-        pool.query(query, values, (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, results.rows[0]);
-            }
-        });
+      UPDATE DemandeAjoutOrganisation 
+      SET IdDemandeur = ?, IdOrganisation = ?
+      WHERE IdDemandeAjout = ?;
+    `;
+        const values = [idDemandeur, idOrganisation, id];
+        await pool.query(query, values);
+        return this.read(id);
     },
 
-    delete(id, callback) {
-        const query = `DELETE FROM DemandeAjoutOrganisation WHERE IdDemandeAjout = $1;`;
-        pool.query(query, [id], (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, true);
-            }
-        });
+    async delete(id) {
+        const query = `DELETE FROM DemandeAjoutOrganisation WHERE IdDemandeAjout = ?;`;
+        await pool.query(query, [id]);
     },
 
-    readall(callback) {
+    async readall() {
         const query = `SELECT * FROM DemandeAjoutOrganisation;`;
-        pool.query(query, (error, results) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(null, results.rows);
-            }
-        });
-    },
-
-    areValid: function(idDemande, callback) {
-        const sql = "SELECT * FROM DemandeAjoutOrganisation WHERE IdDemandeAjout = $1;";
-        pool.query(sql, [idDemande], function(err, results) {
-            if (err) {
-                throw err;
-            }
-            callback(results.rows.length > 0);
-        });
+        const [results] = await pool.query(query);
+        return results;
     }
-
 };
 
 module.exports = DemandeAjoutOrganisation;
