@@ -10,7 +10,12 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
-module.exports = pool.promise(); // Cela permet l'utilisation de `.then()` et `.catch()` sur les requêtes
+const promisePool = pool.promise();
+
+module.exports = {
+    query: (...params) => promisePool.query(...params),
+    close: () => pool.end()
+};
 
 pool.getConnection((err, connection) => {
     if (err) {
