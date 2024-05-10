@@ -3,13 +3,14 @@ const pool = require('./db');
 const FichePoste = {
     async create({ intitule, statutPoste, responsableHierarchique, typeMetier, lieuMission, rythme, salaire, description, idOrganisation }) {
         const query = `
-      INSERT INTO FichePoste 
-      (Intitule, StatutPoste, ResponsableHierarchique, TypeMetier, LieuMission, Rythme, Salaire, Description, IdOrganisation)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
-    `;
+            INSERT INTO FichePoste 
+            (Intitule, StatutPoste, ResponsableHierarchique, TypeMetier, LieuMission, Rythme, Salaire, Description, IdOrganisation)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+        `;
         const values = [intitule, statutPoste, responsableHierarchique, typeMetier, lieuMission, rythme, salaire, description, idOrganisation];
         await pool.query(query, values);
-        return true; // Retourner quelque chose de significatif si nécessaire
+        // Assume it returns something meaningful
+        return this.read(idOrganisation);
     },
 
     async read(id) {
@@ -20,10 +21,10 @@ const FichePoste = {
 
     async update(id, { intitule, statutPoste, responsableHierarchique, typeMetier, lieuMission, rythme, salaire, description, idOrganisation }) {
         const query = `
-      UPDATE FichePoste 
-      SET Intitule = ?, StatutPoste = ?, ResponsableHierarchique = ?, TypeMetier = ?, LieuMission = ?, Rythme = ?, Salaire = ?, Description = ?, IdOrganisation = ?
-      WHERE IdFiche = ?;
-    `;
+            UPDATE FichePoste 
+            SET Intitule = ?, StatutPoste = ?, ResponsableHierarchique = ?, TypeMetier = ?, LieuMission = ?, Rythme = ?, Salaire = ?, Description = ?, IdOrganisation = ?
+            WHERE IdFiche = ?;
+        `;
         const values = [intitule, statutPoste, responsableHierarchique, typeMetier, lieuMission, rythme, salaire, description, idOrganisation, id];
         await pool.query(query, values);
         return this.read(id);
