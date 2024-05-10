@@ -1,71 +1,66 @@
-// main components of the app
-var express = require('express');
-var app = express();
-var sessions = require('express-session');
-var cookieParser = require('cookie-parser');
-var path = require('path');
-var logger = require('morgan');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const sessions = require('express-session');
+const logger = require('./logger');
 
-// Importations des routeurs
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var orgsRouter = require('./routes/organizations');
-var jobsRouter = require('./routes/jobs');
-var loginRouter = require('./routes/login');
-var dashboardRouter = require('./routes/dashboard');
-var registerRouter = require('./routes/register');
-const applicationsRouter = require('./routes/applications');
+// Création de l'application Express
+const app = express();
 
-// Configurations
+// Affichage de l'accès aux pages dans le logging
+app.use((req, res, next) => {
+    logger.info(`Requête reçue: ${req.method} ${req.url} de ${req.ip}`);
+    next();
+});
+
+// Configuration des sessions
 app.use(sessions({
-  secret: "idjijoekozkdjjsqlkdsqkd",
-  saveUninitialized: true,
-  cookie: {maxAge: 1000 * 60 * 60 * 2, httpOnly: true, sameSite: 'Strict'},
-  resave: false
+    secret: "jddjzodkezjfzoc,azzqc@€ecjzakexzm,ac45z1525z45",
+    saveUninitialized: true,
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 2, // Durée de vie du cookie : 2 heures
+        httpOnly: true, // Le cookie ne sera pas accessible par les scripts côté client
+        sameSite: 'Lax' // Protection simple
+    },
+    resave: false
 }));
 
-// middleware setup
-app.use(logger('dev'));
+// Ajout du parsing JSON et URL-encoded pour gérer les données POST
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Gestion des cookies
 app.use(cookieParser());
+
+// Serveur de fichiers statiques
 app.use(express.static(path.join(__dirname, 'public')));
 
-// adding routes
+// Vue engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-// Routage
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/orgs', orgsRouter);
-app.use('/jobs', jobsRouter);
-app.use('/applications', applicationsRouter);
-app.use('/dashboard', dashboardRouter);
-app.use('/', loginRouter);
-app.use('/', registerRouter);
+// Routes Importation
+var indexRouter = require('./routes/index');
 
-// Gestion des erreurs
+// Appliquer les routes
+app.use('/', indexRouter);
+
+// Gestion des erreurs - Capture des routes non traitées
 app.use(function(req, res, next) {
-  var createError = require('http-errors');
-  next(createError(404));
+    res.status(404).render('error', {
+        message: "La page que vous avez demandée n'existe pas."
+    });
 });
 
+// Gestion des erreurs - Middleware d'erreur
 app.use(function(err, req, res, next) {
-    // Capture le statut de l'erreur ou utilisez 500 par défaut si non spécifié
-    const status = err.status || 500;
+    // Log de l'erreur
+    logger.error(`Erreur : ${err.status || 500} - ${err.message}, Stack: ${err.stack}`);
 
-    // Environnement de développement : on montre les détails de l'erreur
-    // En production, cache ces détails pour des raisons de sécurité.
-    const errorDetails = req.app.get('env') === 'development' ? err : {};
-
-    // Rendu de la page d'erreur avec les détails
-    res.status(status).render('error', {
-        message: err.message,
-        error: {
-            status: status,
-            stack: errorDetails.stack || 'Pas de stacktrace disponible'
-        }
+    // Réponse de l'erreur
+    res.status(err.status || 500).render('error', {
+        message: "Une erreur est survenue sur le serveur.",
+        error: req.app.get('env') === 'development' ? err : {}
     });
 });
 

@@ -1,32 +1,31 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+
+// Importation des routages spécifiques
 const loginRouter = require('./login');
 const registerRouter = require('./register');
 const dashboardRouter = require('./dashboard');
+const logger = require("../logger");
 
-/* GET home page. */
-router.all('/', function(req, res) {
+// Redirection principale vers la page de login
+router.get('/', function(req, res) {
   res.redirect('/login');
 });
 
-/* Utilisation des routeurs pour les pages de connexion et d'inscription */
+router.get('/logout', (req, res) => {
+  req.session.destroy(() => {
+    logger.info("Session utilisateur terminée.");
+    res.redirect('/login');
+  });
+});
+
+// Attachement des routes spécifiques
 router.use('/login', loginRouter);
 router.use('/register', registerRouter);
-
-// A changer pour rediriger vers le bon dashboard sur chaque type de compte
-router.get('/candidat', function(req, res, next) {
-  res.render('dashboards/dashboard');
-});
-
-router.get('/recruteur', function(req, res, next) {
-  res.render('dashboards/dashboard');
-});
-
-router.get('/administrateur', function(req, res, next) {
-  res.render('dashboards/dashboard');
-});
-
 router.use('/dashboard', dashboardRouter);
 
+router.use('/candidat', dashboardRouter);
+router.use('/recruteur', dashboardRouter);
+router.use('/administrateur', dashboardRouter);
 
 module.exports = router;

@@ -13,7 +13,7 @@ CREATE TABLE Utilisateur (
                              MotDePasse VARCHAR,
                              Nom VARCHAR,
                              Prenom VARCHAR,
-                             Telephone NUMERIC(10),
+                             Telephone VARCHAR(10),
                              DateCreation TIMESTAMP,
                              StatutCompte VARCHAR CHECK (StatutCompte IN ('actif', 'inactif')),
                              TypeCompte VARCHAR CHECK (TypeCompte IN ('candidat', 'recruteur', 'administrateur', 'recruteur en attente', 'administrateur en attente')),
