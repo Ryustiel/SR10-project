@@ -9,7 +9,7 @@ const FichePoste = {
     `;
         const values = [intitule, statutPoste, responsableHierarchique, typeMetier, lieuMission, rythme, salaire, description, idOrganisation];
         await pool.query(query, values);
-        return this.read(values[0]); // assuming the ID or Unique Identifier is returned here
+        return true; // Retourner quelque chose de significatif si nécessaire
     },
 
     async read(id) {

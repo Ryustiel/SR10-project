@@ -32,7 +32,7 @@ CREATE TABLE FichePoste (
                             IdFiche SERIAL PRIMARY KEY,
                             Intitule VARCHAR,
                             StatutPoste VARCHAR,
-                            ResponsableHiérarchique VARCHAR,
+                            ResponsableHierarchique VARCHAR,
                             TypeMetier VARCHAR,
                             LieuMission VARCHAR,
                             Rythme VARCHAR,
@@ -82,7 +82,7 @@ INSERT INTO DemandeAjoutOrganisation (IdDemandeur, IdOrganisation) VALUES
     ('jane.doe@example.com', '987654321');
 
 -- Insertion dans FichePoste
-INSERT INTO FichePoste (Intitule, StatutPoste, ResponsableHiérarchique, TypeMetier, LieuMission, Rythme, Salaire, Description, IdOrganisation) VALUES
+INSERT INTO FichePoste (Intitule, StatutPoste, ResponsableHierarchique, TypeMetier, LieuMission, Rythme, Salaire, Description, IdOrganisation) VALUES
     ('Développeur Full Stack', 'Ouvert', 'M. Dupont', 'Informatique', '123 Boulevard de l''Innovation, 75000 Paris', 'Plein temps', '45000€ annuel', 'Recherche développeur Full Stack expérimenté.', '123456789');
 
 -- Insertion dans OffreEmploi

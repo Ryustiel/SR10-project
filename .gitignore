@@ -27,3 +27,4 @@
 ## File-based project format:
 *.ipr
 *.iws
+/myapp/coverage/

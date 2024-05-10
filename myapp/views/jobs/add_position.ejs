@@ -1,16 +1,65 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <%- include('../head.ejs')%>
+    <title>Fiches de Poste</title>
 </head>
 <body>
 
-    <%- include('navbar.ejs') %>
+    <%- include('../navbar.ejs') %>
 
-    <h1>View offer</h1>
+    <% if (notification) { %>
+        <%- include('../notification.ejs') %>
+    <% } %>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+
+                <h2 class="mb-3">Création de Fiche de Poste</h2>
+                <% if (locals.errorMessage) { %>
+                    <div class="alert alert-danger" role="alert">
+                        <%= errorMessage %>
+                    </div>
+                <% } %>
+                <form action="/jobs/add_position" method="POST">
+                    <div class="mb-3">
+                        <label for="intitule" class="form-label">Intitulé</label>
+                        <input type="text" class="form-control" id="intitule" name="intitule" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="statutPoste" class="form-label">Statut du Poste</label>
+                        <input type="text" class="form-control" id="statutPoste" name="statutPoste" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="responsableHierarchique" class="form-label">Responsable Hiérarchique</label>
+                        <input type="text" class="form-control" id="responsableHierarchique" name="responsableHierarchique" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="typeMetier" class="form-label">Type de Métier</label>
+                        <input type="text" class="form-control" id="typeMetier" name="typeMetier" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lieuMission" class="form-label">Lieu de Mission</label>
+                        <input type="text" class="form-control" id="lieuMission" name="lieuMission" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="rythme" class="form-label">Rythme</label>
+                        <input type="text" class="form-control" id="rythme" name="rythme" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="salaire" class="form-label">Salaire</label>
+                        <input type="text" class="form-control" id="salaire" name="salaire" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Créer</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>
