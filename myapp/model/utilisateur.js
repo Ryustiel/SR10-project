@@ -19,10 +19,13 @@ const Utilisateur = {
         return results[0];
     },
 
-    async update(email, updates) {
-        const fields = Object.keys(updates).map(field =>`${field} = ?`).join(', ');
-        const values = [...Object.values(updates), email];
-        const query = `UPDATE Utilisateur SET ${fields} WHERE Email = ?;`;
+    async update(email, { motDePasse, nom, prenom, telephone, dateCreation, statutCompte, typeCompte, idOrganisation }) {
+        const query = `
+      UPDATE Utilisateur 
+      SET MotDePasse = ?, Nom = ?, Prenom = ?, Telephone = ?, DateCreation = ?, StatutCompte = ?, TypeCompte = ?, IdOrganisation = ?
+      WHERE Email = ?;
+    `;
+        const values = [motDePasse, nom, prenom, telephone, dateCreation, statutCompte, typeCompte, idOrganisation, email];
         await pool.query(query, values);
         return this.read(email);
     },
@@ -66,40 +69,7 @@ const Utilisateur = {
         } else {
             return null;
         }
-    },
-
-    async updateTypeCompte(email, newTypeCompte) {
-        const query = `UPDATE Utilisateur SET TypeCompte = ? WHERE Email = ?;`;
-        const values = [newTypeCompte, email];
-        const [result] = await pool.query(query, values);
-        return result.affectedRows > 0; // Retourne true si une ligne a été mise à jour
-    },
-
-    async updateTypeCompteWithOrganisation(email, newTypeCompte, idOrganisation) {
-        const query = `UPDATE Utilisateur SET TypeCompte = ?, IdOrganisation = ? WHERE Email = ?;`;
-        const values = [newTypeCompte, idOrganisation, email];
-        const [result] = await pool.query(query, values);
-        return result.affectedRows > 0; // Retourne true si une ligne a été mise à jour
-    },
-
-    async getRecruiterRequests() {
-        const query = `
-        SELECT 
-            u.Nom, u.Prenom, u.Email, u.IdOrganisation, 
-            o.Nom AS OrganisationNom, o.Type AS OrganisationType, 
-            o.AdresseAdministrative, o.StatutOrganisation 
-        FROM 
-            Utilisateur u 
-        LEFT JOIN 
-            Organisation o 
-        ON 
-            u.IdOrganisation = o.NumeroSiren 
-        WHERE 
-            u.TypeCompte = 'recruteur en attente';
-    `;
-        const [results] = await pool.query(query);
-        return results;
-    },
+    }
 };
 
 module.exports = Utilisateur;
