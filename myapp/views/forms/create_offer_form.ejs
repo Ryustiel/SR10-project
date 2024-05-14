@@ -14,9 +14,12 @@
     <div class="mb-3">
         <label for="idFiche" class="form-label">Fiche de Poste</label>
         <select class="form-select" id="idFiche" name="idFiche" required>
-
+            <% for (let i = 0; i < fiches.length; i++) { %>
+                <option value="<%= fiches[i].idFiche %>">
+                    <%= fiches[i].intitule %>
+                </option>
+            <% } %>
         </select>
     </div>
     <button type="submit" class="btn btn-primary">Créer</button>
 </form>
-<%= res_string %>

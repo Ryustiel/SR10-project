@@ -29,6 +29,12 @@ const FichePoste = {
         return this.read(id);
     },
 
+    async list() {
+        const query = `SELECT idFiche, intitule FROM FichePoste;`;
+        const [results] = await pool.query(query);
+        return results;
+    },
+
     async delete(id) {
         const query = `DELETE FROM FichePoste WHERE IdFiche = ?;`;
         await pool.query(query, [id]);
