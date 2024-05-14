@@ -10,7 +10,7 @@ router.get('/', (req, res) => {
         logger.info(`Utilisateur déjà connecté : ${req.session.userEmail}`);
         res.redirect('/dashboard');
     } else {
-        res.render('login', { title: "Connexion" });
+        res.render('auth/login', { errorMessage: '' });
     }
 });
 
@@ -22,24 +22,30 @@ router.post('/', async (req, res) => {
         // Validation basique des entrées
         if (!email || !password) {
             logger.warn("Tentative de connexion sans email ou mot de passe");
-            return res.render('login', { title: "Connexion", errorMessage: 'Email et mot de passe requis.' });
+            return res.render('auth/login', { errorMessage: 'Email et mot de passe requis.' });
         }
 
         const utilisateur = await Utilisateur.read(email);
 
         if (!utilisateur) {
             logger.warn(`Tentative de connexion échouée pour l'utilisateur non trouvé: ${email}`);
-            return res.render('login', { title: "Connexion", errorMessage: 'Utilisateur non trouvé' });
+            return res.render('auth/login', { errorMessage: 'Utilisateur non trouvé' });
         }
 
         const match = await bcrypt.compare(password, utilisateur.MotDePasse);
         if (match) {
             req.session.userEmail = email;
-            logger.info(`Utilisateur connecté : ${email}`);
-            res.redirect('/dashboard');
+            req.session.userType = await Utilisateur.getType(email);
+            req.session.userAffiliation = await Utilisateur.getOrganisationId(email);
+            logger.info(`Utilisateur connecté : ${email} en tant que ${req.session.userType}`);
+
+            const returnTo = req.session.returnTo || '/dashboard'; // redirect to previous page
+            logger.info(`Redirection vers ${returnTo}, session vaut ${req.session.returnTo}`);
+            req.session.returnTo = null;
+            res.redirect(returnTo);
         } else {
             logger.warn(`Tentative de connexion échouée pour mot de passe incorrect: ${email}`);
-            res.render('login', { title: "Connexion", errorMessage: 'Mot de passe incorrect' });
+            res.render('auth/login', { errorMessage: 'Mot de passe incorrect' });
         }
     } catch (error) {
         logger.error(`Erreur dans POST /login : ${error.message}`);

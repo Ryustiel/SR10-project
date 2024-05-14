@@ -49,6 +49,26 @@ const Utilisateur = {
             return bcrypt.compare(motDePasse, user.motDePasse);
         }
         return false;
+    },
+
+    async getType(email) {
+        const query = `SELECT TypeCompte FROM Utilisateur WHERE Email = ?;`;
+        const [results] = await pool.query(query, [email]);
+        if (results.length > 0) {
+            return results[0].TypeCompte;
+        } else {
+            return null;
+        }
+    },
+
+    async getOrganisationId(email) {
+        const query = `SELECT IdOrganisation FROM Utilisateur WHERE Email = ?;`;
+        const [results] = await pool.query(query, [email]);
+        if (results.length > 0) {
+            return results[0].IdOrganisation;
+        } else {
+            return null;
+        }
     }
 };
 

@@ -7,7 +7,7 @@ const logger = require('../logger');
 
 // Route GET pour afficher le formulaire d'inscription
 router.get('/', (req, res) => {
-    res.render('register', {
+    res.render('auth/register', {
         title: "Inscription",
         errors: {},
         data: {}
@@ -29,7 +29,7 @@ router.post('/', [
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         logger.warn(`Erreur de validation lors de l'inscription : ${JSON.stringify(errors.array())}`);
-        return res.render('register', {
+        return res.render('auth/register', {
             title: "Inscription",
             errors: errors.mapped(),
             data: req.body
