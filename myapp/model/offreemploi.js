@@ -1,4 +1,5 @@
 const pool = require('./db');
+const logger = require('../logger.js')
 
 const OffreEmploi = {
     async create({ etat, dateValidite, listePieces, nombrePieces, idFiche, idRecruteur }) {
@@ -38,6 +39,34 @@ const OffreEmploi = {
         const query = `SELECT * FROM OffreEmploi;`;
         const [results] = await pool.query(query);
         return results;
+    },
+
+    async listRecruitorsOffers(idRecruteur) {
+        const query = `
+            SELECT IdOffre, Intitule, DateValidite, Etat FROM OffreEmploi AS O 
+            JOIN FichePoste AS F 
+            ON O.IdFiche = F.IdFiche
+            WHERE IdRecruteur = ?;
+        `;
+        const [results] = await pool.query(query, [idRecruteur]);
+        return results;
+    },
+
+    async publier(idOffre) {
+        const query = `UPDATE OffreEmploi SET Etat = 'publié' WHERE IdOffre = ?;`;
+        await pool.query(query, [idOffre]);
+    },
+
+    async depublier(idOffre) {
+        const query = `UPDATE OffreEmploi SET Etat = 'non publié' WHERE IdOffre = ?;`;
+        await pool.query(query, [idOffre]);
+    },
+
+    async isUserLegitimate(idOffre, idRecruteur) {
+        const query = `SELECT COUNT(*) FROM OffreEmploi WHERE IdOffre = ? AND IdRecruteur = ?`;
+        const [results] = await pool.query(query, [idOffre, idRecruteur]);
+        logger.info(`isUserLegitimate : ${idOffre} ${idRecruteur} ${results[0]['COUNT(*)']}`);
+        return results[0]['COUNT(*)'] > 0;
     }
 };
 
