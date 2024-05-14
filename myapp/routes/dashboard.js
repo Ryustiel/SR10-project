@@ -30,7 +30,7 @@ router.get('/', isLoggedIn, async (req, res) => {
         res.render('dashboards/dashboard', { user: userDetails });
     } catch (error) {
         logger.error("Erreur lors de l'accès au dashboard:", error);
-        res.status(500).render('error', { message: "Erreur de serveur.", error });
+        res.status(500).render('error', { message: "Erreur de serveur.", error: error });
     }
 });
 

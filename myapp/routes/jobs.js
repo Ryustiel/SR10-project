@@ -5,7 +5,8 @@ const FichePoste = require('../model/ficheposte');
 const OffreEmploi = require('../model/offreemploi');
 
 const isLoggedIn = require('../middleware/isLoggedIn.js');
-const isRecruitor = require('../middleware/isRecruitor.js');
+const requireRecruitorStatus = require('../middleware/requireRecruitorStatus.js');
+const requireAffiliation = require('../middleware/requireAffiliation.js');
 
 router.get('/browse_offers', isLoggedIn, async function(req, res, next) {
     try {
@@ -21,7 +22,7 @@ router.post('/view', function(req, res, next) {
     res.render('jobs/view_offer');
 });
 
-router.get('/add_offer', isLoggedIn, async function(req, res, next) {
+router.get('/add_offer', requireAffiliation, async function(req, res, next) {
     let fiches = await FichePoste.list();
 
     res.render('jobs/add_offer', {
@@ -30,12 +31,20 @@ router.get('/add_offer', isLoggedIn, async function(req, res, next) {
     });
 });
 
-router.post('/add_offer', isLoggedIn, async function(req, res, next) {
+router.post('/add_offer', requireAffiliation, async function(req, res, next) {
     try {
         let { dateValidite, listePieces, nombrePieces, idFiche } = req.body;
 
         let idRecruteur = req.session.userEmail;
         let etat = "non publié";
+
+        // prevents user from injecting an offer for a job he doesn't own
+        if (await FichePoste.isUserLegitimate(idFiche, req.session.userAffiliation) === false) {
+            res.render('jobs/add_offer', {
+                notification: 'Vous n\'avez pas les droits pour ajouter une offre pour cette fiche. (sale petit hacker nul)'
+            });
+            return;
+        }
 
         await OffreEmploi.create({
             etat,
@@ -55,19 +64,18 @@ router.post('/add_offer', isLoggedIn, async function(req, res, next) {
     }
 });
 
-router.get('/add_position', isLoggedIn, isRecruitor, function(req, res, next) {
+router.get('/add_position', requireAffiliation, function(req, res, next) {
     res.render('jobs/add_position', {
         notification: null
     });
 });
 
-router.post('/add_position', async function(req, res, next) {
+router.post('/add_position', requireAffiliation, async function(req, res, next) {
     try {
         let {intitule, statutPoste, responsableHierarchique, typeMetier,
             lieuMission, rythme, salaire, description } = req.body;
 
-        // WARNING : ADD_POSITION CURRENTLY USING DEFAULT ORGANIZATION ID 1 INSTEAD OF USER SESSION ORG ID
-        let idOrganisation = '123456789';
+        let idOrganisation = req.session.userAffiliation;
 
         await FichePoste.create({
             intitule,
