@@ -45,6 +45,12 @@ const FichePoste = {
         const query = `SELECT * FROM FichePoste;`;
         const [results] = await pool.query(query);
         return results;
+    },
+
+    async isUserLegitimate(idFiche, idOrganisationRecruteur) {
+        const query = `SELECT COUNT(*) FROM FichePoste WHERE IdFiche = ? AND IdOrganisation = ?`;
+        const [results] = await pool.query(query, [idFiche, idOrganisationRecruteur]);
+        return results[0]['COUNT(*)'] > 0;
     }
 };
 
