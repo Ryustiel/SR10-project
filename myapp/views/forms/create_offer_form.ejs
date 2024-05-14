@@ -1,0 +1,22 @@
+<form action="/jobs/add_offer" method="POST">
+    <div class="mb-3">
+        <label for="dateValidité" class="form-label">Date de Validité</label>
+        <input type="date" class="form-control" id="dateValidité" name="dateValidité" required>
+    </div>
+    <div class="mb-3">
+        <label for="listePieces" class="form-label">Liste des Pièces</label>
+        <textarea class="form-control" id="listePieces" name="listePieces" rows="3" required></textarea>
+    </div>
+    <div class="mb-3">
+        <label for="nombrePieces" class="form-label">Nombre de Pièces</label>
+        <input type="number" class="form-control" id="nombrePieces" name="nombrePieces" required>
+    </div>
+    <div class="mb-3">
+        <label for="idFiche" class="form-label">Fiche de Poste</label>
+        <select class="form-select" id="idFiche" name="idFiche" required>
+
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Créer</button>
+</form>
+<%= res_string %>
