@@ -1,0 +1,49 @@
+<% if (offers.length === 0) { %>
+    <p>
+        Vous n'avez pas encore d'offres d'emploi.
+    </p>
+    <p>
+        Vous pouvez en créer une <a href="/jobs/add_offer">ici</a>.
+    </p>
+<% } %>
+
+<% offers.forEach((offer) => { %>
+
+    <% if (offer.Etat !== 'expiré') { %>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"> <%= offer.Intitule %> </h5>
+                <p class="card-text"> <%= offer.DateValidite %> </p>
+                <div class="btn-group" role="group">
+
+                    <% if (offer.Etat === 'publié') { %>
+                        <form method="post" action="/jobs/my_offers">
+                            <input type="hidden" name="idOffre" value="<%= offer.IdOffre %>">
+                            <input type="hidden" name="action" value="2">
+                            <button type="submit" class="btn btn-secondary">Désactiver</button>
+                        </form>
+                    <% } else { %>
+                        <form method="post" action="/jobs/my_offers">
+                            <input type="hidden" name="idOffre" value="<%= offer.IdOffre %>">
+                            <input type="hidden" name="action" value="1">
+                            <button type="submit" class="btn btn-success">Activer</button>
+                        </form>
+                    <% } %>
+
+                    <form method="post" action="/jobs/edit_offer">
+                        <input type="hidden" name="idOffre" value="<%= offer.IdOffre %>">
+                        <button type="submit" class="btn btn-primary">Editer</button>
+                    </form>
+                    <form method="post" action="/jobs/my_offers">
+                        <input type="hidden" name="idOffre" value="<%= offer.IdOffre %>">
+                        <input type="hidden" name="action" value="3">
+                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    <% } %>
+
+<% }) %>
