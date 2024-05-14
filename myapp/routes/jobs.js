@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const logger = require('../logger');
 
 const FichePoste = require('../model/ficheposte');
 const OffreEmploi = require('../model/offreemploi');
@@ -7,6 +8,7 @@ const OffreEmploi = require('../model/offreemploi');
 const isLoggedIn = require('../middleware/isLoggedIn.js');
 const requireRecruitorStatus = require('../middleware/requireRecruitorStatus.js');
 const requireAffiliation = require('../middleware/requireAffiliation.js');
+
 
 router.get('/browse_offers', isLoggedIn, async function(req, res, next) {
     try {
@@ -17,19 +19,23 @@ router.get('/browse_offers', isLoggedIn, async function(req, res, next) {
     }
 });
 
+
 router.post('/view', function(req, res, next) {
     // GET OFFER DATA
     res.render('jobs/view_offer');
 });
 
+
 router.get('/add_offer', requireAffiliation, async function(req, res, next) {
     let fiches = await FichePoste.list();
 
     res.render('jobs/add_offer', {
-        notification: null,
+        notification: req.session.notification,
         fiches: fiches
     });
+    if (req.session.notification) {req.session.notification = '';}
 });
+
 
 router.post('/add_offer', requireAffiliation, async function(req, res, next) {
     try {
@@ -55,22 +61,23 @@ router.post('/add_offer', requireAffiliation, async function(req, res, next) {
             idRecruteur
         });
 
-        res.render('jobs/add_offer', {
-            notification: 'Votre offre d\'emploi a été ajoutée avec succès !'
-        });
+        req.session.notification = 'Votre offre d\'emploi a été ajoutée avec succès !';
+        res.redirect('/jobs/add_offer');
 
     } catch (error) {
         next(error);
     }
 });
 
-router.get('/add_position', requireAffiliation, function(req, res, next) {
-    res.render('jobs/add_position', {
+
+router.get('/add_job', requireAffiliation, function(req, res, next) {
+    res.render('jobs/add_job', {
         notification: null
     });
 });
 
-router.post('/add_position', requireAffiliation, async function(req, res, next) {
+
+router.post('/add_job', requireAffiliation, async function(req, res, next) {
     try {
         let {intitule, statutPoste, responsableHierarchique, typeMetier,
             lieuMission, rythme, salaire, description } = req.body;
@@ -89,15 +96,89 @@ router.post('/add_position', requireAffiliation, async function(req, res, next) 
             idOrganisation
         });
 
-        res.render('jobs/add_position', {
+        res.render('jobs/add_job', {
             notification: 'Votre fiche d\'emploi a été ajoutée avec succès !'
         });
 
     } catch (error) {
         next(error);
     }
-
 });
+
+
+router.get('/my_offers', requireRecruitorStatus, async function(req, res, next) {
+    try {
+        const offers = await OffreEmploi.listRecruitorsOffers(req.session.userEmail);
+        logger.info(`Offer display : ${JSON.stringify(offers)}`)
+
+        res.render('jobs/my_offers', { offers: offers });
+    } catch (error) {
+        next(error);
+    }
+});
+
+
+router.post('/my_offers', requireAffiliation, async function(req, res, next) {
+    try {
+        let { idOffre, action } = req.body;
+
+        if (!await OffreEmploi.isUserLegitimate(idOffre, req.session.userEmail)) {
+            // METTRE UN MESSAGE D'ERREUR
+            res.redirect('/dashboard');
+            return;
+        }
+
+        logger.info(`Action : ${action} on offer ${idOffre}`)
+
+        if (action === '1') {
+            await OffreEmploi.publier(idOffre);
+        } else if (action === '2') {
+            await OffreEmploi.depublier(idOffre);
+        } else if (action === '3') {
+            logger.info(`Deleting offer ${idOffre}`)
+            await OffreEmploi.delete(idOffre);
+        }
+
+        res.redirect('/jobs/my_offers');
+
+    } catch (error) {
+        next(error);
+    }
+});
+
+
+router.get('/my_jobs', requireAffiliation, async function(req, res, next) {
+    try {
+        let fiches = await FichePoste.listFiches(req.session.userAffiliation);
+
+        res.render('jobs/my_jobs', {
+            fiches: fiches
+        });
+
+    } catch (error) {
+        next(error);
+    }
+});
+
+
+router.post('/my_jobs', requireAffiliation, async function(req, res, next) {
+    try {
+        let { idFiche } = req.body;
+
+        if (!await FichePoste.isUserLegitimate(idFiche, req.session.userAffiliation)) {
+            // METTRE UN MESSAGE D'ERREUR
+            res.redirect('/dashboard');
+            return;
+        }
+
+        await FichePoste.delete(idFiche);
+        res.redirect('/jobs/my_jobs');
+
+    } catch (error) {
+        next(error);
+    }
+});
+
 
 router.get('/apply', function(req, res, next) {
     // GET APPLICATION DETAILS
