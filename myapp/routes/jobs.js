@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const model_ficheposte = require('../model/ficheposte');
-const model_offreemploi = require('../model/offreemploi');
 
-const OffreEmploi = require('../model/offreemploi'); // Ajustez le chemin selon votre structure
+const FichePoste = require('../model/ficheposte');
+const OffreEmploi = require('../model/offreemploi');
 
-router.get('/browse_offers', async function(req, res, next) {
+const isLoggedIn = require('../middleware/isLoggedIn.js');
+const isRecruitor = require('../middleware/isRecruitor.js');
+
+router.get('/browse_offers', isLoggedIn, async function(req, res, next) {
     try {
         const offres = await OffreEmploi.readall();
         res.render('jobsList', { title: 'Liste des Offres d\'Emploi', offres: offres });
@@ -19,21 +21,23 @@ router.post('/view', function(req, res, next) {
     res.render('jobs/view_offer');
 });
 
-router.get('/add_offer', function(req, res, next) {
+router.get('/add_offer', isLoggedIn, async function(req, res, next) {
+    let fiches = await FichePoste.list();
+
     res.render('jobs/add_offer', {
         notification: null,
-        res_string: 'test'
+        fiches: fiches
     });
 });
 
-router.post('/add_offer', async function(req, res, next) {
+router.post('/add_offer', isLoggedIn, async function(req, res, next) {
     try {
         let { dateValidite, listePieces, nombrePieces, idFiche } = req.body;
 
-        let idRecruteur = 0; // GET IT
-        let etat = "Ouverte";
+        let idRecruteur = req.session.userEmail;
+        let etat = "non publié";
 
-        await model_offreemploi.create({
+        await OffreEmploi.create({
             etat,
             dateValidite,
             listePieces,
@@ -42,19 +46,16 @@ router.post('/add_offer', async function(req, res, next) {
             idRecruteur
         });
 
-        res.render('jobs/add_position', {
-            notification: 'Votre fiche d\'emploi a été ajoutée avec succès !'
+        res.render('jobs/add_offer', {
+            notification: 'Votre offre d\'emploi a été ajoutée avec succès !'
         });
 
     } catch (error) {
-        console.error('Add Fiche Emploi Error', error);
-        res.status(500).render('error', { message: "Erreur interne du serveur", error });
+        next(error);
     }
-
 });
 
-
-router.get('/add_position', function(req, res, next) {
+router.get('/add_position', isLoggedIn, isRecruitor, function(req, res, next) {
     res.render('jobs/add_position', {
         notification: null
     });
@@ -68,7 +69,7 @@ router.post('/add_position', async function(req, res, next) {
         // WARNING : ADD_POSITION CURRENTLY USING DEFAULT ORGANIZATION ID 1 INSTEAD OF USER SESSION ORG ID
         let idOrganisation = '123456789';
 
-        await model_ficheposte.create({
+        await FichePoste.create({
             intitule,
             statutPoste,
             responsableHierarchique,
@@ -85,8 +86,7 @@ router.post('/add_position', async function(req, res, next) {
         });
 
     } catch (error) {
-        console.error('Add Fiche Emploi Error', error);
-        res.status(500).render('error', { message: "Erreur interne du serveur", error });
+        next(error);
     }
 
 });
