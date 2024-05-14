@@ -5,11 +5,7 @@ const router = express.Router();
 const loginRouter = require('./login');
 const registerRouter = require('./register');
 const dashboardRouter = require('./dashboard');
-const applicationsRouter = require('./applications');
 const jobsRouter = require('./jobs');
-const usersRouter = require('./users');
-const orgRouter = require('./organizations');
-
 const logger = require("../logger");
 
 // Redirection principale vers la page de login
@@ -34,11 +30,5 @@ router.use('/recruteur', dashboardRouter);
 router.use('/administrateur', dashboardRouter);
 
 router.use('/jobs', jobsRouter);
-
-router.use('/applications', applicationsRouter);
-
-router.use('/users', usersRouter);
-
-router.use('/organizations', orgRouter);
 
 module.exports = router;
