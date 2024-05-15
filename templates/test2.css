@@ -1,0 +1,136 @@
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(to right, #ff7e5f, #feb47b);
+    color: #333;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Header Styles */
+header {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid #fff;
+}
+
+header h1 {
+    font-size: 3rem;
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+header p {
+    font-size: 1.2rem;
+    color: #fff;
+    font-style: italic;
+}
+
+/* Main Styles */
+main {
+    padding: 2rem;
+}
+
+.job-listings {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.job-offer {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    padding: 1.5rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+    width: calc(33% - 2rem);
+}
+
+.job-offer:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.job-offer h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.job-offer p {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.details-btn, .apply-btn {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+}
+
+.details-btn {
+    background: #feb47b;
+    color: #fff;
+    margin-right: 0.5rem;
+}
+
+.details-btn:hover {
+    background: #ff7e5f;
+    color: #fff;
+}
+
+.apply-btn {
+    background: #ff7e5f;
+    color: #fff;
+}
+
+.apply-btn:hover {
+    background: #feb47b;
+    color: #fff;
+}
+
+/* Footer Styles */
+footer {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+    border-top: 1px solid #fff;
+    margin-top: 2rem;
+}
+
+footer p {
+    color: #fff;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.job-offer:hover {
+    animation: pulse 1s infinite;
+}

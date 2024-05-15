@@ -1,6 +1,7 @@
 const model = require("../model/utilisateur.js");
 const bcrypt = require("bcryptjs");
 const Utilisateur = require("../model/utilisateur");
+const db = require("../model/db");
 
 describe("Test d'inscription et de connexion", () => {
 
@@ -11,6 +12,10 @@ describe("Test d'inscription et de connexion", () => {
         phone: "0734567890",
         password: "test"
     };
+
+    afterAll(async () => {
+        await db.close(); // Assurez-vous que la fermeture est complète avant de terminer les tests
+    });
 
     test("Créer un compte", async () => {
 
