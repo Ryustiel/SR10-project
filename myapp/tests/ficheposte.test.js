@@ -1,9 +1,10 @@
-const db = require('../model/db');
-const FichePoste = require('../model/ficheposte');
+const FichePoste = require('.././model/ficheposte');  // remplacer par le chemin correct vers votre fichier
+const pool = require('../model/db');
 
+// Mocking the pool.query function
 jest.mock('../model/db', () => ({
     query: jest.fn(),
-    close: jest.fn()
+    close: jest.fn(),
 }));
 
 describe("Model Tests - FichePoste", () => {
@@ -12,7 +13,7 @@ describe("Model Tests - FichePoste", () => {
     });
 
     afterAll(async () => {
-        await db.close();  // Assuming there is a close method to clean up resources
+        await pool.close();
     });
 
     test("create fiche poste successfully", async () => {
@@ -27,22 +28,29 @@ describe("Model Tests - FichePoste", () => {
             description: "Software development",
             idOrganisation: 1
         };
-        db.query.mockResolvedValueOnce();
-        db.query.mockResolvedValueOnce([[{ id: 1, ...mockFiche }], {}]);  // Simulating insert and then fetch
+
+        pool.query.mockResolvedValueOnce();
 
         const result = await FichePoste.create(mockFiche);
-        expect(result).toEqual({ id: 1, ...mockFiche });
-        expect(db.query).toHaveBeenCalledTimes(2);
+
+        expect(result).toEqual(true);
+        expect(pool.query).toHaveBeenCalledWith(expect.any(String), expect.arrayContaining([
+            mockFiche.intitule, mockFiche.statutPoste, mockFiche.responsableHierarchique,
+            mockFiche.typeMetier, mockFiche.lieuMission, mockFiche.rythme,
+            mockFiche.salaire, mockFiche.description, mockFiche.idOrganisation
+        ]));
     });
 
     test("read fiche poste successfully", async () => {
         const id = 1;
         const mockFiche = { id, intitule: "Developer" };
-        db.query.mockResolvedValueOnce([[mockFiche], {}]);
+
+        pool.query.mockResolvedValueOnce([[mockFiche], {}]);
 
         const result = await FichePoste.read(id);
+
         expect(result).toEqual(mockFiche);
-        expect(db.query).toHaveBeenCalledTimes(1);
+        expect(pool.query).toHaveBeenCalledWith(expect.any(String), [id]);
     });
 
     test("update fiche poste successfully", async () => {
@@ -58,28 +66,70 @@ describe("Model Tests - FichePoste", () => {
             description: "Advanced Software development",
             idOrganisation: 1
         };
-        db.query.mockResolvedValueOnce([{}, {}]);
-        db.query.mockResolvedValueOnce([[{ id, ...updates }], {}]);  // Simulating update and then fetch
+
+        pool.query.mockResolvedValueOnce();
+        pool.query.mockResolvedValueOnce([[{ id, ...updates }], {}]);
 
         const result = await FichePoste.update(id, updates);
+
         expect(result).toEqual({ id, ...updates });
-        expect(db.query).toHaveBeenCalledTimes(2);
+        expect(pool.query).toHaveBeenCalledTimes(2);
+    });
+
+    test("list fiches successfully", async () => {
+        const mockFiches = [{ idFiche: 1, intitule: "Developer" }];
+
+        pool.query.mockResolvedValueOnce([mockFiches, {}]);
+
+        const result = await FichePoste.list();
+
+        expect(result).toEqual(mockFiches);
+        expect(pool.query).toHaveBeenCalledWith(expect.any(String));
     });
 
     test("delete fiche poste successfully", async () => {
         const id = 1;
-        db.query.mockResolvedValueOnce([{}, {}]);
+
+        pool.query.mockResolvedValueOnce();
 
         await FichePoste.delete(id);
-        expect(db.query).toHaveBeenCalledTimes(1);
+
+        expect(pool.query).toHaveBeenCalledWith(expect.any(String), [id]);
     });
 
     test("read all fiches postes successfully", async () => {
         const mockFiches = [{ id: 1, intitule: "Developer" }];
-        db.query.mockResolvedValueOnce([mockFiches, {}]);
+
+        pool.query.mockResolvedValueOnce([mockFiches, {}]);
 
         const result = await FichePoste.readall();
+
         expect(result).toEqual(mockFiches);
-        expect(db.query).toHaveBeenCalledTimes(1);
+        expect(pool.query).toHaveBeenCalledTimes(1);
+    });
+
+    test("list fiches by organisation successfully", async () => {
+        const idOrganisation = 1;
+        const mockFiches = [{ idFiche: 1, intitule: "Developer" }];
+
+        pool.query.mockResolvedValueOnce([mockFiches, {}]);
+
+        const result = await FichePoste.listFiches(idOrganisation);
+
+        expect(result).toEqual(mockFiches);
+        expect(pool.query).toHaveBeenCalledWith(expect.any(String), [idOrganisation]);
+    });
+
+    test("check if a user is legitimate", async () => {
+        const idFiche = 1;
+        const idOrganisation = 1;
+        const mockCount = { 'COUNT(*)': 1 };
+
+        pool.query.mockResolvedValueOnce([[mockCount], {}]);
+
+        const result = await FichePoste.isUserLegitimate(idFiche, idOrganisation);
+
+        expect(result).toBe(true);
+        expect(pool.query).toHaveBeenCalledWith(expect.any(String), [idFiche, idOrganisation]);
     });
 });

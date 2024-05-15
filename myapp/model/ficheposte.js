@@ -54,7 +54,7 @@ const FichePoste = {
     },
 
     async isUserLegitimate(idFiche, idOrganisationRecruteur) {
-        const query = `SELECT COUNT(*) FROM FichePoste WHERE IdFiche = ? AND IdOrganisation = ?`;
+        const query = `SELECT COUNT(*) FROM FichePoste WHERE IdFiche = ? AND IdOrganisation = ? AND StatutPoste = 'Ouvert';`;
         const [results] = await pool.query(query, [idFiche, idOrganisationRecruteur]);
         return results[0]['COUNT(*)'] > 0;
     }
