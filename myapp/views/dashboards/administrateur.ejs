@@ -3,62 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plateforme de Recrutement - Accueil Administrateur</title>
+    <title>Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 </head>
 <body>
-
-<%- include('../navbar.ejs') %>
-
-<div class="p-5 mb-4 bg-light rounded-3 border">
-    <div class="container-fluid py-5">
-        <h1 class="display-5 fw-bold">Bienvenue sur votre espace administrateur</h1>
-        <p class="fs-4"></p>
-        <a href="#" class="btn btn-primary btn-lg">Administrater</a>
+<%- include("../navbar.ejs") %>
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="mb-0">Admin Dashboard</h1>
+                <a href="/logout" class="btn btn-danger">Se déconnecter</a>
+            </div>
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    Profil de : <%= user.Prenom %> <%= user.Nom %>
+                </div>
+                <div class="card-body">
+                    <p class="card-text"><strong>Email :</strong> <%= user.Email %></p>
+                    <p class="card-text"><strong>Téléphone :</strong> <%= user.Telephone %></p>
+                    <p class="card-text"><strong>Date de création :</strong> <%= new Date(user.DateCreation).toLocaleDateString("fr-FR") %></p>
+                    <p class="card-text"><strong>Statut du Compte :</strong> <%= user.StatutCompte %></p>
+                    <p class="card-text"><strong>Type de Compte :</strong> <%= user.TypeCompte %></p>
+                    <p class="card-text"><strong>Organisation :</strong> <%= user.IdOrganisation %></p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="/applications/manage_requests" class="btn btn-secondary">Gérer les demandes</a>
+            </div>
+        </div>
     </div>
 </div>
-
-<div class="container">
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">Utilisateurs</h5>
-                    <p class="card-text"></p>
-                    <a href="/users/browse" class="btn btn-primary mt-auto">Gérer les Utilisateurs</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">Demandes Recruteur</h5>
-                    <p class="card-text"></p>
-                    <a href="applications/recruitor-requests" class="btn btn-primary mt-auto">Gérer les demandes recruteur</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">Demandes Organisations</h5>
-                    <p class="card-text"></p>
-                    <a href="applications/organization-requests" class="btn btn-primary mt-auto">Gérer les demandes organisation</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">Gestion des Organisations</h5>
-                            <p class="card-text"></p>
-                            <a href="organizations/browse" class="btn btn-primary mt-auto">Gérer les organisation</a>
-                        </div>
-                    </div>
-                </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
 </body>
 </html>
