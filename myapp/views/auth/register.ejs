@@ -11,9 +11,7 @@
             <h2 class="mb-4">Inscription</h2>
             <% if (Object.keys(errors).length) { %>
                 <div class="alert alert-danger">
-                    <% for(var key in errors) { %>
-                        <p><%= errors[key].msg %></p>
-                    <% } %>
+                    <% Object.keys(errors).forEach(function(key) { %><%= errors[key].msg %><br><% }); %>
                 </div>
             <% } %>
 

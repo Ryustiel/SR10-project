@@ -1,3 +1,4 @@
+<% var currentPage = typeof activePage !== 'undefined' ? activePage : ''; %>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">Plateforme de Recrutement</a>
@@ -7,26 +8,25 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link active" href="/dashboard">Dashboard</a>
+                    <a class="nav-link <%= currentPage === 'dashboard' ? 'active' : '' %>" href="/dashboard">Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/jobs/add_job">Ajouter un Poste</a>
+                    <a class="nav-link <%= currentPage === 'add_job' ? 'active' : '' %>" href="/jobs/add_job">Ajouter un Poste</a>
                 </li>
                 <li class="nav-item">
-
-                    <a class="nav-link" href="/jobs/add_offer">Ajouter une Offre</a>
+                    <a class="nav-link <%= currentPage === 'add_offer' ? 'active' : '' %>" href="/jobs/add_offer">Ajouter une Offre</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/jobs/browse_offers" id="espaceRecruteur">Postuler</a>
+                    <a class="nav-link <%= currentPage === 'browse_offers' ? 'active' : '' %>" href="/jobs/browse_offers" id="espaceRecruteur">Postuler</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="applications/browse_received">Voir mes Demandes</a>
+                    <a class="nav-link <%= currentPage === 'browse_received' ? 'active' : '' %>" href="applications/browse_received">Voir mes Demandes</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/jobs/my_offers">Voir mes Offres</a>
+                    <a class="nav-link <%= currentPage === 'my_offers' ? 'active' : '' %>" href="/jobs/my_offers">Voir mes Offres</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/users/view">Mon Profil</a>
+                    <a class="nav-link <%= currentPage === 'my_profile' ? 'active' : '' %>" href="/dashboard/my_profile">Mon Profil</a>
                 </li>
             </ul>
         </div>

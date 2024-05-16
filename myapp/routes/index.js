@@ -5,6 +5,7 @@ const router = express.Router();
 const loginRouter = require('./login');
 const registerRouter = require('./register');
 const dashboardRouter = require('./dashboard');
+const applicationsRouter = require('./applications');
 const jobsRouter = require('./jobs');
 const logger = require("../logger");
 
@@ -30,5 +31,7 @@ router.use('/recruteur', dashboardRouter);
 router.use('/administrateur', dashboardRouter);
 
 router.use('/jobs', jobsRouter);
+
+router.use('/applications', applicationsRouter);
 
 module.exports = router;
