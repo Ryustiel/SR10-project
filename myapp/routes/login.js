@@ -37,6 +37,7 @@ router.post('/', async (req, res) => {
             req.session.userEmail = email;
             req.session.userType = await Utilisateur.getType(email);
             req.session.userAffiliation = await Utilisateur.getOrganisationId(email);
+            req.session.notification = '';
             logger.info(`Utilisateur connecté : ${email} en tant que ${req.session.userType}`);
 
             const returnTo = req.session.returnTo || '/dashboard'; // redirect to previous page

@@ -38,6 +38,23 @@ const Candidature = {
         const query = `SELECT * FROM Candidature;`;
         const [results] = await pool.query(query);
         return results;
+    },
+
+    async isCandidate(idCandidat, idOffre) {
+        const query = `SELECT COUNT(*) FROM Candidature WHERE IdCandidat = ? AND IdOffre = ?`;
+        const [results] = await pool.query(query, [idCandidat, idOffre]);
+        return results[0]['COUNT(*)'] > 0;
+    },
+
+    async listApplications(idRecruteur) {
+        const query = `
+            SELECT IdCandidature, IdCandidat, IdOffre, DateCandidature FROM Candidature AS C
+            JOIN OffreEmploi AS O
+            ON C.IdOffre = O.IdOffre
+            WHERE O.IdRecruteur = ?;
+        `;
+        const [results] = await pool.query(query, [idRecruteur]);
+        return results;
     }
 };
 

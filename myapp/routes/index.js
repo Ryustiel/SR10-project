@@ -6,6 +6,7 @@ const loginRouter = require('./login');
 const registerRouter = require('./register');
 const dashboardRouter = require('./dashboard');
 const jobsRouter = require('./jobs');
+const applicationsRouter = require('./applications');
 const logger = require("../logger");
 
 // Redirection principale vers la page de login
@@ -30,5 +31,6 @@ router.use('/recruteur', dashboardRouter);
 router.use('/administrateur', dashboardRouter);
 
 router.use('/jobs', jobsRouter);
+router.use('/applications', applicationsRouter);
 
 module.exports = router;

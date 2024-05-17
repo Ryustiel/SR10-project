@@ -1,0 +1,23 @@
+<% if (offres.length === 0) { %>
+    <p>
+        Aucune Offre d'emploi n'est disponible
+    </p>
+<% } %>
+
+<% offres.forEach((offre) => { %>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title"> <%= offre.Intitule %> </h5>
+            <p class="card-text"> <%= offre.DateValidite %> </p>
+            <div class="btn-group" role="group">
+
+                <form method="POST" action="/jobs/view_offer">
+                    <input type="hidden" name="idOffre" value="<%= offre.IdOffre %>">
+                    <button type="submit" class="btn btn-primary">Voir les Détails</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<% }) %>

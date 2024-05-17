@@ -1,0 +1,40 @@
+<form id="applicationForm" enctype="multipart/form-data" action="/applications/apply" method="POST">
+    <input type="hidden" name="idOffre" value="<%= idOffre %>" />
+    <% if (offre.NombrePieces > 0) { %>
+        <div class="mb-3">
+            <label for="formFileLg" class="form-label">Télécharger des Pièces Justificatives</label>
+            <input class="form-control form-control-lg" id="formFileLg" type="file" multiple />
+        </div>
+        <button id="submitButton" type="submit" class="btn btn-secondary" disabled>Postuler</button>
+    <% } else { %>
+        <button type="submit" class="btn btn-success">Postuler</button>
+    <% } %>
+</form>
+<div id="fileCount"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const fileInput = document.getElementById('formFileLg');
+        const fileCountDisplay = document.getElementById('fileCount');
+        const submitButton = document.getElementById('submitButton');
+
+        fileInput.addEventListener('change', () => {
+            const files = fileInput.files;
+            const fileCount = files.length;
+            fileCountDisplay.textContent = `
+                Pièces justificatives fournies : ${fileCount} / <%= offre.NombrePieces %>
+            `;
+
+            // Change button type based on the number of files
+            if (fileCount === <%= offre.NombrePieces %>) {
+                submitButton.classList.remove('btn-secondary');
+                submitButton.classList.add('btn-success');
+                submitButton.disabled = false;
+            } else {
+                submitButton.classList.remove('btn-success');
+                submitButton.classList.add('btn-secondary');
+                submitButton.disabled = true;
+            }
+        });
+    });
+</script>
