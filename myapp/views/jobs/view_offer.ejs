@@ -1,14 +1,59 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <%- include('../head.ejs') %>>
-    <title>Connexion</title>
+    <%- include('../head.ejs') %>
+    <title>Voir l'Offre</title>
 </head>
 <body>
 
 <%- include('../navbar.ejs') %>
 
-    <h1>View offers</h1>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <h1><%= offre.Intitule %></h1>
+            <div class="card">
+                <div class="card-body">
+                    <p class="card-text"><strong>Description:</strong> <%= offre.Description %></p>
+                    <p class="card-text"><strong>Statut du Poste:</strong> <%= offre.StatutPoste %></p>
+                    <p class="card-text"><strong>Responsable Hiérarchique:</strong> <%= offre.ResponsableHierarchique %></p>
+                    <p class="card-text"><strong>Type de Métier:</strong> <%= offre.TypeMetier %></p>
+                    <p class="card-text"><strong>Lieu de Mission:</strong> <%= offre.LieuMission %></p>
+                    <p class="card-text"><strong>Rythme:</strong> <%= offre.Rythme %></p>
+                    <p class="card-text"><strong>Salaire:</strong> <%= offre.Salaire %></p>
+                    <p class="card-text"><strong>Valide jusqu'à:</strong> <%= offre.DateValidite %></p>
+                    <p class="card-text"><strong>Organisation:</strong> <%= offre.nom %></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <% if (isCandidate) { %>
+
+        <div class="row">
+            <div class="col-md-6 offset-md-3 mt-3">
+                <h3>Vous postulez déjà à cette offre</h3>
+            </div>
+        </div>
+
+    <% } else { %>
+
+        <div class="row">
+            <div class="col-md-6 offset-md-3 mt-3">
+                <h3>Postuler à cette Offre</h3>
+                <p>
+                    Les pièces suivantes sont demandées :<br>
+                    <%= offre.ListePieces %>
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <%- include('../forms/apply_form.ejs') %>
+            </div>
+        </div>
+
+    <% } %>
 
 </body>
 </html>
