@@ -9,6 +9,7 @@ const Candidature = require('../model/candidature');
 const isLoggedIn = require('../middleware/isLoggedIn.js');
 const requireRecruitorStatus = require('../middleware/requireRecruitorStatus.js');
 const requireAffiliation = require('../middleware/requireAffiliation.js');
+const readNotification = require('../middleware/readNotification');
 
 // Set storage engine
 const storage = multer.memoryStorage();
@@ -64,10 +65,7 @@ router.post('/cancel-application', isLoggedIn, async function(req, res, next) {
     }
 });
 
-router.get('/my-applications', function(req, res, next) {
-
-    let notification = req.session.notification;
-    req.session.notification = '';
+router.get('/my-applications', isLoggedIn, readNotification, function(req, res, next) {
 
     res.render('applications/my_applications.ejs');
 });
