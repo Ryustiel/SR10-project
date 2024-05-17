@@ -65,6 +65,10 @@ router.post('/cancel-application', isLoggedIn, async function(req, res, next) {
 });
 
 router.get('/my-applications', function(req, res, next) {
+
+    let notification = req.session.notification;
+    req.session.notification = '';
+
     res.render('applications/my_applications.ejs');
 });
 router.get('/incoming-applications', function(req, res, next) {
