@@ -29,9 +29,9 @@ const Candidature = {
         return this.read(id);
     },
 
-    async delete(id) {
-        const query = `DELETE FROM Candidature WHERE IdCandidature = ?;`;
-        await pool.query(query, [id]);
+    async delete(idCandidat, idOffre) {
+        const query = `DELETE FROM Candidature WHERE IdCandidat = ? AND IdOffre = ?;`;
+        await pool.query(query, [idCandidat, idOffre]);
     },
 
     async readall() {
@@ -46,14 +46,25 @@ const Candidature = {
         return results[0]['COUNT(*)'] > 0;
     },
 
-    async listApplications(idRecruteur) {
+    async getApplicationsRecruteur(idRecruteur) {
         const query = `
-            SELECT IdCandidature, IdCandidat, IdOffre, DateCandidature FROM Candidature AS C
-            JOIN OffreEmploi AS O
-            ON C.IdOffre = O.IdOffre
+            SELECT O.IdOffre, IdCandidat, Intitule, DateCandidature FROM Candidature AS C
+            JOIN OffreEmploi AS O ON C.IdOffre = O.IdOffre
+            JOIN FichePoste AS F ON F.IdFiche = O.IdFiche
             WHERE O.IdRecruteur = ?;
         `;
         const [results] = await pool.query(query, [idRecruteur]);
+        return results;
+    },
+
+    async getApplicationsCandidat(idCandidat) {
+        const query = `
+            SELECT O.IdOffre, Intitule, DateCandidature FROM Candidature AS C
+            JOIN OffreEmploi AS O ON C.IdOffre = O.IdOffre
+            JOIN FichePoste AS F ON F.IdFiche = O.IdFiche
+            WHERE C.IdCandidat = ?;
+        `;
+        const [results] = await pool.query(query, [idCandidat]);
         return results;
     }
 };
