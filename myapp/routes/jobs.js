@@ -9,22 +9,22 @@ const Candidature = require('../model/candidature');
 const isLoggedIn = require('../middleware/isLoggedIn.js');
 const requireRecruitorStatus = require('../middleware/requireRecruitorStatus.js');
 const requireAffiliation = require('../middleware/requireAffiliation.js');
+const readNotification = require('../middleware/readNotification.js');
 
 
-router.get('/browse_offers', isLoggedIn, async function(req, res, next) {
+router.get('/browse_offers', isLoggedIn, readNotification, async function(req, res, next) {
     try {
         const offres = await OffreEmploi.candidateListOffers();
-        if (req.session.notification === '') {req.session.notification = 'TEST NOTIF BROWSE'}
-        let notification = req.session.notification;
-        req.session.notification = '';
+
         res.render('jobs/browse_offers', {
-            notification: notification,
+            notification: req.notification,
             offres: offres
         });
     } catch (error) {
         next(error); // Passe l'erreur au gestionnaire d'erreurs d'Express
     }
 });
+
 
 router.get('/view_offer', function (req, res, next) {
     // RETURN BAD REQUEST
@@ -45,13 +45,11 @@ router.post('/view_offer', isLoggedIn, async function(req, res, next) {
 });
 
 
-router.get('/add_offer', requireAffiliation, async function(req, res, next) {
+router.get('/add_offer', requireAffiliation, readNotification, async function(req, res, next) {
     let fiches = await FichePoste.list();
 
-    let notification = req.session.notification;
-    req.session.notification = '';
     res.render('jobs/add_offer', {
-        notification: notification,
+        notification: req.notification,
         fiches: fiches
     });
 });
