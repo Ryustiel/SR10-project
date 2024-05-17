@@ -69,7 +69,40 @@ const Utilisateur = {
         } else {
             return null;
         }
-    }
+    },
+
+    async updateTypeCompte(email, newTypeCompte) {
+        const query = `UPDATE Utilisateur SET TypeCompte = ? WHERE Email = ?;`;
+        const values = [newTypeCompte, email];
+        const [result] = await pool.query(query, values);
+        return result.affectedRows > 0; // Retourne true si une ligne a été mise à jour
+    },
+
+    async updateTypeCompteWithOrganisation(email, newTypeCompte, idOrganisation) {
+        const query = `UPDATE Utilisateur SET TypeCompte = ?, IdOrganisation = ? WHERE Email = ?;`;
+        const values = [newTypeCompte, idOrganisation, email];
+        const [result] = await pool.query(query, values);
+        return result.affectedRows > 0; // Retourne true si une ligne a été mise à jour
+    },
+
+    async getRecruiterRequests() {
+        const query = `
+        SELECT 
+            u.Nom, u.Prenom, u.Email, u.IdOrganisation, 
+            o.Nom AS OrganisationNom, o.Type AS OrganisationType, 
+            o.AdresseAdministrative, o.StatutOrganisation 
+        FROM 
+            Utilisateur u 
+        LEFT JOIN 
+            Organisation o 
+        ON 
+            u.IdOrganisation = o.NumeroSiren 
+        WHERE 
+            u.TypeCompte = 'recruteur en attente';
+    `;
+        const [results] = await pool.query(query);
+        return results;
+    },
 };
 
 module.exports = Utilisateur;

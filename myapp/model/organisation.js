@@ -31,7 +31,8 @@ const Organisation = {
 
     async delete(numeroSiren) {
         const query = `DELETE FROM Organisation WHERE NumeroSiren = ?;`;
-        await pool.query(query, [numeroSiren]);
+        const [result] = await pool.query(query, [numeroSiren]);
+        return result.affectedRows > 0; // Retourne true si une ligne a été supprimée
     },
 
     async readall() {
@@ -44,7 +45,20 @@ const Organisation = {
         const sql = "SELECT * FROM Organisation WHERE NumeroSiren = ?;";
         const [results] = await pool.query(sql, [idOrganisation]);
         return results.length > 0;
-    }
+    },
+
+    async updateStatus(numeroSiren, statutOrganisation) {
+        const query = `UPDATE Organisation SET StatutOrganisation = ? WHERE NumeroSiren = ?;`;
+        const values = [statutOrganisation, numeroSiren];
+        const [result] = await pool.query(query, values);
+        return result.affectedRows > 0; // Retourne true si une ligne a été mise à jour
+    },
+
+    async readApproved() {
+        const query = 'SELECT * FROM Organisation WHERE StatutOrganisation = "approuvée"';
+        const [results] = await pool.query(query);
+        return results;
+    },
 };
 
 module.exports = Organisation;

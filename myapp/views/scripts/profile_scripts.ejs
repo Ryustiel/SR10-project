@@ -1,0 +1,13 @@
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+<script>
+    document.getElementById('existingOrganisation').addEventListener('change', function() {
+    const newOrganisationFields = document.getElementById('newOrganisationFields');
+    if (this.value === 'new') {
+    newOrganisationFields.classList.remove('d-none');
+    newOrganisationFields.querySelectorAll('input').forEach(input => input.required = true);
+} else {
+    newOrganisationFields.classList.add('d-none');
+    newOrganisationFields.querySelectorAll('input').forEach(input => input.required = false);
+}
+});
+</script>

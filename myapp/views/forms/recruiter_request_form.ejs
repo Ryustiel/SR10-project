@@ -1,0 +1,42 @@
+<div class="modal fade" id="requestRecruiterModal" tabindex="-1" aria-labelledby="requestRecruiterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="requestRecruiterModalLabel">Demande à devenir recruteur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="recruiterRequestForm" method="post" action="/applications/request-recruiter">
+                    <div class="mb-3">
+                        <label for="existingOrganisation" class="form-label">Choisissez une organisation existante</label>
+                        <select class="form-select" id="existingOrganisation" name="existingOrganisation" required>
+                            <% organisations.forEach(function(org) { %>
+                                <option value="<%= org.NumeroSiren %>"><%= org.Nom %> (<%= org.NumeroSiren %>)</option>
+                            <% }); %>
+                            <option value="new">Ajouter une nouvelle organisation</option>
+                        </select>
+                    </div>
+                    <div id="newOrganisationFields" class="d-none">
+                        <div class="mb-3">
+                            <label for="newOrganisationSiren" class="form-label">SIREN de l'organisation</label>
+                            <input type="number" class="form-control" id="newOrganisationSiren" name="newOrganisationSiren" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newOrganisationName" class="form-label">Nom de l'organisation</label>
+                            <input type="text" class="form-control" id="newOrganisationName" name="newOrganisationName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newOrganisationType" class="form-label">Type de l'organisation</label>
+                            <input type="text" class="form-control" id="newOrganisationType" name="newOrganisationType" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newOrganisationAddress" class="form-label">Adresse administrative</label>
+                            <input type="text" class="form-control" id="newOrganisationAddress" name="newOrganisationAddress" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Envoyer la demande</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
