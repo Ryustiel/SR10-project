@@ -32,25 +32,6 @@ router.get('/', isLoggedIn, async (req, res) => {
     }
 });
 
-router.get('/my_profile', isLoggedIn, async (req, res) => {
-    logger.debug("Accès au profil utilisateur...");
-    try {
-        const email = req.session.userEmail;
-        logger.debug(`Recherche des détails pour l'email : ${email}`);
-        const userDetails = await Utilisateur.read(email);
-        if (!userDetails) {
-            logger.warn("Aucun utilisateur trouvé avec cet email.");
-            throw new Error("Détails de l'utilisateur non trouvés.");
-        }
-        const organisations = await Organisation.readApproved(); // Récupère les organisations approuvées
-        logger.info("Utilisateur trouvé, rendu du profil.");
-        res.render('users/view_profile', { user: userDetails, organisations, activePage: 'my_profile' });
-    } catch (error) {
-        logger.error("Erreur lors de l'accès au profil:", error);
-        res.status(500).render('error', { message: "Erreur de serveur.", error: error });
-    }
-});
-
 router.get('/administrateur', isLoggedIn, isAdmin, async (req, res) => {
     logger.debug("Accès au dashboard administrateur...");
     try {

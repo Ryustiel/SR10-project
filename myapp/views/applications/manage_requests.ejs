@@ -38,12 +38,12 @@
                             <% } %>
                         </td>
                         <td>
-                            <form action="/applications/accept_request" method="post" class="d-inline">
+                            <form action="/organizations/accept_request" method="post" class="d-inline">
                                 <input type="hidden" name="email" value="<%= request.Email %>">
                                 <input type="hidden" name="organisationNumber" value="<%= request.IdOrganisation %>">
                                 <button type="submit" class="btn btn-success">Accepter</button>
                             </form>
-                            <form action="/applications/reject_request" method="post" class="d-inline">
+                            <form action="/organizations/reject_request" method="post" class="d-inline">
                                 <input type="hidden" name="email" value="<%= request.Email %>">
                                 <button type="submit" class="btn btn-danger">Refuser</button>
                             </form>

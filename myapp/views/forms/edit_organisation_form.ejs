@@ -1,0 +1,33 @@
+<form id="editOrganisationForm" method="post" action="/organizations/request-organisation-change">
+    <div class="mb-3">
+        <label for="existingOrganisationEdit" class="form-label">Nouvelle Organisation</label>
+        <select class="form-select" id="existingOrganisationEdit" name="existingOrganisationEdit" required>
+            <option value="" selected disabled>Sélectionnez une organisation</option>
+            <% organisations.forEach(function(org) { %>
+                <% if (org.NumeroSiren !== user.IdOrganisation) { %>
+                    <option value="<%= org.NumeroSiren %>"><%= org.Nom %> (<%= org.NumeroSiren %>)</option>
+                <% } %>
+            <% }); %>
+            <option value="new">Ajouter une nouvelle organisation</option>
+        </select>
+    </div>
+    <div id="newOrganisationFieldsEdit" class="d-none">
+        <div class="mb-3">
+            <label for="newOrganisationSirenEdit" class="form-label">SIREN de l'organisation</label>
+            <input type="number" class="form-control" id="newOrganisationSirenEdit" name="newOrganisationSirenEdit">
+        </div>
+        <div class="mb-3">
+            <label for="newOrganisationNameEdit" class="form-label">Nom de l'organisation</label>
+            <input type="text" class="form-control" id="newOrganisationNameEdit" name="newOrganisationNameEdit">
+        </div>
+        <div class="mb-3">
+            <label for="newOrganisationTypeEdit" class="form-label">Type de l'organisation</label>
+            <input type="text" class="form-control" id="newOrganisationTypeEdit" name="newOrganisationTypeEdit">
+        </div>
+        <div class="mb-3">
+            <label for="newOrganisationAddressEdit" class="form-label">Adresse administrative</label>
+            <input type="text" class="form-control" id="newOrganisationAddressEdit" name="newOrganisationAddressEdit">
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Envoyer la demande</button>
+</form>

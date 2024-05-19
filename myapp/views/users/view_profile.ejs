@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de Bord</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 <%- include("../navbar.ejs") %>
@@ -15,42 +16,97 @@
                 <h2 class="mb-0">Mon Profil</h2>
                 <a href="/logout" class="btn btn-danger">Se déconnecter</a>
             </div>
-
-            <!-- Afficher le message d'erreur s'il existe -->
             <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
                 <div class="alert alert-danger"><%= errorMessage %></div>
             <% } %>
-
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     Profil de : <%= user.Prenom %> <%= user.Nom %>
                 </div>
                 <div class="card-body">
-                    <p class="card-text"><strong>Email :</strong> <%= user.Email %></p>
-                    <p class="card-text"><strong>Téléphone :</strong> <%= user.Telephone %></p>
-                    <p class="card-text"><strong>Date de création :</strong> <%= new Date(user.DateCreation).toLocaleDateString("fr-FR") %></p>
-                    <p class="card-text"><strong>Statut du Compte :</strong> <%= user.StatutCompte %></p>
+                    <p class="card-text">
+                        <strong>Email :</strong> <%= user.Email %>
+                        <button class="btn btn-link" data-bs-toggle="modal" data-bs-target="#editEmailModal">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </p>
+                    <p class="card-text">
+                        <strong>Téléphone :</strong> <%= user.Telephone %>
+                        <button class="btn btn-link" data-bs-toggle="modal" data-bs-target="#editTelephoneModal">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </p>
+                    <p class="card-text">
+                        <strong>Date de création :</strong> <%= new Date(user.DateCreation).toLocaleDateString("fr-FR") %>
+                    </p>
+                    <p class="card-text">
+                        <strong>Statut du Compte :</strong> <%= user.StatutCompte %>
+                    </p>
                     <p class="card-text">
                         <strong>Type de Compte :</strong> <%= user.TypeCompte %>
-                        <% if (user.TypeCompte.toLowerCase() === 'candidat') { %>
+                        <% if (user.TypeCompte && user.TypeCompte.toLowerCase() === 'candidat') { %>
                             <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#requestRecruiterModal">Demander à devenir recruteur</button>
-                        <% } else if (user.TypeCompte.toLowerCase() === 'recruteur en attente') { %>
-                            <a href="/applications/cancel-recruiter-request" class="btn btn-secondary">Annuler la demande</a>
+                        <% } else if (user.TypeCompte && user.TypeCompte.toLowerCase() === 'recruteur en attente') { %>
+                            <a href="/organizations/cancel-recruiter-request" class="btn btn-secondary">Annuler la demande</a>
                         <% } %>
                     </p>
-                    <p class="card-text"><strong>Organisation :</strong> <%= user.IdOrganisation %></p>
+                    <% if (user.TypeCompte && user.TypeCompte.toLowerCase() === 'recruteur') { %>
+                        <p class="card-text">
+                            <strong>Organisation :</strong> <%= user.IdOrganisation %>
+                            <button class="btn btn-link" data-bs-toggle="modal" data-bs-target="#editOrganisationModal">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </p>
+                    <% } %>
+                    <p class="card-text">
+                        <button class="btn btn-link" data-bs-toggle="modal" data-bs-target="#editPasswordModal">
+                            <i class="fas fa-key"></i> Modifier le mot de passe
+                        </button>
+                    </p>
                 </div>
             </div>
-            <% if (user.TypeCompte.toLowerCase() === 'administrateur') { %>
+            <% if (user.TypeCompte && user.TypeCompte.toLowerCase() === 'administrateur') { %>
                 <div class="mt-4">
-                    <a href="/applications/manage_requests" class="btn btn-secondary">Gérer les demandes</a>
+                    <a href="/organizations/manage_requests" class="btn btn-secondary">Gérer les demandes</a>
                 </div>
             <% } %>
         </div>
     </div>
 </div>
-<%- include("../forms/recruiter_request_form.ejs") %>
-<%- include("../scripts/profile_scripts.ejs") %>
+
+<%- include("../modal.ejs", { modalId: "editOrganisationModal", modalLabelId: "editOrganisationModalLabel", modalTitle: "Modifier l'Organisation", modalBody: "forms/edit_organisation_form.ejs" }) %>
+<%- include("../modal.ejs", { modalId: "requestRecruiterModal", modalLabelId: "requestRecruiterModalLabel", modalTitle: "Demande à devenir recruteur", modalBody: "forms/recruiter_request_form.ejs" }) %>
+<%- include("../modal.ejs", { modalId: "editEmailModal", modalLabelId: "editEmailModalLabel", modalTitle: "Modifier l'Email", modalBody: "forms/edit_email_form.ejs" }) %>
+<%- include("../modal.ejs", { modalId: "editTelephoneModal", modalLabelId: "editTelephoneModalLabel", modalTitle: "Modifier le Téléphone", modalBody: "forms/edit_telephone_form.ejs" }) %>
+<%- include("../modal.ejs", { modalId: "editPasswordModal", modalLabelId: "editPasswordModalLabel", modalTitle: "Modifier le Mot de Passe", modalBody: "forms/edit_password_form.ejs" }) %> <!-- Ajout du formulaire de modification du mot de passe -->
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.querySelectorAll('.modal').forEach(modal => {
+        const selectElement = modal.querySelector('select');
+        if(selectElement) {
+            selectElement.addEventListener('change', function() {
+                const newOrganisationFields = modal.querySelector('#newOrganisationFieldsEdit') || modal.querySelector('#newOrganisationFields');
+                if (this.value === 'new') {
+                    newOrganisationFields.classList.remove('d-none');
+                    newOrganisationFields.querySelectorAll('input').forEach(input => input.required = true);
+                } else {
+                    newOrganisationFields.classList.add('d-none');
+                    newOrganisationFields.querySelectorAll('input').forEach(input => input.required = false);
+                }
+            });
+        }
+
+        const formElement = modal.querySelector('form');
+        if(formElement) {
+            formElement.addEventListener('submit', function(event) {
+                if (selectElement && (!selectElement.value || selectElement.value === '')) {
+                    event.preventDefault();
+                    alert('Veuillez sélectionner une organisation.');
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>

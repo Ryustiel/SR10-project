@@ -19,13 +19,10 @@ const Utilisateur = {
         return results[0];
     },
 
-    async update(email, { motDePasse, nom, prenom, telephone, dateCreation, statutCompte, typeCompte, idOrganisation }) {
-        const query = `
-      UPDATE Utilisateur 
-      SET MotDePasse = ?, Nom = ?, Prenom = ?, Telephone = ?, DateCreation = ?, StatutCompte = ?, TypeCompte = ?, IdOrganisation = ?
-      WHERE Email = ?;
-    `;
-        const values = [motDePasse, nom, prenom, telephone, dateCreation, statutCompte, typeCompte, idOrganisation, email];
+    async update(email, updates) {
+        const fields = Object.keys(updates).map(field =>`${field} = ?`).join(', ');
+        const values = [...Object.values(updates), email];
+        const query = `UPDATE Utilisateur SET ${fields} WHERE Email = ?;`;
         await pool.query(query, values);
         return this.read(email);
     },

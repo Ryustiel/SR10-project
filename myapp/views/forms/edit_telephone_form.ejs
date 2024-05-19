@@ -1,0 +1,10 @@
+<form id="editTelephoneForm" method="post" action="/users/update-telephone">
+    <div class="mb-3">
+        <label for="newTelephone" class="form-label">Nouveau Téléphone</label>
+        <input type="tel" class="form-control" id="newTelephone" name="newTelephone" required pattern="^0[67][0-9]{8}$" value="<%= user.Telephone %>">
+        <div class="invalid-feedback">
+            Veuillez entrer un numéro de téléphone mobile français valide (10 chiffres commençant par 06 ou 07).
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
+</form>
