@@ -12,7 +12,7 @@ describe("Model Tests - Candidature", () => {
     });
 
     afterAll(async () => {
-        await db.close();  // Assuming there's a close method
+        await db.close();
     });
 
     test("create candidature successfully", async () => {

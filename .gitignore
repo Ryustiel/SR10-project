@@ -3,6 +3,7 @@
 
 ## Directory-based project format:
 .idea/
+/myapp/coverage/
 # if you remove the above rule, at least ignore the following:
 
 # User-specific stuff:
@@ -27,4 +28,3 @@
 ## File-based project format:
 *.ipr
 *.iws
-/myapp/coverage/

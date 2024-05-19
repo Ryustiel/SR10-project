@@ -20,7 +20,10 @@
                     <a class="nav-link <%= currentPage === 'browse_offers' ? 'active' : '' %>" href="/jobs/browse_offers" id="espaceRecruteur">Postuler</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <%= currentPage === 'browse_received' ? 'active' : '' %>" href="applications/browse_received">Voir mes Demandes</a>
+                    <a class="nav-link <%= currentPage === 'my_applications' ? 'active' : '' %>" href="/applications/my-applications">Voir mes Candidatures</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <%= currentPage === 'incoming_applications' ? 'active' : '' %>" href="/applications/incoming-applications">Voir les Candidatures</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link <%= currentPage === 'my_offers' ? 'active' : '' %>" href="/jobs/my_offers">Voir mes Offres</a>

@@ -41,6 +41,18 @@ const OffreEmploi = {
         return results;
     },
 
+    async getNom(idOffre) {
+        const query = `
+            SELECT Intitule FROM OffreEmploi 
+            JOIN FichePoste WHERE IdOffre = ?;
+        `;
+        const [results] = await pool.query(query, [idOffre]);
+        if (!results || results.length === 0) {
+            return "OFFRE INCONNUE";
+        }
+        return results[0]['Intitule'];
+    },
+
     async listRecruitorsOffers(idRecruteur) {
         const query = `
             SELECT IdOffre, Intitule, DateValidite, Etat FROM OffreEmploi AS O 
@@ -50,6 +62,32 @@ const OffreEmploi = {
         `;
         const [results] = await pool.query(query, [idRecruteur]);
         return results;
+    },
+
+    async candidateListOffers() {
+      const query = `
+          SELECT IdOffre, Intitule, DateValidite FROM OffreEmploi AS O 
+          JOIN FichePoste AS F 
+          ON O.IdFiche = F.IdFiche
+          WHERE Etat = 'publié';
+      `;
+        const [results] = await pool.query(query);
+        return results;
+    },
+
+    async candidateViewOffer(idOffre) {
+        const query = `
+            SELECT IdOffre, Intitule, Description, StatutPoste, ResponsableHierarchique, 
+                   TypeMetier, LieuMission, Rythme, Salaire, DateValidite, ListePieces, 
+                   NombrePieces, nom, idOrganisation FROM OffreEmploi AS Off 
+            JOIN FichePoste AS F 
+            ON Off.IdFiche = F.IdFiche
+            JOIN Organisation AS Org 
+            ON F.IdOrganisation = Org.NumeroSiren
+            WHERE IdOffre = ? AND Etat = 'publié';
+        `;
+        const [results] = await pool.query(query, [idOffre]);
+        return results[0];
     },
 
     async publier(idOffre) {

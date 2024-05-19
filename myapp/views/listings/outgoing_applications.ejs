@@ -1,0 +1,24 @@
+<% if (candidatures.length === 0) { %>
+    <p>
+        Vous n'avez candidaté à aucune offre.
+    </p>
+<% } %>
+
+<% candidatures.forEach((candidature) => { %>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title"> <%= candidature.Intitule %> </h5>
+            <p class="card-text"> le <%= candidature.DateCandidature %> </p>
+            <div class="btn-group" role="group">
+
+                <form method="POST" action="/applications/cancel-application">
+                    <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
+                    <input type="hidden" name="idCandidat" value="self">
+                    <button type="submit" class="btn btn-danger">Annuler</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<% }) %>

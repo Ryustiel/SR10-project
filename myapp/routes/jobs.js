@@ -4,36 +4,54 @@ const logger = require('../logger');
 
 const FichePoste = require('../model/ficheposte');
 const OffreEmploi = require('../model/offreemploi');
+const Candidature = require('../model/candidature');
 
 const isLoggedIn = require('../middleware/isLoggedIn.js');
 const requireRecruitorStatus = require('../middleware/requireRecruitorStatus.js');
 const requireAffiliation = require('../middleware/requireAffiliation.js');
+const readNotification = require('../middleware/readNotification.js');
 
 
-router.get('/browse_offers', isLoggedIn, async function(req, res, next) {
+router.get('/browse_offers', isLoggedIn, readNotification, async function(req, res, next) {
     try {
-        const offres = await OffreEmploi.readall();
-        res.render('jobsList', { title: 'Liste des Offres d\'Emploi', offres: offres });
+        const offres = await OffreEmploi.candidateListOffers();
+
+        res.render('jobs/browse_offers', {
+            notification: req.notification,
+            offres: offres
+        });
     } catch (error) {
         next(error); // Passe l'erreur au gestionnaire d'erreurs d'Express
     }
 });
 
 
-router.post('/view', function(req, res, next) {
-    // GET OFFER DATA
-    res.render('jobs/view_offer');
+router.get('/view_offer', function (req, res, next) {
+    // RETURN BAD REQUEST
+    res.redirect('/jobs/browse_offers');
+});
+
+router.post('/view_offer', isLoggedIn, async function(req, res, next) {
+
+    const { idOffre } = req.body;
+    const offre = await OffreEmploi.candidateViewOffer(idOffre);
+    const isCandidate = await Candidature.isCandidate(req.session.userEmail, idOffre);
+
+    res.render('jobs/view_offer', {
+        offre: offre,
+        idOffre: idOffre,
+        isCandidate: isCandidate
+    });
 });
 
 
-router.get('/add_offer', requireAffiliation, async function(req, res, next) {
+router.get('/add_offer', requireAffiliation, readNotification, async function(req, res, next) {
     let fiches = await FichePoste.list();
 
     res.render('jobs/add_offer', {
-        notification: req.session.notification,
+        notification: req.notification,
         fiches: fiches
     });
-    if (req.session.notification) {req.session.notification = '';}
 });
 
 

@@ -5,11 +5,11 @@ const router = express.Router();
 const loginRouter = require('./login');
 const registerRouter = require('./register');
 const dashboardRouter = require('./dashboard');
-const applicationsRouter = require('./applications');
 const jobsRouter = require('./jobs');
 const usersRouter = require('./users');
 const orgRouter = require('./organizations');
 
+const applicationsRouter = require('./applications');
 const logger = require("../logger");
 
 // Redirection principale vers la page de login

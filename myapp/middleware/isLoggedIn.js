@@ -6,10 +6,10 @@ function isLoggedIn(req, res, next) {
         logger.debug(`Utilisateur connecté avec l'email : ${req.session.userEmail}`);
         next();
     } else {
+        req.session.returnTo = req.originalUrl || '/'; // save current page
         logger.warn("Aucun utilisateur connecté, redirection vers /login");
         res.redirect('/login');
     }
 }
-
 
 module.exports = isLoggedIn;
