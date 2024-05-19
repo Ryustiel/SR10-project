@@ -1,0 +1,7 @@
+<form id="editEmailForm" method="post" action="/users/update-email">
+    <div class="mb-3">
+        <label for="newEmail" class="form-label">Nouvel Email</label>
+        <input type="email" class="form-control" id="newEmail" name="newEmail" required value="<%= user.Email %>">
+    </div>
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
+</form>
