@@ -17,6 +17,11 @@
                     <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
                     <button type="submit" class="btn btn-primary">Voir le Profil</button>
                 </form>
+                <form method="POST" action="/applications/attachments">
+                    <input type="hidden" name="idCandidat" value="<%= candidature.IdCandidat %>">
+                    <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
+                    <button type="submit" class="btn btn-success">Consulter les Pièces</button>
+                </form>
                 <form method="POST" action="/applications/cancel-application">
                     <input type="hidden" name="idCandidat" value="<%= candidature.IdCandidat %>">
                     <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
