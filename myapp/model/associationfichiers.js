@@ -1,44 +1,82 @@
 const pool = require('./db');
 
 const AssociationFichiers = {
-    async create({ idCandidature, fichier }) {
+
+    async create({ idCandidat, idOffre, fichier }) {
+
         const query = `
-      INSERT INTO AssociationFichiers 
-      (IdCandidature, Fichier) 
-      VALUES (?, ?);
+
+      INSERT INTO AssociationFichiers (IdCandidat, IdOffre, Fichier)
+
+      VALUES (?, ?, ?);
+
     `;
-        const values = [idCandidature, fichier];
+
+        const values = [idCandidat, idOffre, fichier];
+
         await pool.query(query, values);
-        return this.read(idCandidature);
+
+        return this.read(idCandidat, idOffre, fichier);
+
     },
 
-    async read(id) {
+
+
+    async read(idAssociation) {
+
         const query = `SELECT * FROM AssociationFichiers WHERE IdAssociation = ?;`;
-        const [results] = await pool.query(query, [id]);
+
+        const [results] = await pool.query(query, [idAssociation]);
+
         return results[0];
+
     },
 
-    async update(id, { idCandidature, fichier }) {
+
+
+    async update(idAssociation, { idCandidat, idOffre, fichier }) {
+
         const query = `
-      UPDATE AssociationFichiers 
-      SET IdCandidature = ?, Fichier = ?
+
+      UPDATE AssociationFichiers
+
+      SET IdCandidat = ?, IdOffre = ?, Fichier = ?
+
       WHERE IdAssociation = ?;
+
     `;
-        const values = [idCandidature, fichier, id];
+
+        const values = [idCandidat, idOffre, fichier, idAssociation];
+
         await pool.query(query, values);
-        return this.read(id);
+
+        return this.read(idAssociation);
+
     },
 
-    async delete(id) {
+
+
+    async delete(idAssociation) {
+
         const query = `DELETE FROM AssociationFichiers WHERE IdAssociation = ?;`;
-        await pool.query(query, [id]);
+
+        await pool.query(query, [idAssociation]);
+
     },
+
+
 
     async readall() {
+
         const query = `SELECT * FROM AssociationFichiers;`;
+
         const [results] = await pool.query(query);
+
         return results;
+
     }
+
 };
+
 
 module.exports = AssociationFichiers;
