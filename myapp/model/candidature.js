@@ -94,11 +94,13 @@ const Candidature = {
 
         const query = `
 
-      SELECT O.IdOffre, IdCandidat, Intitule, DateCandidature
+      SELECT O.IdOffre, IdCandidat, Nom, Prenom, Intitule, DateCandidature
 
       FROM Candidature AS C
 
       JOIN OffreEmploi AS O ON C.IdOffre = O.IdOffre
+          
+      JOIN Utilisateur AS U ON C.IdCandidat = U.email
 
       JOIN FichePoste AS F ON F.IdFiche = O.IdFiche
 
