@@ -1,3 +1,4 @@
+// Importation des modules
 const express = require('express');
 const router = express.Router();
 const logger = require('../logger');
@@ -5,11 +6,16 @@ const multer = require('multer');
 
 const OffreEmploi = require('../model/offreemploi');
 const Candidature = require('../model/candidature');
+const Utilisateur = require('../model/utilisateur');
+const Organisation = require('../model/organisation');
 
 const isLoggedIn = require('../middleware/isLoggedIn.js');
 const requireRecruitorStatus = require('../middleware/requireRecruitorStatus.js');
 const requireAffiliation = require('../middleware/requireAffiliation.js');
 const readNotification = require('../middleware/readNotification');
+const isAdmin = require('../middleware/isAdmin');
+const readReturnTo = require('../middleware/readReturnTo');
+
 
 // Set storage engine
 const storage = multer.memoryStorage();
@@ -51,27 +57,30 @@ router.post('/apply', upload.array('formFileLg'), isLoggedIn, async function(req
 });
 
 
-router.post('/cancel-application', isLoggedIn, async function(req, res, next) {
-    const { idOffre, idCandidat } = req.body;
+router.post('/cancel-application', isLoggedIn, readReturnTo, async function(req, res, next) {
+    const { idCandidat, idOffre } = req.body;
+    logger.warn(`Suppression avec idCandidat : ${idCandidat}, idOffre : ${idOffre} affiliation : ${req.session.userType}`);
     if (idCandidat === 'self') {
         if (await Candidature.isCandidate(req.session.userEmail, idOffre)) {
             await Candidature.delete(req.session.userEmail, idOffre);
             req.session.notification = `
             Vous ne candidatez plus à ${await OffreEmploi.getNom(idOffre)}
         `;
-            res.redirect('/jobs/browse_offers');
         } else {
             req.session.notification = `Vous n'êtes pas candidat à ${await OffreEmploi.getNom(idOffre)}`;
-            res.redirect('/jobs/browse_offers');
         }
-    } else if (req.session.userAffiliation === 'recruiter') {
+    } else if (req.session.userType === 'recruteur') {
+        if (await OffreEmploi.isUserLegitimate(idOffre, req.session.userEmail)) {
+            await Candidature.delete(idCandidat, idOffre);
+            req.session.notification = `Vous avez refusé la candidature de ${await Utilisateur.getNom(idCandidat)} à ${await OffreEmploi.getNom(idOffre)}`;
+        }
+    } else if (req.session.userAffiliation === 'administrateur') {
         await Candidature.delete(idCandidat, idOffre);
-        // TODO : A SECURISER
-    }
-        else {
+    } else {
         req.session.notification = 'Vous n\'êtes pas autorisé à annuler cette candidature'
-        res.redirect('/jobs/browse_offers');
     }
+
+    res.redirect(req.returnTo);
 });
 
 
@@ -79,6 +88,7 @@ router.get('/my-applications', isLoggedIn, readNotification, async function(req,
 
     const candidatures = await Candidature.getApplicationsCandidat(req.session.userEmail);
 
+    req.session.returnTo = "/applications/my-applications";
     res.render('applications/my_applications.ejs', {
         notification: req.notification,
         candidatures: candidatures
@@ -86,31 +96,15 @@ router.get('/my-applications', isLoggedIn, readNotification, async function(req,
 });
 
 
-router.get('/incoming-applications', async function(req, res, next) {
+router.get('/incoming-applications', requireRecruitorStatus, readNotification, async function(req, res, next) {
     const candidatures = await Candidature.getApplicationsRecruteur(req.session.userEmail);
 
+    req.session.returnTo = "/applications/incoming-applications";
     res.render('applications/incoming_applications.ejs', {
         notification: req.notification,
         candidatures: candidatures
     });
 });
 
-
-router.get('/recruitor-requests', function(req, res, next) {
-    res.render('applications/browse_received.ejs', { title: 'Requêtes Recruteur' });
-});
-router.get('/organization-requests', function(req, res, next) {
-    res.render('applications/browse_received.ejs', { title: 'Requêtes Organisations' });
-});
-router.get('/applicants', function(req, res, next) {
-    res.render('applications/browse_received.ejs', { title: 'Requêtes Emploi' });
-});
-
-router.get('/offers', function(req, res, next) {
-    res.render('applications/browse_sent.ejs', { title: 'Mes Offres' });
-});
-router.get('/job-descriptions', function(req, res, next) {
-    res.render('applications/browse_sent.ejs', { title: 'Mes Fiches Emploi' });
-});
 
 module.exports = router;

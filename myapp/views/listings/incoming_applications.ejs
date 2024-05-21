@@ -12,14 +12,14 @@
             <p class="card-text"> le <%= candidature.DateCandidature %> </p>
             <div class="btn-group" role="group">
 
-                <form method="POST" action="/">
-                    <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
+                <form method="POST" action="/applications/cancel-application">
                     <input type="hidden" name="idCandidat" value="<%= candidature.IdCandidat %>">
+                    <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
                     <button type="submit" class="btn btn-primary">Voir le Profil</button>
                 </form>
                 <form method="POST" action="/applications/cancel-application">
-                    <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
                     <input type="hidden" name="idCandidat" value="<%= candidature.IdCandidat %>">
+                    <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
                     <button type="submit" class="btn btn-danger">Refuser</button>
                 </form>
             </div>

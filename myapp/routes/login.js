@@ -4,6 +4,8 @@ const bcrypt = require('bcryptjs');
 const Utilisateur = require('../model/utilisateur');
 const logger = require('../logger');
 
+const readReturnTo = require('../middleware/readReturnTo');
+
 // Page de connexion
 router.get('/', (req, res) => {
     if (req.session.userEmail) {
@@ -15,7 +17,7 @@ router.get('/', (req, res) => {
 });
 
 // Traitement du formulaire de connexion
-router.post('/', async (req, res) => {
+router.post('/', readReturnTo, async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -40,10 +42,7 @@ router.post('/', async (req, res) => {
             req.session.notification = '';
             logger.info(`Utilisateur connecté : ${email} en tant que ${req.session.userType}`);
 
-            const returnTo = req.session.returnTo || '/dashboard'; // redirect to previous page
-            logger.info(`Redirection vers ${returnTo}, session vaut ${req.session.returnTo}`);
-            req.session.returnTo = null;
-            res.redirect(returnTo);
+            res.redirect(req.returnTo);
         } else {
             logger.warn(`Tentative de connexion échouée pour mot de passe incorrect: ${email}`);
             res.render('auth/login', { errorMessage: 'Mot de passe incorrect' });

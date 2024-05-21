@@ -61,6 +61,16 @@ const Utilisateur = {
         }
     },
 
+    async getNom(email) {
+        const query = `SELECT Nom, Prenom FROM Utilisateur WHERE Email = ?;`;
+        const [results] = await pool.query(query, [email]);
+        if (results.length > 0) {
+            return results[0].Nom + ' ' + results[0].Prenom;
+        } else {
+            return null;
+        }
+    },
+
     async getOrganisationId(email) {
         const query = `SELECT IdOrganisation FROM Utilisateur WHERE Email = ?;`;
         const [results] = await pool.query(query, [email]);

@@ -13,8 +13,8 @@
             <div class="btn-group" role="group">
 
                 <form method="POST" action="/applications/cancel-application">
-                    <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
                     <input type="hidden" name="idCandidat" value="self">
+                    <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
                     <button type="submit" class="btn btn-danger">Annuler</button>
                 </form>
             </div>
