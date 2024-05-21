@@ -26,7 +26,7 @@ router.post('/apply', upload.array('formFileLg'), isLoggedIn, async function(req
         const files = req.files;
 
         // Check if files exist
-        //if (!files || files.length === 0) {
+        // if (!files || files.length === 0) {
         //    return res.status(400).send('No files uploaded');
         //}
 
@@ -54,6 +54,15 @@ router.post('/apply', upload.array('formFileLg'), isLoggedIn, async function(req
     } catch (error) {
         next(error);
     }
+});
+
+
+router .post('/attachments', requireRecruitorStatus, async function(req, res, next) {
+    const { idCandidat, idOffre } = req.body;
+    const candidatures = await Candidature.getApplicationsRecruteur(idCandidat, idOffre);
+    res.render('applications/attachments.ejs', {
+        candidature: candidatures[0]
+    });
 });
 
 
