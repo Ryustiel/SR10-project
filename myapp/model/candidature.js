@@ -1,20 +1,26 @@
 const pool = require('./db');
+const AssociationFichiers = require('./associationfichiers.js');
+
+const logger = require('../logger');
 
 const Candidature = {
 
-    async create({ idCandidat, idOffre, dateCandidature }) {
+    async create(idCandidat, idOffre, dateCandidature, files) {
 
         const query = `
-
-      INSERT INTO Candidature (IdCandidat, IdOffre, DateCandidature)
-
-      VALUES (?, ?, ?);
-
-    `;
+            INSERT INTO Candidature (IdCandidat, IdOffre, DateCandidature)
+            VALUES (?, ?, ?);
+        `;
 
         const values = [idCandidat, idOffre, dateCandidature];
-
         await pool.query(query, values);
+
+        if (files.length > 0) {
+            for (const filename of files) {
+                logger.info(`Creating file entry for ${filename} with user ${idCandidat} and offer ${idOffre}`);
+                await AssociationFichiers.create(idCandidat, idOffre, filename);
+            }
+        }
 
         return this.read(idCandidat, idOffre);
 
@@ -58,6 +64,7 @@ const Candidature = {
 
     async delete(idCandidat, idOffre) {
 
+        await AssociationFichiers.deleteFiles(idCandidat, idOffre);
         const query = `DELETE FROM Candidature WHERE IdCandidat = ? AND IdOffre = ?;`;
 
         await pool.query(query, [idCandidat, idOffre]);
