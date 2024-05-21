@@ -28,3 +28,4 @@
 ## File-based project format:
 *.ipr
 *.iws
+/myapp/uploads/

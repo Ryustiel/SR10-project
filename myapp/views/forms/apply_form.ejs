@@ -3,7 +3,7 @@
     <% if (offre.NombrePieces > 0) { %>
         <div class="mb-3">
             <label for="formFileLg" class="form-label">Télécharger des Pièces Justificatives</label>
-            <input class="form-control form-control-lg" id="formFileLg" type="file" multiple />
+            <input class="form-control form-control-lg" id="formFileLg" name="formFileLg" type="file" multiple />
         </div>
         <button id="submitButton" type="submit" class="btn btn-secondary" disabled>Postuler</button>
     <% } else { %>

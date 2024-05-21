@@ -3,11 +3,13 @@ const express = require('express');
 const router = express.Router();
 const logger = require('../logger');
 const multer = require('multer');
+const path = require('path');
 
 const OffreEmploi = require('../model/offreemploi');
 const Candidature = require('../model/candidature');
 const Utilisateur = require('../model/utilisateur');
 const Organisation = require('../model/organisation');
+const AssociationFichier = require('../model/associationfichiers')
 
 const isLoggedIn = require('../middleware/isLoggedIn.js');
 const requireRecruitorStatus = require('../middleware/requireRecruitorStatus.js');
@@ -18,7 +20,15 @@ const readReturnTo = require('../middleware/readReturnTo');
 
 
 // Set storage engine
-const storage = multer.memoryStorage();
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/'); // Folder to save the files
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
 const upload = multer({ storage: storage });
 
 router.post('/apply', upload.array('formFileLg'), isLoggedIn, async function(req, res, next) {
@@ -26,28 +36,27 @@ router.post('/apply', upload.array('formFileLg'), isLoggedIn, async function(req
         const files = req.files;
 
         // Check if files exist
-        // if (!files || files.length === 0) {
-        //    return res.status(400).send('No files uploaded');
-        //}
+        if (!files || files.length === 0) {
+            return res.status(400).send('No files uploaded');
+        }
 
-        // Convert the file buffers to strings or process them further
-        files.forEach(file => {
-            const fileString = file.buffer.toString();
-            logger.warn(`File content : ${fileString}`)
-            // Store the file string or process it further
-        });
+        // Process and save files
+        const filenames = files.map(file => file.filename);
+        logger.info(`uploaded ${files.length} files as ${JSON.stringify(filenames)}`);
 
         const { idOffre } = req.body;
         const idCandidat = req.session.userEmail;
         const dateCandidature = new Date();
 
         // CREATE APPLICATION
-        await Candidature.create({
+        await Candidature.create(
             idCandidat,
             idOffre,
-            dateCandidature
-        });
+            dateCandidature,
+            filenames
+        );
 
+        // NOTIFY
         const nom = await OffreEmploi.getNom(idOffre);
         req.session.notification = `Vous avez postulé à ${nom}`;
         res.redirect('/jobs/browse_offers');
