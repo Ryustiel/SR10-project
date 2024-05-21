@@ -44,7 +44,8 @@ const OffreEmploi = {
     async getNom(idOffre) {
         const query = `
             SELECT Intitule FROM OffreEmploi 
-            JOIN FichePoste WHERE IdOffre = ?;
+            JOIN FichePoste On OffreEmploi.IdFiche = FichePoste.IdFiche
+            WHERE IdOffre = ?;
         `;
         const [results] = await pool.query(query, [idOffre]);
         if (!results || results.length === 0) {
