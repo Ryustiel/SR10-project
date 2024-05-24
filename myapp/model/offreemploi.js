@@ -106,6 +106,20 @@ const OffreEmploi = {
         const [results] = await pool.query(query, [idOffre, idRecruteur]);
         logger.info(`isUserLegitimate : ${idOffre} ${idRecruteur} ${results[0]['COUNT(*)']}`);
         return results[0]['COUNT(*)'] > 0;
+    },
+
+    async isOrganisationLegitimate(idOffre, idRecruteur) {
+        const query = `
+            SELECT COUNT(*) FROM OffreEmploi AS O 
+            JOIN FichePoste AS F 
+            ON O.IdFiche = F.IdFiche
+            JOIN Utilisateur AS U
+            ON F.IdOrganisation = U.IdOrganisation
+            WHERE O.IdOffre = ? AND U.Email = ?;
+        `;
+        const [results] = await pool.query(query, [idOffre, idRecruteur]);
+        logger.info(`isOrganisationLegitimate : ${idOffre} ${idRecruteur} ${results[0]['COUNT(*)']}`);
+        return results[0]['COUNT(*)'] > 0;
     }
 };
 

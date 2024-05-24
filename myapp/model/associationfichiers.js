@@ -82,6 +82,17 @@ const AssociationFichiers = {
     },
 
 
+    async readFichier(fichier) {
+        // Possible grâce à la contrainte UNIQUE sur Fichier
+        const query = `SELECT IdCandidat, IdOffre FROM AssociationFichiers WHERE Fichier = ?;`;
+        const results = await pool.query(query, [fichier]);
+        if (results.length === 0) {
+            return null;
+        }
+        return results[0][0];
+    },
+
+
     async readall() {
 
         const query = `SELECT * FROM AssociationFichiers;`;

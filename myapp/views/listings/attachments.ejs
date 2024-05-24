@@ -1,0 +1,27 @@
+<% if (fichiers.length === 0) { %>
+    <p>
+        Aucune Pièce jointe n'est disponible pour cette candidature.
+    </p>
+<% } %>
+
+<% fichiers.forEach((fichier) => { %>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title"> <%= fichier.Fichier %> </h5>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-primary" onclick="openDownloadTab('<%= fichier.Fichier %>')">
+                    Télécharger
+                </button>
+            </div>
+        </div>
+    </div>
+
+<% }) %>
+
+<script>
+    function openDownloadTab(fichier) {
+        const currentUrl = window.location.origin;
+        window.open(`${currentUrl}/applications/download-attachment?fichier=${fichier}`, '_blank');
+    }
+</script>
