@@ -66,20 +66,54 @@ router.post('/apply', upload.array('formFileLg'), isLoggedIn, async function(req
 });
 
 
-router .post('/attachments', requireRecruitorStatus, async function(req, res, next) {
+router.post('/attachments', isLoggedIn, async function(req, res, next) {
     const { idCandidat, idOffre } = req.body;
-    const candidatures = await Candidature.getApplicationsRecruteur(idCandidat, idOffre);
-    res.render('applications/attachments.ejs', {
-        candidature: candidatures[0]
-    });
+    if (
+        req.session.userEmail === idCandidat || // Est candidat associé ?
+        await OffreEmploi.isUserLegitimate(idOffre, req.session.userEmail) // Est recruteur associé ?
+    ) {
+        const nom_candidat = await Utilisateur.getNom(idCandidat);
+        const nom_offre = await OffreEmploi.getNom(idOffre);
+        const fichiers = await AssociationFichier.listFiles(idCandidat, idOffre);
+
+        res.render('applications/attachments.ejs', {
+            nom_candidat: nom_candidat,
+            nom_offre: nom_offre,
+            fichiers: fichiers
+        });
+    } else {
+        res.status(403).send('Unauthorized');
+    }
+});
+
+
+router.get('/download-attachment', isLoggedIn, async function(req, res, next) {
+    const { fichier } = req.query;
+    const result = await AssociationFichier.readFichier(fichier);
+    if (!result) {
+        res.status(403).send('Unauthorized');
+    } else {
+        logger.warn(`DOWNLOAD ATTACHMENT : ${JSON.stringify(result)}`);
+        if (
+            req.session.userEmail === result.IdCandidat || // Est candidat associé ?
+            await OffreEmploi.isOrganisationLegitimate(result.IdOffre, req.session.userEmail) // Fait partie de l'organisation associée ?
+        ) {
+            const filePath = path.join(__dirname, '..', 'uploads', fichier);
+            res.download(filePath, fichier);
+        } else {
+            res.status(403).send('Unauthorized');
+        }
+    }
 });
 
 
 router.post('/cancel-application', isLoggedIn, readReturnTo, async function(req, res, next) {
     const { idCandidat, idOffre } = req.body;
-    logger.warn(`Suppression avec idCandidat : ${idCandidat}, idOffre : ${idOffre} affiliation : ${req.session.userType}`);
+    logger.info(`Tentative de Suppression avec idCandidat : ${idCandidat}, idOffre : ${idOffre} affiliation : ${req.session.userType}`);
+    // GESTION DES PERMISSIONS DES UTILISATEURS
     if (idCandidat === 'self') {
         if (await Candidature.isCandidate(req.session.userEmail, idOffre)) {
+            // ne supprime que si l'utilisateur a crée la candidature
             await Candidature.delete(req.session.userEmail, idOffre);
             req.session.notification = `
             Vous ne candidatez plus à ${await OffreEmploi.getNom(idOffre)}
@@ -89,10 +123,12 @@ router.post('/cancel-application', isLoggedIn, readReturnTo, async function(req,
         }
     } else if (req.session.userType === 'recruteur') {
         if (await OffreEmploi.isUserLegitimate(idOffre, req.session.userEmail)) {
+            // ne supprime que si le recruteur est proprietaire de l'offre
             await Candidature.delete(idCandidat, idOffre);
             req.session.notification = `Vous avez refusé la candidature de ${await Utilisateur.getNom(idCandidat)} à ${await OffreEmploi.getNom(idOffre)}`;
         }
     } else if (req.session.userAffiliation === 'administrateur') {
+        // la suppression est permise inconditionnellement
         await Candidature.delete(idCandidat, idOffre);
     } else {
         req.session.notification = 'Vous n\'êtes pas autorisé à annuler cette candidature'
