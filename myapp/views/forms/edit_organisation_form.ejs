@@ -1,4 +1,5 @@
 <form id="editOrganisationForm" method="post" action="/organizations/request-organisation-change">
+    <input type="hidden" name="userId" value="<%= user.Email %>">
     <div class="mb-3">
         <label for="existingOrganisationEdit" class="form-label">Nouvelle Organisation</label>
         <select class="form-select" id="existingOrganisationEdit" name="existingOrganisationEdit" required>
@@ -31,3 +32,16 @@
     </div>
     <button type="submit" class="btn btn-primary">Envoyer la demande</button>
 </form>
+
+<script>
+    document.getElementById('existingOrganisationEdit').addEventListener('change', function () {
+        const newOrganisationFields = document.getElementById('newOrganisationFieldsEdit');
+        if (this.value === 'new') {
+            newOrganisationFields.classList.remove('d-none');
+            newOrganisationFields.querySelectorAll('input').forEach(input => input.required = true);
+        } else {
+            newOrganisationFields.classList.add('d-none');
+            newOrganisationFields.querySelectorAll('input').forEach(input => input.required = false);
+        }
+    });
+</script>

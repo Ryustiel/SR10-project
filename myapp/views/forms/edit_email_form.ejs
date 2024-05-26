@@ -1,4 +1,5 @@
 <form id="editEmailForm" method="post" action="/users/update-email">
+    <input type="hidden" name="userId" value="<%= user.Email %>">
     <div class="mb-3">
         <label for="newEmail" class="form-label">Nouvel Email</label>
         <input type="email" class="form-control" id="newEmail" name="newEmail" required value="<%= user.Email %>">

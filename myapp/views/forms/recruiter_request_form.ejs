@@ -1,4 +1,5 @@
 <form id="recruiterRequestForm" method="post" action="/organizations/request-recruiter">
+    <input type="hidden" name="userId" value="<%= user.Email %>">
     <div class="mb-3">
         <label for="existingOrganisation" class="form-label">Choisissez une organisation existante</label>
         <select class="form-select" id="existingOrganisation" name="existingOrganisation" required>
@@ -29,3 +30,16 @@
     </div>
     <button type="submit" class="btn btn-primary">Envoyer la demande</button>
 </form>
+
+<script>
+    document.getElementById('existingOrganisation').addEventListener('change', function () {
+        const newOrganisationFields = document.getElementById('newOrganisationFields');
+        if (this.value === 'new') {
+            newOrganisationFields.classList.remove('d-none');
+            newOrganisationFields.querySelectorAll('input').forEach(input => input.required = true);
+        } else {
+            newOrganisationFields.classList.add('d-none');
+            newOrganisationFields.querySelectorAll('input').forEach(input => input.required = false);
+        }
+    });
+</script>

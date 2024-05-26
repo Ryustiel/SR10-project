@@ -1,37 +1,44 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const {body, validationResult} = require('express-validator');
 const Utilisateur = require('../model/utilisateur');
 const logger = require('../logger');
-
 const readReturnTo = require('../middleware/readReturnTo');
+const readMessage = require('../middleware/readMessage');
 
-// Page de connexion
-router.get('/', (req, res) => {
+// Route GET pour afficher le formulaire de connexion
+router.get('/', readMessage, (req, res) => {
     if (req.session.userEmail) {
         logger.info(`Utilisateur déjà connecté : ${req.session.userEmail}`);
         res.redirect('/dashboard');
     } else {
-        res.render('auth/login', { errorMessage: '' });
+        res.render('auth/login');
     }
 });
 
-// Traitement du formulaire de connexion
-router.post('/', readReturnTo, async (req, res) => {
+// Validation et processing de la connexion
+router.post('/', readReturnTo, [
+    body('email', 'Veuillez entrer un email valide').isEmail().trim().escape(),
+    body('password', 'Le mot de passe est requis').notEmpty().trim().escape()
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        req.session.message = errors.array().map(error => error.msg).join(', ');
+        req.session.messageType = 'error';
+        logger.warn(`Erreur de validation lors de la connexion : ${JSON.stringify(errors.array())}`);
+        return res.redirect('/');
+    }
+
+    const {email, password} = req.body;
     try {
-        const { email, password } = req.body;
-
-        // Validation basique des entrées
-        if (!email || !password) {
-            logger.warn("Tentative de connexion sans email ou mot de passe");
-            return res.render('auth/login', { errorMessage: 'Email et mot de passe requis.' });
-        }
-
         const utilisateur = await Utilisateur.read(email);
 
         if (!utilisateur) {
             logger.warn(`Tentative de connexion échouée pour l'utilisateur non trouvé: ${email}`);
-            return res.render('auth/login', { errorMessage: 'Utilisateur non trouvé' });
+            req.session.message = 'Utilisateur non trouvé';
+            req.session.messageType = 'error';
+            return res.redirect('/');
         }
 
         const match = await bcrypt.compare(password, utilisateur.MotDePasse);
@@ -42,13 +49,15 @@ router.post('/', readReturnTo, async (req, res) => {
             req.session.notification = '';
             logger.info(`Utilisateur connecté : ${email} en tant que ${req.session.userType}`);
 
-            res.redirect(req.returnTo);
+            res.redirect(req.returnTo || '/dashboard');
         } else {
             logger.warn(`Tentative de connexion échouée pour mot de passe incorrect: ${email}`);
-            res.render('auth/login', { errorMessage: 'Mot de passe incorrect' });
+            req.session.message = 'Mot de passe incorrect';
+            req.session.messageType = 'error';
+            res.redirect('/');
         }
     } catch (error) {
-        logger.error(`Erreur dans POST /login : ${error.message}`);
+        logger.error(`Erreur dans POST /login : ${error.message}`, {stack: error.stack});
         res.status(500).render('error', {
             message: "Erreur interne du serveur",
             error: req.app.get('env') === 'development' ? error : {}

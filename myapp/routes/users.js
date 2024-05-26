@@ -2,161 +2,178 @@ const express = require('express');
 const router = express.Router();
 const userModel = require('../model/utilisateur');
 const isLoggedIn = require("../middleware/isLoggedIn");
-const logger = require("../logger");
+const isAdmin = require("../middleware/isAdmin");
+const {canViewProfile, canEditProfile} = require("../middleware/profile_properties");
+const logger = require('../logger');
 const bcrypt = require('bcryptjs');
-const { body, validationResult } = require('express-validator');
-const { getUserDetailsAndOrgs } = require('../middleware/userUtils');
+const {body, validationResult} = require('express-validator');
+const {renderProfileView} = require("../middleware/renderProfileView"); // Ensure the correct import path
+const pool = require('../model/db'); // Import the database connection
+const readMessage = require('../middleware/readMessage'); // Import the new middleware
 
-// Route pour lister les utilisateurs
-router.get('/userslist', async (req, res, next) => {
+// Route to list users
+router.get('/userslist', isLoggedIn, isAdmin, readMessage, async (req, res, next) => {
     try {
-        const result = await userModel.readall();
-        res.render('usersList', { title: 'Liste des Utilisateurs', users: result || [] });
+        const users = await userModel.readall(); // Use the correct method from Utilisateur model
+        logger.info("Liste des utilisateurs récupérée avec succès.");
+        res.render('users/userslist', {title: 'Liste des Utilisateurs', users: users || []});
     } catch (error) {
-        logger.error("Erreur lors de la récupération de la liste des utilisateurs:", error);
-        next(error);
-    }
-});
-
-// Route pour parcourir les utilisateurs
-router.get('/browse', async (req, res, next) => {
-    try {
-        const result = await userModel.readall();
-        res.render('users/browse_users', { users: result || [] });
-    } catch (error) {
-        logger.error("Erreur lors de la récupération des utilisateurs:", error);
-        next(error);
-    }
-});
-
-// Route pour afficher le profil utilisateur
-router.get('/my_profile', isLoggedIn, async (req, res) => {
-    logger.debug("Accès au profil utilisateur...");
-    try {
-        const email = req.session.userEmail;
-        logger.debug(`Recherche des détails pour l'email : ${email}`);
-        const { userDetails, organisations } = await getUserDetailsAndOrgs(email);
-        res.render('users/view_profile', { user: userDetails, organisations, activePage: 'my_profile' });
-    } catch (error) {
-        logger.error("Erreur lors de l'accès au profil:", error);
-        res.status(500).render('error', { message: "Erreur de serveur.", error: error });
-    }
-});
-
-// Route pour mettre à jour l'email utilisateur
-router.post('/update-email', isLoggedIn, body('newEmail').isEmail().withMessage('Email invalide.'), async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        logger.warn("Email invalide fourni.");
-        const email = req.session.userEmail;
-        const { userDetails, organisations } = await getUserDetailsAndOrgs(email);
-        return res.status(400).render('users/view_profile', {
-            user: userDetails,
-            organisations: organisations,
-            errorMessage: errors.array().map(e => e.msg).join(', '),
-            activePage: 'my_profile'
-        });
-    }
-    try {
-        const email = req.session.userEmail;
-        const { newEmail } = req.body;
-        logger.debug(`Mise à jour de l'email de l'utilisateur: ${email} vers ${newEmail}`);
-        await userModel.update(email, { Email: newEmail });
-        req.session.userEmail = newEmail;
-        res.redirect('/users/my_profile');
-    } catch (error) {
-        const email = req.session.userEmail;
-        const { userDetails, organisations } = await getUserDetailsAndOrgs(email);
-        logger.error("Erreur lors de la mise à jour de l'email:", error);
-        res.status(500).render('users/view_profile', {
-            user: userDetails,
-            organisations: organisations,
-            errorMessage: "Erreur de serveur.",
-            activePage: 'my_profile'
+        res.status(500).render('error', {
+            message: "Erreur interne du serveur lors de la récupération de la liste des utilisateurs",
+            error
         });
     }
 });
 
-// Route pour mettre à jour le téléphone utilisateur
-router.post('/update-telephone', isLoggedIn, body('newTelephone').isMobilePhone('fr-FR').withMessage('Numéro de téléphone mobile invalide.'), async (req, res) => {
+// Route pour afficher le profil de l'utilisateur avec un argument par défaut
+router.get('/profile', isLoggedIn, async (req, res) => {
+    const userId = req.session.userEmail;
+    logger.info(`Accès au profil de l'utilisateur ${userId}`);
+    await renderProfileView(req, res, userId);
+});
+
+// Route pour afficher le profil d'un utilisateur spécifique
+router.post('/profile', isLoggedIn, canViewProfile, async (req, res) => {
+    const userId = req.body.userId || req.session.userEmail;
+    logger.info(`Accès au profil de l'utilisateur ${userId}`);
+    await renderProfileView(req, res, userId);
+});
+
+// Route pour mettre à jour l'email de l'utilisateur
+router.post('/update-email', isLoggedIn, canEditProfile, [
+    body('newEmail').isEmail().withMessage('Email invalide.')
+], async (req, res) => {
     const errors = validationResult(req);
+    const userId = req.body.userId || req.session.userEmail;
     if (!errors.isEmpty()) {
-        logger.warn("Numéro de téléphone mobile invalide fourni.");
-        return res.status(400).render('error', { message: errors.array().map(e => e.msg).join(', ') });
+        req.session.message = errors.array().map(e => e.msg).join(', ');
+        req.session.messageType = 'error';
+        return res.redirect('/users/profile');
     }
     try {
-        const email = req.session.userEmail;
-        const { newTelephone } = req.body;
-        logger.debug(`Mise à jour du téléphone de l'utilisateur: ${email} vers ${newTelephone}`);
-        await userModel.update(email, { Telephone: newTelephone });
-        res.redirect('/users/my_profile');
+        const {newEmail} = req.body;
+
+        // Start a transaction
+        await pool.query('START TRANSACTION');
+
+        // Update the user's email
+        await userModel.update(userId, {Email: newEmail});
+
+        // Commit the transaction
+        await pool.query('COMMIT');
+
+        if (userId === req.session.userEmail) {
+            req.session.userEmail = newEmail;
+        }
+        req.session.message = "Email mis à jour avec succès.";
+        req.session.messageType = 'notification';
+        res.send(`
+            <form id="redirectForm" method="post" action="/users/profile">
+                <input type="hidden" name="userId" value="${newEmail}">
+            </form>
+            <script>document.getElementById('redirectForm').submit();</script>
+        `);
     } catch (error) {
-        logger.error("Erreur lors de la mise à jour du téléphone:", error);
-        res.status(500).render('error', { message: "Erreur de serveur.", error });
+        // Rollback the transaction in case of error
+        await pool.query('ROLLBACK');
+        res.status(500).render('error', {message: "Erreur de serveur.", error});
     }
 });
 
-// Route pour mettre à jour le mot de passe utilisateur
+// Route pour mettre à jour le téléphone de l'utilisateur
+router.post('/update-telephone', isLoggedIn, canEditProfile, [
+    body('newTelephone').isMobilePhone('fr-FR').withMessage('Numéro de téléphone mobile invalide.')
+], async (req, res) => {
+    const errors = validationResult(req);
+    const userId = req.body.userId || req.session.userEmail;
+    if (!errors.isEmpty()) {
+        req.session.message = errors.array().map(e => e.msg).join(', ');
+        req.session.messageType = 'error';
+        return res.redirect('/users/profile');
+    }
+    try {
+        const {newTelephone} = req.body;
+        await userModel.update(userId, {Telephone: newTelephone});
+        req.session.message = "Téléphone mis à jour avec succès.";
+        req.session.messageType = 'notification';
+        res.send(`
+            <form id="redirectForm" method="post" action="/users/profile">
+                <input type="hidden" name="userId" value="${userId}">
+            </form>
+            <script>document.getElementById('redirectForm').submit();</script>
+        `);
+    } catch (error) {
+        res.status(500).render('error', {message: "Erreur de serveur.", error});
+    }
+});
+
+// Route pour réinitialiser le mot de passe de l'utilisateur (Admin)
+router.post('/reset-password', isLoggedIn, isAdmin, async (req, res) => {
+    const userId = req.body.userId || req.session.userEmail;
+    try {
+        const defaultPassword = 'password'; // Mot de passe par défaut
+        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
+        await userModel.update(userId, {MotDePasse: hashedPassword});
+        req.session.message = "Mot de passe réinitialisé avec succès.";
+        req.session.messageType = 'notification';
+        res.send(`
+            <form id="redirectForm" method="post" action="/users/profile">
+                <input type="hidden" name="userId" value="${userId}">
+            </form>
+            <script>document.getElementById('redirectForm').submit();</script>
+        `);
+    } catch (error) {
+        res.status(500).render('error', {message: "Erreur de serveur.", error});
+    }
+});
+
+// Route pour mettre à jour le mot de passe de l'utilisateur
 router.post('/update-password', isLoggedIn, [
     body('currentPassword', 'Votre mot de passe actuel est requis').notEmpty(),
     body('newPassword', 'Le nouveau mot de passe doit contenir au moins 8 caractères, incluant une majuscule, une minuscule, un chiffre et un caractère spécial.')
         .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/),
-    body('confirmPassword', 'Les mots de passe ne correspondent pas').custom((value, { req }) => value === req.body.newPassword)
+    body('confirmPassword', 'Les mots de passe ne correspondent pas').custom((value, {req}) => value === req.body.newPassword)
 ], async (req, res) => {
     const errors = validationResult(req);
-    const email = req.session.userEmail;
+    const userId = req.session.userEmail;
     if (!errors.isEmpty()) {
-        const { userDetails, organisations } = await getUserDetailsAndOrgs(email);
-        logger.warn(`Erreur de validation lors de la mise à jour du mot de passe : ${JSON.stringify(errors.array())}`);
-        return res.status(400).render('users/view_profile', {
-            user: userDetails,
-            organisations: organisations,
-            errorMessage: errors.array().map(e => e.msg).join(', '),
-            activePage: 'my_profile'
-        });
+        req.session.message = errors.array().map(e => e.msg).join(', ');
+        req.session.messageType = 'error';
+        return res.redirect('/users/profile');
     }
 
     try {
-        const { currentPassword, newPassword } = req.body;
-
-        // Vérification des valeurs
-        if (!currentPassword || !newPassword) {
-            throw new Error("Les mots de passe ne peuvent pas être vides.");
-        }
-
-        const user = await userModel.read(email);
-
+        const {currentPassword, newPassword} = req.body;
+        const user = await userModel.read(userId);
         const match = await bcrypt.compare(currentPassword, user.MotDePasse);
         if (!match) {
-            const { userDetails, organisations } = await getUserDetailsAndOrgs(email);
-            return res.status(400).render('users/view_profile', {
-                user: userDetails,
-                organisations: organisations,
-                errorMessage: "Le mot de passe actuel est incorrect.",
-                activePage: 'my_profile'
-            });
+            req.session.message = "Le mot de passe actuel est incorrect.";
+            req.session.messageType = 'error';
+            return res.redirect('/users/profile');
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-        // Vérification avant la mise à jour
-        if (!hashedPassword) {
-            throw new Error("Impossible de générer le nouveau mot de passe.");
-        }
-
-        await userModel.update(email, { MotDePasse: hashedPassword });
-        logger.info(`Mot de passe mis à jour pour l'utilisateur: ${email}`);
-        res.redirect('/users/my_profile');
+        await userModel.update(userId, {MotDePasse: hashedPassword});
+        req.session.message = "Mot de passe mis à jour avec succès.";
+        req.session.messageType = 'notification';
+        res.redirect(`/users/profile`);
     } catch (error) {
-        logger.error("Erreur lors de la mise à jour du mot de passe :", error);
-        const { userDetails, organisations } = await getUserDetailsAndOrgs(email);
-        res.status(500).render('users/view_profile', {
-            user: userDetails,
-            organisations: organisations,
-            errorMessage: "Erreur de serveur.",
-            activePage: 'my_profile'
-        });
+        res.status(500).render('error', {message: "Erreur de serveur.", error});
     }
 });
 
+router.post('/delete', isLoggedIn, isAdmin, async (req, res) => {
+    const userId = req.body.userId;
+    try {
+        await userModel.delete(userId);
+        req.session.message = "Utilisateur supprimé avec succès.";
+        req.session.messageType = 'notification';
+        res.redirect('/users/userslist');
+    } catch (error) {
+        res.status(500).render('error', { message: "Erreur de serveur.", error });
+    }
+});
+
+//export router and functions
 module.exports = router;

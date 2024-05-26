@@ -1,4 +1,4 @@
-const { createLogger, format, transports } = require('winston');
+const {createLogger, format, transports} = require('winston');
 
 // Vérifier si 'debug' est présent dans les arguments de ligne de commande
 const isDebugEnabled = process.argv.includes('debug');

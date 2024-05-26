@@ -1,21 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <%- include('../head.ejs') %>>
+    <%- include('../head.ejs') %>
     <title>Inscription</title>
 </head>
 <body>
 <div class="container mt-5">
+    <%- include("../message.ejs") %>
     <div class="row">
         <div class="col-md-8 offset-md-2">
             <h2 class="mb-4">Inscription</h2>
-            <% if (Object.keys(errors).length) { %>
-                <div class="alert alert-danger">
-                    <% for(var key in errors) { %>
-                        <p><%= errors[key].msg %></p>
-                    <% } %>
-                </div>
-            <% } %>
 
             <%- include('../forms/registration_form.ejs') %>
 
