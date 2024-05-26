@@ -80,8 +80,10 @@ router.post('/request-organisation-change', isLoggedIn, canEditProfile, [
             await handleExistingOrganisationRequest(userId, existingOrganisationEdit);
         }
 
-        // Update session user type
-        req.session.userType = 'recruteur en attente';
+        if (userId === req.session.userEmail) {
+            // Update session user type
+            req.session.userType = 'recruteur en attente';
+        }
 
         req.session.message = "Demande de changement d'organisation réussie.";
         req.session.messageType = 'notification';
@@ -220,12 +222,25 @@ router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req,
     }
 });
 
-// Route pour gérer les demandes de recruteur
+// Route pour gérer les demandes de recruteur avec recherche et pagination
 router.get('/manage_requests', isLoggedIn, isAdmin, readMessage, async (req, res) => {
+    const search = req.query.search || '';
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10; // Number of requests per page
+    const offset = (page - 1) * limit;
+
     logger.debug("Accès à la gestion des demandes...");
     try {
-        const requests = await Utilisateur.getRecruiterRequests();
-        res.render('applications/manage_requests', {requests, activePage: 'manage_requests'});
+        const {requests, totalRequests} = await Utilisateur.getRecruiterRequestsWithPagination(search, limit, offset);
+        const totalPages = Math.ceil(totalRequests / limit);
+
+        res.render('applications/manage_requests', {
+            requests,
+            search,
+            currentPage: page,
+            totalPages,
+            activePage: 'manage_requests'
+        });
     } catch (error) {
         res.status(500).render('error', {message: "Erreur de serveur.", error});
     }

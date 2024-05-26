@@ -13,6 +13,7 @@
     <div class="row">
         <div class="col-md-10 offset-md-1">
             <h1 class="mb-4">Liste des Utilisateurs</h1>
+            <%- include("../search_pagination.ejs", { search, currentPage, totalPages }) %>
             <table class="table table-bordered">
                 <thead>
                 <tr>
@@ -45,11 +46,18 @@
                                 <input type="hidden" name="userId" value="<%= user.Email %>">
                                 <button type="submit" class="btn btn-danger mb-2">Supprimer</button>
                             </form>
+                            <% if (user.Email !== currentUserEmail && user.TypeCompte !== 'admin') { %>
+                                <form action="/users/make-admin" method="post" class="d-inline">
+                                    <input type="hidden" name="userId" value="<%= user.Email %>">
+                                    <button type="submit" class="btn btn-warning mb-2">Promouvoir en Admin</button>
+                                </form>
+                            <% } %>
                         </td>
                     </tr>
                 <% }); %>
                 </tbody>
             </table>
+            <%- include("../pagination.ejs", { currentPage, totalPages, search }) %>
         </div>
     </div>
 </div>

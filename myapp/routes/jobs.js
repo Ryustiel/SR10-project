@@ -12,12 +12,38 @@ const requireRecruitorStatus = require('../middleware/requireRecruitorStatus.js'
 const requireAffiliation = require('../middleware/requireAffiliation.js');
 const readMessage = require('../middleware/readMessage.js');
 
-// Route to browse offers
+// Route to browse offers with search, pagination, sorting and filtering
 router.get('/browse_offers', isLoggedIn, readMessage, async function (req, res, next) {
+    const search = req.query.search || '';
+    const sort = req.query.sort || 'date';
+    const typeMetier = req.query.typeMetier || '';
+    const minSalaire = parseFloat(req.query.minSalaire) || 0;
+    const maxSalaire = parseFloat(req.query.maxSalaire) || Number.MAX_SAFE_INTEGER;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10; // Number of offers per page
+    const offset = (page - 1) * limit;
+
     try {
-        const offres = await OffreEmploi.candidateListOffers();
+        const {
+            offres,
+            totalOffres
+        } = await OffreEmploi.browseOffers(search, sort, typeMetier, minSalaire, maxSalaire, limit, offset);
+        const totalPages = Math.ceil(totalOffres / limit);
+        const typesMetier = await OffreEmploi.getTypesMetier();
+
         logger.info("Offres d'emploi récupérées avec succès.");
-        res.render('jobs/browse_offers', {offres});
+        res.render('jobs/browse_offers', {
+            offres,
+            search,
+            sort,
+            selectedTypeMetier: typeMetier,
+            minSalaire: minSalaire || '',
+            maxSalaire: maxSalaire !== Number.MAX_SAFE_INTEGER ? maxSalaire : '',
+            currentPage: page,
+            totalPages,
+            typesMetier,
+            user: req.session.userEmail
+        });
     } catch (error) {
         logger.error(`Erreur lors de la récupération des offres d'emploi: ${error.message}`, {stack: error.stack});
         res.status(500).render('error', {message: "Erreur interne du serveur.", error});
@@ -82,7 +108,17 @@ router.post('/add_offer', requireAffiliation, [
             return res.redirect('/jobs/add_offer');
         }
 
-        await OffreEmploi.create({etat, dateValidité, listePieces, nombrePieces, idFiche, idRecruteur});
+        // Format the date correctly for MySQL
+        const formattedDateValidite = new Date(dateValidité).toISOString().split('T')[0];
+
+        await OffreEmploi.create({
+            etat,
+            dateValidite: formattedDateValidite,
+            listePieces,
+            nombrePieces,
+            idFiche,
+            idRecruteur
+        });
 
         req.session.message = "Votre offre d'emploi a été ajoutée avec succès !";
         req.session.messageType = 'notification';
@@ -94,7 +130,6 @@ router.post('/add_offer', requireAffiliation, [
         res.status(500).render('error', {message: "Erreur interne du serveur.", error});
     }
 });
-
 
 // Route to add job (GET)
 router.get('/add_job', requireAffiliation, readMessage, function (req, res) {
@@ -178,7 +213,7 @@ router.post('/my_offers', requireAffiliation, [
     }
 
     try {
-        const {idOffre, action} = req.body;
+        const { idOffre, action } = req.body;
 
         if (!await OffreEmploi.isUserLegitimate(idOffre, req.session.userEmail)) {
             req.session.message = "Vous n'avez pas les droits pour gérer cette offre.";
@@ -189,9 +224,9 @@ router.post('/my_offers', requireAffiliation, [
         logger.info(`Action : ${action} sur l'offre ${idOffre} par ${req.session.userEmail}`);
 
         if (action === '1') {
-            await OffreEmploi.publier(idOffre);
+            await OffreEmploi.update(idOffre, { Etat: 'publié' });
         } else if (action === '2') {
-            await OffreEmploi.depublier(idOffre);
+            await OffreEmploi.update(idOffre, { Etat: 'non publié' });
         } else if (action === '3') {
             await OffreEmploi.delete(idOffre);
         }
@@ -206,21 +241,21 @@ router.post('/my_offers', requireAffiliation, [
 });
 
 // Route to list user's jobs (GET)
-router.get('/my_jobs', requireAffiliation, readMessage, async function(req, res, next) {
+router.get('/my_jobs', requireAffiliation, readMessage, async function (req, res, next) {
     try {
         const fiches = await FichePoste.listFiches(req.session.userAffiliation);
         logger.info(`Fiches de l'organisation ${req.session.userAffiliation} récupérées avec succès.`);
-        res.render('jobs/my_jobs', { fiches });
+        res.render('jobs/my_jobs', {fiches});
     } catch (error) {
-        logger.error(`Erreur lors de la récupération des fiches de l'organisation: ${error.message}`, { stack: error.stack });
-        res.status(500).render('error', { message: "Erreur interne du serveur.", error });
+        logger.error(`Erreur lors de la récupération des fiches de l'organisation: ${error.message}`, {stack: error.stack});
+        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
     }
 });
 
 // Route to manage user's jobs (POST)
 router.post('/my_jobs', requireAffiliation, [
     body('idFiche').notEmpty().withMessage('ID de la fiche requis')
-], async function(req, res, next) {
+], async function (req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         req.session.message = errors.array().map(e => e.msg).join(', ');
@@ -229,7 +264,7 @@ router.post('/my_jobs', requireAffiliation, [
     }
 
     try {
-        const { idFiche } = req.body;
+        const {idFiche} = req.body;
 
         if (!await FichePoste.isUserLegitimate(idFiche, req.session.userAffiliation)) {
             req.session.message = "Vous n'avez pas les droits pour gérer cette fiche.";
@@ -242,13 +277,13 @@ router.post('/my_jobs', requireAffiliation, [
         req.session.messageType = 'notification';
         res.redirect('/jobs/my_jobs');
     } catch (error) {
-        logger.error(`Erreur lors de la suppression de la fiche: ${error.message}`, { stack: error.stack });
+        logger.error(`Erreur lors de la suppression de la fiche: ${error.message}`, {stack: error.stack });
         res.status(500).render('error', { message: "Erreur interne du serveur.", error });
     }
 });
 
 // Route to apply for a job (GET)
-router.get('/apply', readMessage, function(req, res) {
+router.get('/apply', readMessage, function (req, res) {
     res.render('jobs/apply');
 });
 

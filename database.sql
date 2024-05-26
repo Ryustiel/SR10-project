@@ -37,7 +37,7 @@ CREATE TABLE FichePoste
     TypeMetier              VARCHAR(255),
     LieuMission             VARCHAR(255),
     Rythme                  VARCHAR(255),
-    Salaire                 VARCHAR(255),
+    Salaire                 INT,
     Description             VARCHAR(255),
     IdOrganisation          VARCHAR(255),
     FOREIGN KEY (IdOrganisation) REFERENCES Organisation (NumeroSiren) ON UPDATE CASCADE
@@ -48,9 +48,9 @@ CREATE TABLE OffreEmploi
 (
     IdOffre      INT AUTO_INCREMENT PRIMARY KEY,
     Etat         VARCHAR(255),
-    DateValidite TIMESTAMP,
+    DateValidite TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ListePieces  VARCHAR(255),
-    NombrePieces Decimal(10, 0),
+    NombrePieces DECIMAL(10, 0),
     IdFiche      INT,
     IdRecruteur  VARCHAR(255),
     CONSTRAINT chk_etat CHECK (Etat IN ('publié', 'non publié', 'expiré')),

@@ -11,17 +11,43 @@
 <%- include('../message.ejs') %>
 
 <div class="container mt-5">
-    <div class = "row">
+    <div class="row">
         <div class="col-md-6 offset-md-3">
             <h1>Parcourir les Offres</h1>
         </div>
     </div>
     <div class="row">
         <div class="col-md-6 offset-md-3">
-            <%- include('../listings/browse_offers.ejs') %>
+            <%- include('../listings/browse_offers.ejs', { offres, search, sort, selectedTypeMetier, minSalaire, maxSalaire, currentPage, totalPages, typesMetier, user }) %>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.querySelectorAll('.btn-primary[data-bs-toggle="modal"]').forEach(button => {
+        button.addEventListener('click', async function () {
+            const modalId = this.getAttribute('data-bs-target').substring(1);
+            const modal = document.getElementById(modalId);
+            const idOffre = this.closest('.card').querySelector('input[name="idOffre"]').value;
+
+            try {
+                const response = await fetch('/jobs/view_offer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ idOffre })
+                });
+
+                const data = await response.text();
+                modal.querySelector('.modal-body').innerHTML = data;
+            } catch (error) {
+                console.error('Erreur lors de la récupération des détails de l'offre:', error);
+            }
+        });
+    });
+</script>
 
 </body>
 </html>

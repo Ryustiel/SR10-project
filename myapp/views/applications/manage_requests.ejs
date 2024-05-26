@@ -13,6 +13,7 @@
     <div class="row">
         <div class="col-md-10 offset-md-1">
             <h1 class="mb-4">Demandes de changement de statut</h1>
+            <%- include("../search_pagination.ejs", { search, currentPage, totalPages }) %>
             <table class="table table-bordered">
                 <thead>
                 <tr>
@@ -39,20 +40,24 @@
                             <% } %>
                         </td>
                         <td>
-                            <form action="/organizations/accept_request" method="post" class="d-inline">
-                                <input type="hidden" name="email" value="<%= request.Email %>">
-                                <input type="hidden" name="organisationNumber" value="<%= request.IdOrganisation %>">
-                                <button type="submit" class="btn btn-success">Accepter</button>
-                            </form>
-                            <form action="/organizations/reject_request" method="post" class="d-inline">
-                                <input type="hidden" name="email" value="<%= request.Email %>">
-                                <button type="submit" class="btn btn-danger">Refuser</button>
-                            </form>
+                            <% if (request.Email !== currentUserEmail && request.TypeCompte !== 'admin') { %>
+                                <form action="/organizations/accept_request" method="post" class="d-inline">
+                                    <input type="hidden" name="email" value="<%= request.Email %>">
+                                    <input type="hidden" name="organisationNumber"
+                                           value="<%= request.IdOrganisation %>">
+                                    <button type="submit" class="btn btn-success">Accepter</button>
+                                </form>
+                                <form action="/organizations/reject_request" method="post" class="d-inline">
+                                    <input type="hidden" name="email" value="<%= request.Email %>">
+                                    <button type="submit" class="btn btn-danger">Refuser</button>
+                                </form>
+                            <% } %>
                         </td>
                     </tr>
                 <% }); %>
                 </tbody>
             </table>
+            <%- include("../pagination.ejs", { currentPage, totalPages, search }) %>
         </div>
     </div>
 </div>

@@ -1,15 +1,17 @@
 <form id="applicationForm" enctype="multipart/form-data" action="/applications/apply" method="POST">
-    <input type="hidden" name="idOffre" value="<%= idOffre %>" />
+    <input type="hidden" name="idOffre" value="<%= idOffre %>"/>
+
     <% if (offre.NombrePieces > 0) { %>
         <div class="mb-3">
             <label for="formFileLg" class="form-label">Télécharger des Pièces Justificatives</label>
-            <input class="form-control form-control-lg" id="formFileLg" name="formFileLg" type="file" multiple />
+            <input class="form-control form-control-lg" id="formFileLg" name="formFileLg" type="file" multiple/>
         </div>
         <button id="submitButton" type="submit" class="btn btn-secondary" disabled>Postuler</button>
     <% } else { %>
         <button type="submit" class="btn btn-success">Postuler</button>
     <% } %>
 </form>
+
 <div id="fileCount"></div>
 
 <script>

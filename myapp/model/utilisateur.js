@@ -2,19 +2,21 @@ const pool = require('./db');
 const bcrypt = require('bcryptjs');
 
 const Utilisateur = {
-    async create({ email, motDePasse, nom, prenom, telephone, dateCreation, statutCompte, typeCompte, idOrganisation }) {
+    async create({email, motDePasse, nom, prenom, telephone, dateCreation, statutCompte, typeCompte, idOrganisation}) {
         const query = `
-      INSERT INTO Utilisateur 
-      (Email, MotDePasse, Nom, Prenom, Telephone, DateCreation, StatutCompte, TypeCompte, IdOrganisation) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
-    `;
+            INSERT INTO Utilisateur
+            (Email, MotDePasse, Nom, Prenom, Telephone, DateCreation, StatutCompte, TypeCompte, IdOrganisation)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+        `;
         const values = [email, motDePasse, nom, prenom, telephone, dateCreation, statutCompte, typeCompte, idOrganisation];
         await pool.query(query, values);
         return this.read(email);
     },
 
     async read(email) {
-        const query = `SELECT * FROM Utilisateur WHERE Email = ?;`;
+        const query = `SELECT *
+                       FROM Utilisateur
+                       WHERE Email = ?;`;
         const [results] = await pool.query(query, [email]);
         return results[0];
     },
@@ -36,10 +38,10 @@ const Utilisateur = {
         }
 
         const query = `
-      UPDATE Utilisateur 
-      SET ${setClauses.join(', ')}
-      WHERE Email = ?;
-    `;
+            UPDATE Utilisateur
+            SET ${setClauses.join(', ')}
+            WHERE Email = ?;
+        `;
         values.push(email);
 
         await pool.query(query, values);
@@ -48,12 +50,15 @@ const Utilisateur = {
 
 
     async delete(email) {
-        const query = `DELETE FROM Utilisateur WHERE Email = ?;`;
+        const query = `DELETE
+                       FROM Utilisateur
+                       WHERE Email = ?;`;
         await pool.query(query, [email]);
     },
 
     async readall() {
-        const query = `SELECT * FROM Utilisateur;`;
+        const query = `SELECT *
+                       FROM Utilisateur;`;
         const [results] = await pool.query(query);
         return results;
     },
@@ -69,7 +74,9 @@ const Utilisateur = {
     },
 
     async getType(email) {
-        const query = `SELECT TypeCompte FROM Utilisateur WHERE Email = ?;`;
+        const query = `SELECT TypeCompte
+                       FROM Utilisateur
+                       WHERE Email = ?;`;
         const [results] = await pool.query(query, [email]);
         if (results.length > 0) {
             return results[0].TypeCompte;
@@ -79,7 +86,9 @@ const Utilisateur = {
     },
 
     async getNom(email) {
-        const query = `SELECT Nom, Prenom FROM Utilisateur WHERE Email = ?;`;
+        const query = `SELECT Nom, Prenom
+                       FROM Utilisateur
+                       WHERE Email = ?;`;
         const [results] = await pool.query(query, [email]);
         if (results.length > 0) {
             return results[0].Nom + ' ' + results[0].Prenom;
@@ -89,7 +98,9 @@ const Utilisateur = {
     },
 
     async getOrganisationId(email) {
-        const query = `SELECT IdOrganisation FROM Utilisateur WHERE Email = ?;`;
+        const query = `SELECT IdOrganisation
+                       FROM Utilisateur
+                       WHERE Email = ?;`;
         const [results] = await pool.query(query, [email]);
         if (results.length > 0) {
             return results[0].IdOrganisation;
@@ -100,9 +111,9 @@ const Utilisateur = {
 
     async updateTypeCompte(email, typeCompte) {
         const query = `
-          UPDATE Utilisateur 
-          SET TypeCompte = ?
-          WHERE Email = ?;
+            UPDATE Utilisateur
+            SET TypeCompte = ?
+            WHERE Email = ?;
         `;
         const values = [typeCompte, email];
 
@@ -112,9 +123,10 @@ const Utilisateur = {
 
     async updateTypeCompteWithOrganisation(email, typeCompte, idOrganisation) {
         const query = `
-          UPDATE Utilisateur 
-          SET TypeCompte = ?, IdOrganisation = ?
-          WHERE Email = ?;
+            UPDATE Utilisateur
+            SET TypeCompte     = ?,
+                IdOrganisation = ?
+            WHERE Email = ?;
         `;
         const values = [typeCompte, idOrganisation, email];
 
@@ -124,12 +136,47 @@ const Utilisateur = {
 
     async getRecruiterRequests() {
         const query = `
-      SELECT * FROM Utilisateur 
-      WHERE TypeCompte = 'recruteur en attente';
-    `;
+            SELECT *
+            FROM Utilisateur
+            WHERE TypeCompte = 'recruteur en attente';
+        `;
         const [rows] = await pool.query(query);
         return rows;
-    }
+    },
+
+    async readAllWithPagination(search, limit, offset) {
+        const query = `
+            SELECT * FROM Utilisateur
+            WHERE Email LIKE ?
+            LIMIT ? OFFSET ?
+        `;
+        const [users] = await pool.query(query, [`%${search}%`, limit, offset]);
+
+        const countQuery = `
+            SELECT COUNT(*) as totalUsers FROM Utilisateur
+            WHERE Email LIKE ?
+        `;
+        const [[{ totalUsers }]] = await pool.query(countQuery, [`%${search}%`]);
+
+        return { users, totalUsers };
+    },
+    async getRecruiterRequestsWithPagination(search, limit, offset) {
+        const query = `
+            SELECT * FROM Utilisateur
+            WHERE TypeCompte = 'recruteur en attente' AND Email LIKE ?
+            LIMIT ? OFFSET ?
+        `;
+        const [requests] = await pool.query(query, [`%${search}%`, limit, offset]);
+
+        const countQuery = `
+            SELECT COUNT(*) as totalRequests FROM Utilisateur
+            WHERE TypeCompte = 'recruteur en attente' AND Email LIKE ?
+        `;
+        const [[{ totalRequests }]] = await pool.query(countQuery, [`%${search}%`]);
+
+        return { requests, totalRequests };
+    },
+
 };
 
 module.exports = Utilisateur;

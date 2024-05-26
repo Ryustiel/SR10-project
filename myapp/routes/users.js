@@ -11,12 +11,25 @@ const {renderProfileView} = require("../middleware/renderProfileView"); // Ensur
 const pool = require('../model/db'); // Import the database connection
 const readMessage = require('../middleware/readMessage'); // Import the new middleware
 
-// Route to list users
+// Route to list users with search and pagination
 router.get('/userslist', isLoggedIn, isAdmin, readMessage, async (req, res, next) => {
+    const search = req.query.search || '';
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5; // Number of users per page
+    const offset = (page - 1) * limit;
+
     try {
-        const users = await userModel.readall(); // Use the correct method from Utilisateur model
+        const {users, totalUsers} = await userModel.readAllWithPagination(search, limit, offset);
+        const totalPages = Math.ceil(totalUsers / limit);
+
         logger.info("Liste des utilisateurs récupérée avec succès.");
-        res.render('users/userslist', {title: 'Liste des Utilisateurs', users: users || []});
+        res.render('users/userslist', {
+            title: 'Liste des Utilisateurs',
+            users: users || [],
+            search,
+            currentPage: page,
+            totalPages
+        });
     } catch (error) {
         res.status(500).render('error', {
             message: "Erreur interne du serveur lors de la récupération de la liste des utilisateurs",
@@ -24,6 +37,7 @@ router.get('/userslist', isLoggedIn, isAdmin, readMessage, async (req, res, next
         });
     }
 });
+
 
 // Route pour afficher le profil de l'utilisateur avec un argument par défaut
 router.get('/profile', isLoggedIn, async (req, res) => {
@@ -163,6 +177,7 @@ router.post('/update-password', isLoggedIn, [
     }
 });
 
+//Route pour supprimer un utilisateur
 router.post('/delete', isLoggedIn, isAdmin, async (req, res) => {
     const userId = req.body.userId;
     try {
@@ -174,6 +189,20 @@ router.post('/delete', isLoggedIn, isAdmin, async (req, res) => {
         res.status(500).render('error', { message: "Erreur de serveur.", error });
     }
 });
+
+// Route pour promouvoir un utilisateur en administrateur
+router.post('/make-admin', isLoggedIn, isAdmin, async (req, res) => {
+    const userId = req.body.userId;
+    try {
+        await userModel.update(userId, { TypeCompte: 'administrateur' });
+        req.session.message = "Utilisateur promu en administrateur avec succès.";
+        req.session.messageType = 'notification';
+        res.redirect('/users/userslist');
+    } catch (error) {
+        res.status(500).render('error', { message: "Erreur de serveur.", error });
+    }
+});
+
 
 //export router and functions
 module.exports = router;

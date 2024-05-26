@@ -1,13 +1,13 @@
 const pool = require('./db');
-const logger = require('../logger.js')
+const logger = require('../logger.js');
 
 const OffreEmploi = {
-    async create({ etat, dateValidite, listePieces, nombrePieces, idFiche, idRecruteur }) {
+    async create({etat, dateValidite, listePieces, nombrePieces, idFiche, idRecruteur}) {
         const query = `
-      INSERT INTO OffreEmploi 
-      (Etat, DateValidite, ListePieces, NombrePieces, IdFiche, IdRecruteur) 
-      VALUES (?, ?, ?, ?, ?, ?);
-    `;
+            INSERT INTO OffreEmploi
+                (Etat, DateValidite, ListePieces, NombrePieces, IdFiche, IdRecruteur)
+            VALUES (?, ?, ?, ?, ?, ?);
+        `;
         const values = [etat, dateValidite, listePieces, nombrePieces, idFiche, idRecruteur];
         await pool.query(query, values);
         return this.read(idFiche);
@@ -19,15 +19,46 @@ const OffreEmploi = {
         return results[0];
     },
 
-    async update(id, { etat, dateValidite, listePieces, nombrePieces, idFiche, idRecruteur }) {
-        const query = `
-      UPDATE OffreEmploi 
-      SET Etat = ?, DateValidite = ?, ListePieces = ?, NombrePieces = ?, IdFiche = ?, IdRecruteur = ?
-      WHERE IdOffre = ?;
-    `;
-        const values = [etat, dateValidite, listePieces, nombrePieces, idFiche, idRecruteur, id];
-        await pool.query(query, values);
-        return this.read(id);
+        async update(id, fields) {
+            const allowedFields = ['Etat', 'ListePieces', 'NombrePieces', 'IdFiche', 'IdRecruteur'];
+            const setClauses = [];
+            const values = [];
+
+            for (const field of allowedFields) {
+                if (fields[field] !== undefined) {
+                    setClauses.push(`${field} = ?`);
+                    values.push(fields[field]);
+                }
+            }
+
+            if (fields['DateValidite'] !== undefined) {
+                setClauses.push(`DateValidite = ?`);
+                values.push(fields['DateValidite']);
+            }
+
+            if (setClauses.length === 0) {
+                throw new Error('No fields to update');
+            }
+
+            const query = `
+            UPDATE OffreEmploi
+            SET ${setClauses.join(', ')}
+            WHERE IdOffre = ?;
+        `;
+            values.push(id);
+
+            // Log the query and values for debugging
+            logger.info(`Executing query: ${query}`);
+            logger.info(`With values: ${JSON.stringify(values)}`);
+
+            await pool.query(query, values);
+            return this.read(id);
+        },
+
+    async read(id) {
+        const query = `SELECT * FROM OffreEmploi WHERE IdOffre = ?;`;
+        const [results] = await pool.query(query, [id]);
+        return results[0];
     },
 
     async delete(id) {
@@ -66,12 +97,13 @@ const OffreEmploi = {
     },
 
     async candidateListOffers() {
-      const query = `
-          SELECT IdOffre, Intitule, DateValidite FROM OffreEmploi AS O 
-          JOIN FichePoste AS F 
-          ON O.IdFiche = F.IdFiche
-          WHERE Etat = 'publié';
-      `;
+        const query = `
+            SELECT IdOffre, Intitule, DateValidite
+            FROM OffreEmploi AS O
+                     JOIN FichePoste AS F
+                          ON O.IdFiche = F.IdFiche
+            WHERE Etat = 'publié';
+        `;
         const [results] = await pool.query(query);
         return results;
     },
@@ -125,8 +157,61 @@ const OffreEmploi = {
     async updateRecruiterEmail(oldEmail, newEmail) {
         const query = `UPDATE OffreEmploi SET IdRecruteur = ? WHERE IdRecruteur = ?;`;
         await pool.query(query, [newEmail, oldEmail]);
-    }
+    },
 
+    async browseOffers(search, sort, typeMetier, minSalaire, maxSalaire, limit, offset) {
+        let query = `
+            SELECT IdOffre, Intitule, Description, StatutPoste, ResponsableHierarchique, 
+                   TypeMetier, LieuMission, Rythme, Salaire, DateValidite, ListePieces, 
+                   NombrePieces FROM OffreEmploi AS O 
+            JOIN FichePoste AS F 
+            ON O.IdFiche = F.IdFiche
+            WHERE Etat = 'publié' AND Intitule LIKE ? AND Salaire BETWEEN ? AND ?
+        `;
+        let values = [`%${search}%`, minSalaire, maxSalaire];
+
+        if (typeMetier) {
+            query += ` AND TypeMetier = ?`;
+            values.push(typeMetier);
+        }
+
+        if (sort === 'date') {
+            query += ` ORDER BY DateValidite DESC`;
+        } else if (sort === 'lieu') {
+            query += ` ORDER BY LieuMission ASC`;
+        } else if (sort === 'salaire') {
+            query += ` ORDER BY Salaire DESC`;
+        }
+
+        query += ` LIMIT ? OFFSET ?`;
+        values.push(limit, offset);
+
+        const [offres] = await pool.query(query, values);
+
+        let countQuery = `
+            SELECT COUNT(*) as totalOffres FROM OffreEmploi AS O 
+            JOIN FichePoste AS F 
+            ON O.IdFiche = F.IdFiche
+            WHERE Etat = 'publié' AND Intitule LIKE ? AND Salaire BETWEEN ? AND ?
+        `;
+        let countValues = [`%${search}%`, minSalaire, maxSalaire];
+
+        if (typeMetier) {
+            countQuery += ` AND TypeMetier = ?`;
+            countValues.push(typeMetier);
+        }
+
+        const [[{totalOffres}]] = await pool.query(countQuery, countValues);
+
+        return {offres, totalOffres};
+    },
+
+    async getTypesMetier() {
+        const query = `SELECT DISTINCT TypeMetier
+                       FROM FichePoste`;
+        const [results] = await pool.query(query);
+        return results.map(row => row.TypeMetier);
+    },
 };
 
 module.exports = OffreEmploi;
