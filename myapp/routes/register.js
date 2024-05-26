@@ -10,8 +10,9 @@ const readMessage = require('../middleware/readMessage');
 router.get('/', readMessage, (req, res) => {
     res.render('auth/register', {
         title: "Inscription",
-        data: {}
+        data: req.session.formData || {} // Utiliser les données de session si disponibles
     });
+    delete req.session.formData; // Supprimer les données de session après le rendu
 });
 
 // Validation et processing de l'inscription
@@ -31,12 +32,35 @@ router.post('/', [
     if (!errors.isEmpty()) {
         req.session.message = errors.array().map(error => error.msg).join(', ');
         req.session.messageType = 'error';
+        req.session.formData = {
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
+            email: req.body.email,
+            confirmEmail: req.body.confirmEmail,
+            phone: req.body.phone
+        };
         logger.warn(`Erreur de validation lors de l'inscription : ${JSON.stringify(errors.array())}`);
         return res.redirect('/register');
     }
 
     const {firstname, lastname, email, phone, password} = req.body;
     try {
+        // Vérifier si l'email existe déjà
+        const existingUser = await Utilisateur.read(email);
+        if (existingUser) {
+            req.session.message = 'Un utilisateur avec cet email existe déjà.';
+            req.session.messageType = 'error';
+            req.session.formData = {
+                firstname: req.body.firstname,
+                lastname: req.body.lastname,
+                email: req.body.email,
+                confirmEmail: req.body.confirmEmail,
+                phone: req.body.phone
+            };
+            logger.warn(`Tentative d'inscription avec un email existant : ${email}`);
+            return res.redirect('/register');
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
         await Utilisateur.create({
             nom: lastname,
@@ -57,7 +81,7 @@ router.post('/', [
         req.session.messageType = 'notification';
         res.redirect('/dashboard');
     } catch (error) {
-        logger.error(`Erreur lors de l'enregistrement de l'utilisateur : ${error.message}`, {stack: error.stack});
+        logger.error(`Erreur lors de l'enregistrement de l'utilisateur : ${error.message}`, { stack: error.stack });
         res.status(500).render('error', {
             message: "Erreur interne du serveur lors de l'inscription",
             error: error // Pass the actual error object
