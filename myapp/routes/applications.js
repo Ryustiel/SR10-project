@@ -4,20 +4,17 @@ const router = express.Router();
 const logger = require('../logger');
 const multer = require('multer');
 const path = require('path');
+const {body, validationResult} = require('express-validator');
 
 const OffreEmploi = require('../model/offreemploi');
 const Candidature = require('../model/candidature');
 const Utilisateur = require('../model/utilisateur');
-const Organisation = require('../model/organisation');
-const AssociationFichier = require('../model/associationfichiers')
+const AssociationFichier = require('../model/associationfichiers');
 
 const isLoggedIn = require('../middleware/isLoggedIn.js');
 const requireRecruitorStatus = require('../middleware/requireRecruitorStatus.js');
-const requireAffiliation = require('../middleware/requireAffiliation.js');
-const readNotification = require('../middleware/readNotification');
-const isAdmin = require('../middleware/isAdmin');
+const readMessage = require('../middleware/readMessage.js');
 const readReturnTo = require('../middleware/readReturnTo');
-
 
 // Set storage engine
 const storage = multer.diskStorage({
@@ -29,22 +26,34 @@ const storage = multer.diskStorage({
         cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
-const upload = multer({ storage: storage });
+const upload = multer({storage: storage});
 
-router.post('/apply', upload.array('formFileLg'), isLoggedIn, async function(req, res, next) {
+// Route to apply for a job (POST)
+router.post('/apply', upload.array('formFileLg'), isLoggedIn, [
+    body('idOffre').notEmpty().withMessage("ID de l'offre requis")
+], async function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        req.session.message = errors.array().map(e => e.msg).join(', ');
+        req.session.messageType = 'error';
+        return res.redirect('/jobs/browse_offers');
+    }
+
     try {
         const files = req.files;
 
         // Check if files exist
         if (!files || files.length === 0) {
-            return res.status(400).send('No files uploaded');
+            req.session.message = 'No files uploaded';
+            req.session.messageType = 'error';
+            return res.redirect('/jobs/browse_offers');
         }
 
         // Process and save files
         const filenames = files.map(file => file.filename);
         logger.info(`uploaded ${files.length} files as ${JSON.stringify(filenames)}`);
 
-        const { idOffre } = req.body;
+        const {idOffre} = req.body;
         const idCandidat = req.session.userEmail;
         const dateCandidature = new Date();
 
@@ -58,107 +67,149 @@ router.post('/apply', upload.array('formFileLg'), isLoggedIn, async function(req
 
         // NOTIFY
         const nom = await OffreEmploi.getNom(idOffre);
-        req.session.notification = `Vous avez postulé à ${nom}`;
+        req.session.message = `Vous avez postulé à ${nom}`;
+        req.session.messageType = 'notification';
         res.redirect('/jobs/browse_offers');
     } catch (error) {
-        next(error);
+        logger.error(`Erreur lors de la candidature: ${error.message}`, {stack: error.stack});
+        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
     }
 });
 
-
-router.post('/attachments', isLoggedIn, async function(req, res, next) {
-    const { idCandidat, idOffre } = req.body;
-    if (
-        req.session.userEmail === idCandidat || // Est candidat associé ?
-        await OffreEmploi.isUserLegitimate(idOffre, req.session.userEmail) // Est recruteur associé ?
-    ) {
-        const nom_candidat = await Utilisateur.getNom(idCandidat);
-        const nom_offre = await OffreEmploi.getNom(idOffre);
-        const fichiers = await AssociationFichier.listFiles(idCandidat, idOffre);
-
-        res.render('applications/attachments.ejs', {
-            nom_candidat: nom_candidat,
-            nom_offre: nom_offre,
-            fichiers: fichiers
-        });
-    } else {
-        res.status(403).send('Unauthorized');
+// Route to view attachments (POST)
+router.post('/attachments', isLoggedIn, [
+    body('idCandidat').notEmpty().withMessage('ID du candidat requis'),
+    body('idOffre').notEmpty().withMessage("ID de l'offre requis")
+], async function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        req.session.message = errors.array().map(e => e.msg).join(', ');
+        req.session.messageType = 'error';
+        return res.redirect('/applications/my-applications');
     }
-});
 
-
-router.get('/download-attachment', isLoggedIn, async function(req, res, next) {
-    const { fichier } = req.query;
-    const result = await AssociationFichier.readFichier(fichier);
-    if (!result) {
-        res.status(403).send('Unauthorized');
-    } else {
-        logger.warn(`DOWNLOAD ATTACHMENT : ${JSON.stringify(result)}`);
+    try {
+        const {idCandidat, idOffre} = req.body;
         if (
-            req.session.userEmail === result.IdCandidat || // Est candidat associé ?
-            await OffreEmploi.isOrganisationLegitimate(result.IdOffre, req.session.userEmail) // Fait partie de l'organisation associée ?
+            req.session.userEmail === idCandidat || // Est candidat associé ?
+            await OffreEmploi.isUserLegitimate(idOffre, req.session.userEmail) // Est recruteur associé ?
         ) {
-            const filePath = path.join(__dirname, '..', 'uploads', fichier);
-            res.download(filePath, fichier);
+            const nom_candidat = await Utilisateur.getNom(idCandidat);
+            const nom_offre = await OffreEmploi.getNom(idOffre);
+            const fichiers = await AssociationFichier.listFiles(idCandidat, idOffre);
+
+            res.render('applications/attachments.ejs', {
+                nom_candidat: nom_candidat,
+                nom_offre: nom_offre,
+                fichiers: fichiers
+            });
         } else {
             res.status(403).send('Unauthorized');
         }
+    } catch (error) {
+        logger.error(`Erreur lors de la récupération des pièces jointes: ${error.message}`, {stack: error.stack});
+        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
     }
 });
 
-
-router.post('/cancel-application', isLoggedIn, readReturnTo, async function(req, res, next) {
-    const { idCandidat, idOffre } = req.body;
-    logger.info(`Tentative de Suppression avec idCandidat : ${idCandidat}, idOffre : ${idOffre} affiliation : ${req.session.userType}`);
-    // GESTION DES PERMISSIONS DES UTILISATEURS
-    if (idCandidat === 'self') {
-        if (await Candidature.isCandidate(req.session.userEmail, idOffre)) {
-            // ne supprime que si l'utilisateur a crée la candidature
-            await Candidature.delete(req.session.userEmail, idOffre);
-            req.session.notification = `
-            Vous ne candidatez plus à ${await OffreEmploi.getNom(idOffre)}
-        `;
+// Route to download attachment (GET)
+router.get('/download-attachment', isLoggedIn, async function (req, res, next) {
+    try {
+        const {fichier} = req.query;
+        const result = await AssociationFichier.readFichier(fichier);
+        if (!result) {
+            res.status(403).send('Unauthorized');
         } else {
-            req.session.notification = `Vous n'êtes pas candidat à ${await OffreEmploi.getNom(idOffre)}`;
+            logger.warn(`DOWNLOAD ATTACHMENT : ${JSON.stringify(result)}`);
+            if (
+                req.session.userEmail === result.IdCandidat || // Est candidat associé ?
+                await OffreEmploi.isOrganisationLegitimate(result.IdOffre, req.session.userEmail) // Fait partie de l'organisation associée ?
+            ) {
+                const filePath = path.join(__dirname, '..', 'uploads', fichier);
+                res.download(filePath, fichier);
+            } else {
+                res.status(403).send('Unauthorized');
+            }
         }
-    } else if (req.session.userType === 'recruteur') {
-        if (await OffreEmploi.isUserLegitimate(idOffre, req.session.userEmail)) {
-            // ne supprime que si le recruteur est proprietaire de l'offre
-            await Candidature.delete(idCandidat, idOffre);
-            req.session.notification = `Vous avez refusé la candidature de ${await Utilisateur.getNom(idCandidat)} à ${await OffreEmploi.getNom(idOffre)}`;
-        }
-    } else if (req.session.userAffiliation === 'administrateur') {
-        // la suppression est permise inconditionnellement
-        await Candidature.delete(idCandidat, idOffre);
-    } else {
-        req.session.notification = 'Vous n\'êtes pas autorisé à annuler cette candidature'
+    } catch (error) {
+        logger.error(`Erreur lors du téléchargement de la pièce jointe: ${error.message}`, {stack: error.stack});
+        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
+    }
+});
+
+// Route to cancel application (POST)
+router.post('/cancel-application', isLoggedIn, readReturnTo, [
+    body('idCandidat').notEmpty().withMessage('ID du candidat requis'),
+    body('idOffre').notEmpty().withMessage("ID de l'offre requis")
+], async function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        req.session.message = errors.array().map(e => e.msg).join(', ');
+        req.session.messageType = 'error';
+        return res.redirect(req.returnTo);
     }
 
-    res.redirect(req.returnTo);
+    try {
+        const {idCandidat, idOffre} = req.body;
+        logger.info(`Tentative de Suppression avec idCandidat : ${idCandidat}, idOffre : ${idOffre} affiliation : ${req.session.userType}`);
+
+        // GESTION DES PERMISSIONS DES UTILISATEURS
+        if (idCandidat === 'self') {
+            if (await Candidature.isCandidate(req.session.userEmail, idOffre)) {
+                // ne supprime que si l'utilisateur a crée la candidature
+                await Candidature.delete(req.session.userEmail, idOffre);
+                req.session.message = `Vous ne candidatez plus à ${await OffreEmploi.getNom(idOffre)}`;
+                req.session.messageType = 'notification';
+            } else {
+                req.session.message = `Vous n'êtes pas candidat à ${await OffreEmploi.getNom(idOffre)}`;
+                req.session.messageType = 'error';
+            }
+        } else if (req.session.userType === 'recruteur') {
+            if (await OffreEmploi.isUserLegitimate(idOffre, req.session.userEmail)) {
+                // ne supprime que si le recruteur est proprietaire de l'offre
+                await Candidature.delete(idCandidat, idOffre);
+                req.session.message = `Vous avez refusé la candidature de ${await Utilisateur.getNom(idCandidat)} à ${await OffreEmploi.getNom(idOffre)}`;
+                req.session.messageType = 'notification';
+            }
+        } else if (req.session.userAffiliation === 'administrateur') {
+            // la suppression est permise inconditionnellement
+            await Candidature.delete(idCandidat, idOffre);
+            req.session.message = 'La candidature a été annulée avec succès.';
+            req.session.messageType = 'notification';
+        } else {
+            req.session.message = "Vous n'êtes pas autorisé à annuler cette candidature";
+            req.session.messageType = 'error';
+        }
+
+        res.redirect(req.returnTo);
+    } catch (error) {
+        logger.error(`Erreur lors de l'annulation de la candidature: ${error.message}`, { stack: error.stack });
+        res.status(500).render('error', { message: "Erreur interne du serveur.", error });
+    }
 });
 
-
-router.get('/my-applications', isLoggedIn, readNotification, async function(req, res, next) {
-
-    const candidatures = await Candidature.getApplicationsCandidat(req.session.userEmail);
-
-    req.session.returnTo = "/applications/my-applications";
-    res.render('applications/my_applications.ejs', {
-        notification: req.notification,
-        candidatures: candidatures
-    });
+// Route to list user's applications (GET)
+router.get('/my-applications', isLoggedIn, readMessage, async function(req, res, next) {
+    try {
+        const candidatures = await Candidature.getApplicationsCandidat(req.session.userEmail);
+        req.session.returnTo = "/applications/my-applications";
+        res.render('applications/my_applications.ejs', { candidatures });
+    } catch (error) {
+        logger.error(`Erreur lors de la récupération des candidatures: ${error.message}`, { stack: error.stack });
+        res.status(500).render('error', { message: "Erreur interne du serveur.", error });
+    }
 });
 
-
-router.get('/incoming-applications', requireRecruitorStatus, readNotification, async function(req, res, next) {
-    const candidatures = await Candidature.getApplicationsRecruteur(req.session.userEmail);
-
-    req.session.returnTo = "/applications/incoming-applications";
-    res.render('applications/incoming_applications.ejs', {
-        notification: req.notification,
-        candidatures: candidatures
-    });
+// Route to list incoming applications (GET)
+router.get('/incoming-applications', requireRecruitorStatus, readMessage, async function(req, res, next) {
+    try {
+        const candidatures = await Candidature.getApplicationsRecruteur(req.session.userEmail);
+        req.session.returnTo = "/applications/incoming-applications";
+        res.render('applications/incoming_applications.ejs', { candidatures });
+    } catch (error) {
+        logger.error(`Erreur lors de la récupération des candidatures entrantes: ${error.message}`, { stack: error.stack });
+        res.status(500).render('error', { message: "Erreur interne du serveur.", error });
+    }
 });
-
 
 module.exports = router;

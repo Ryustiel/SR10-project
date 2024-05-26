@@ -120,7 +120,13 @@ const OffreEmploi = {
         const [results] = await pool.query(query, [idOffre, idRecruteur]);
         logger.info(`isOrganisationLegitimate : ${idOffre} ${idRecruteur} ${results[0]['COUNT(*)']}`);
         return results[0]['COUNT(*)'] > 0;
+    },
+
+    async updateRecruiterEmail(oldEmail, newEmail) {
+        const query = `UPDATE OffreEmploi SET IdRecruteur = ? WHERE IdRecruteur = ?;`;
+        await pool.query(query, [newEmail, oldEmail]);
     }
+
 };
 
 module.exports = OffreEmploi;

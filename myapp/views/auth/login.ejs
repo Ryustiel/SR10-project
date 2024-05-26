@@ -6,14 +6,10 @@
 </head>
 <body>
 <div class="container mt-5">
+    <%- include("../message.ejs") %>
     <div class="row">
         <div class="col-md-6 offset-md-3">
             <h2 class="mb-3">Connexion</h2>
-            <% if (locals.errorMessage) { %>
-                <div class="alert alert-danger" role="alert">
-                    <%= errorMessage %>
-                </div>
-            <% } %>
 
             <%- include('../forms/login_form.ejs') %>
 
@@ -30,8 +26,6 @@
     </div>
 </div>
 
-<script>
-    document.cookie = "userEmail=; SameSite=Strict; path=/";
-</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

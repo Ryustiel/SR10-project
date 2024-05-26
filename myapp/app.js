@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const sessions = require('express-session');
 const logger = require('./logger');
+const sessionMiddleware = require('./middleware/session');
 
 // Création de l'application Express
 const app = express();
@@ -19,6 +20,9 @@ app.use(sessions({
     cookie: { maxAge: 1000 * 60 * 60 * 2, httpOnly: true, sameSite: 'Lax' },
     resave: false
 }));
+
+
+app.use(sessionMiddleware);
 
 // Ajout du parsing JSON et URL-encoded pour gérer les données POST
 app.use(express.json());

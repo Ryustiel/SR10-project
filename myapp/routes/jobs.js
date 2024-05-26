@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const logger = require('../logger');
+const {body, validationResult} = require('express-validator');
 
 const FichePoste = require('../model/ficheposte');
 const OffreEmploi = require('../model/offreemploi');
@@ -9,98 +10,127 @@ const Candidature = require('../model/candidature');
 const isLoggedIn = require('../middleware/isLoggedIn.js');
 const requireRecruitorStatus = require('../middleware/requireRecruitorStatus.js');
 const requireAffiliation = require('../middleware/requireAffiliation.js');
-const readNotification = require('../middleware/readNotification.js');
+const readMessage = require('../middleware/readMessage.js');
 
-
-router.get('/browse_offers', isLoggedIn, readNotification, async function(req, res, next) {
+// Route to browse offers
+router.get('/browse_offers', isLoggedIn, readMessage, async function (req, res, next) {
     try {
         const offres = await OffreEmploi.candidateListOffers();
-
-        res.render('jobs/browse_offers', {
-            notification: req.notification,
-            offres: offres
-        });
+        logger.info("Offres d'emploi récupérées avec succès.");
+        res.render('jobs/browse_offers', {offres});
     } catch (error) {
-        next(error); // Passe l'erreur au gestionnaire d'erreurs d'Express
+        logger.error(`Erreur lors de la récupération des offres d'emploi: ${error.message}`, {stack: error.stack});
+        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
     }
 });
 
-
-router.get('/view_offer', function (req, res, next) {
-    // RETURN BAD REQUEST
+// Route to view offer (GET)
+router.get('/view_offer', function (req, res) {
     res.redirect('/jobs/browse_offers');
 });
 
-router.post('/view_offer', isLoggedIn, async function(req, res, next) {
-
-    const { idOffre } = req.body;
-    const offre = await OffreEmploi.candidateViewOffer(idOffre);
-    const isCandidate = await Candidature.isCandidate(req.session.userEmail, idOffre);
-
-    res.render('jobs/view_offer', {
-        offre: offre,
-        idOffre: idOffre,
-        isCandidate: isCandidate
-    });
-});
-
-
-router.get('/add_offer', requireAffiliation, readNotification, async function(req, res, next) {
-    let fiches = await FichePoste.list();
-
-    res.render('jobs/add_offer', {
-        notification: req.notification,
-        fiches: fiches
-    });
-});
-
-
-router.post('/add_offer', requireAffiliation, async function(req, res, next) {
+// Route to view offer (POST)
+router.post('/view_offer', isLoggedIn, async function (req, res, next) {
     try {
-        let { dateValidite, listePieces, nombrePieces, idFiche } = req.body;
+        const {idOffre} = req.body;
+        const offre = await OffreEmploi.candidateViewOffer(idOffre);
+        const isCandidate = await Candidature.isCandidate(req.session.userEmail, idOffre);
+        logger.info(`Détails de l'offre ${idOffre} récupérés avec succès.`);
+        res.render('jobs/view_offer', {offre, idOffre, isCandidate});
+    } catch (error) {
+        logger.error(`Erreur lors de la récupération de l'offre: ${error.message}`, {stack: error.stack});
+        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
+    }
+});
 
-        let idRecruteur = req.session.userEmail;
-        let etat = "non publié";
+// Route to add offer (GET)
+router.get('/add_offer', requireAffiliation, readMessage, async function (req, res, next) {
+    try {
+        const fiches = await FichePoste.list();
+        logger.info("Fiches de poste récupérées avec succès.");
+        res.render('jobs/add_offer', {fiches});
+    } catch (error) {
+        logger.error(`Erreur lors de la récupération des fiches de poste: ${error.message}`, {stack: error.stack});
+        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
+    }
+});
 
-        // prevents user from injecting an offer for a job he doesn't own
-        if (await FichePoste.isUserLegitimate(idFiche, req.session.userAffiliation) === false) {
-            res.render('jobs/add_offer', {
-                notification: 'Vous n\'avez pas les droits pour ajouter une offre pour cette fiche. (sale petit hacker nul)'
-            });
-            return;
+// Route to add offer (POST)
+router.post('/add_offer', requireAffiliation, [
+    body('dateValidité')
+        .isISO8601()
+        .withMessage('Date de validité invalide. Utilisez le format jj/mm/aaaa ou aaaa/mm/jj'),
+    body('listePieces').notEmpty().withMessage('Liste des pièces requises'),
+    body('nombrePieces').isInt({min: 1}).withMessage('Nombre de pièces doit être un entier positif'),
+    body('idFiche').notEmpty().withMessage('ID de la fiche requis')
+], async function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        req.session.message = errors.array().map(e => e.msg).join(', ');
+        req.session.messageType = 'error';
+        return res.redirect('/jobs/add_offer');
+    }
+
+    try {
+        const {dateValidité, listePieces, nombrePieces, idFiche} = req.body;
+        const idRecruteur = req.session.userEmail;
+        const etat = "non publié";
+
+        if (!await FichePoste.isUserLegitimate(idFiche, req.session.userAffiliation)) {
+            req.session.message = "Vous n'avez pas les droits pour ajouter une offre sur cette fiche";
+            req.session.messageType = 'error';
+            return res.redirect('/jobs/add_offer');
         }
 
-        await OffreEmploi.create({
-            etat,
-            dateValidite,
-            listePieces,
-            nombrePieces,
-            idFiche,
-            idRecruteur
-        });
+        await OffreEmploi.create({etat, dateValidité, listePieces, nombrePieces, idFiche, idRecruteur});
 
-        req.session.notification = 'Votre offre d\'emploi a été ajoutée avec succès !';
+        req.session.message = "Votre offre d'emploi a été ajoutée avec succès !";
+        req.session.messageType = 'notification';
+        logger.info(`Offre d'emploi ajoutée avec succès par ${idRecruteur}.`);
+
         res.redirect('/jobs/add_offer');
-
     } catch (error) {
-        next(error);
+        logger.error(`Erreur lors de l'ajout de l'offre d'emploi: ${error.message}`, {stack: error.stack});
+        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
     }
 });
 
 
-router.get('/add_job', requireAffiliation, function(req, res, next) {
-    res.render('jobs/add_job', {
-        notification: null
-    });
+// Route to add job (GET)
+router.get('/add_job', requireAffiliation, readMessage, function (req, res) {
+    res.render('jobs/add_job');
 });
 
+// Route to add job (POST)
+router.post('/add_job', requireAffiliation, [
+    body('intitule').notEmpty().withMessage('Intitulé requis'),
+    body('statutPoste').notEmpty().withMessage('Statut du poste requis'),
+    body('responsableHierarchique').notEmpty().withMessage('Responsable hiérarchique requis'),
+    body('typeMetier').notEmpty().withMessage('Type de métier requis'),
+    body('lieuMission').notEmpty().withMessage('Lieu de mission requis'),
+    body('rythme').notEmpty().withMessage('Rythme requis'),
+    body('salaire').isFloat({min: 0}).withMessage('Salaire doit être un nombre positif'),
+    body('description').notEmpty().withMessage('Description requise')
+], async function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        req.session.message = errors.array().map(e => e.msg).join(', ');
+        req.session.messageType = 'error';
+        return res.redirect('/jobs/add_job');
+    }
 
-router.post('/add_job', requireAffiliation, async function(req, res, next) {
     try {
-        let {intitule, statutPoste, responsableHierarchique, typeMetier,
-            lieuMission, rythme, salaire, description } = req.body;
-
-        let idOrganisation = req.session.userAffiliation;
+        const {
+            intitule,
+            statutPoste,
+            responsableHierarchique,
+            typeMetier,
+            lieuMission,
+            rythme,
+            salaire,
+            description
+        } = req.body;
+        const idOrganisation = req.session.userAffiliation;
 
         await FichePoste.create({
             intitule,
@@ -113,93 +143,112 @@ router.post('/add_job', requireAffiliation, async function(req, res, next) {
             description,
             idOrganisation
         });
-
-        res.render('jobs/add_job', {
-            notification: 'Votre fiche d\'emploi a été ajoutée avec succès !'
-        });
-
+        req.session.message = "Votre fiche d'emploi a été ajoutée avec succès !";
+        req.session.messageType = 'notification';
+        logger.info(`Fiche de poste ajoutée avec succès par ${idOrganisation}.`);
+        res.redirect('/jobs/add_job');
     } catch (error) {
-        next(error);
+        logger.error(`Erreur lors de l'ajout de la fiche de poste: ${error.message}`, {stack: error.stack});
+        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
     }
 });
 
-
-router.get('/my_offers', requireRecruitorStatus, async function(req, res, next) {
+// Route to list user's offers (GET)
+router.get('/my_offers', requireRecruitorStatus, readMessage, async function (req, res, next) {
     try {
         const offers = await OffreEmploi.listRecruitorsOffers(req.session.userEmail);
-        logger.info(`Offer display : ${JSON.stringify(offers)}`)
-
-        res.render('jobs/my_offers', { offers: offers });
+        logger.info(`Offres de l'utilisateur ${req.session.userEmail} récupérées avec succès.`);
+        res.render('jobs/my_offers', {offers});
     } catch (error) {
-        next(error);
+        logger.error(`Erreur lors de la récupération des offres de l'utilisateur: ${error.message}`, {stack: error.stack});
+        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
     }
 });
 
+// Route to manage user's offers (POST)
+router.post('/my_offers', requireAffiliation, [
+    body('idOffre').notEmpty().withMessage("ID de l'offre requis"),
+    body('action').isIn(['1', '2', '3']).withMessage('Action invalide')
+], async function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        req.session.message = errors.array().map(e => e.msg).join(', ');
+        req.session.messageType = 'error';
+        return res.redirect('/jobs/my_offers');
+    }
 
-router.post('/my_offers', requireAffiliation, async function(req, res, next) {
     try {
-        let { idOffre, action } = req.body;
+        const {idOffre, action} = req.body;
 
         if (!await OffreEmploi.isUserLegitimate(idOffre, req.session.userEmail)) {
-            // METTRE UN MESSAGE D'ERREUR
-            res.redirect('/dashboard');
-            return;
+            req.session.message = "Vous n'avez pas les droits pour gérer cette offre.";
+            req.session.messageType = 'error';
+            return res.redirect('/dashboard');
         }
 
-        logger.info(`Action : ${action} on offer ${idOffre}`)
+        logger.info(`Action : ${action} sur l'offre ${idOffre} par ${req.session.userEmail}`);
 
         if (action === '1') {
             await OffreEmploi.publier(idOffre);
         } else if (action === '2') {
             await OffreEmploi.depublier(idOffre);
         } else if (action === '3') {
-            logger.info(`Deleting offer ${idOffre}`)
             await OffreEmploi.delete(idOffre);
         }
 
+        req.session.message = "L'action sur l'offre a été réalisée avec succès.";
+        req.session.messageType = 'notification';
         res.redirect('/jobs/my_offers');
-
     } catch (error) {
-        next(error);
+        logger.error(`Erreur lors de la gestion de l'offre: ${error.message}`, { stack: error.stack });
+        res.status(500).render('error', { message: "Erreur interne du serveur.", error });
     }
 });
 
-
-router.get('/my_jobs', requireAffiliation, async function(req, res, next) {
+// Route to list user's jobs (GET)
+router.get('/my_jobs', requireAffiliation, readMessage, async function(req, res, next) {
     try {
-        let fiches = await FichePoste.listFiches(req.session.userAffiliation);
-
-        res.render('jobs/my_jobs', {
-            fiches: fiches
-        });
-
+        const fiches = await FichePoste.listFiches(req.session.userAffiliation);
+        logger.info(`Fiches de l'organisation ${req.session.userAffiliation} récupérées avec succès.`);
+        res.render('jobs/my_jobs', { fiches });
     } catch (error) {
-        next(error);
+        logger.error(`Erreur lors de la récupération des fiches de l'organisation: ${error.message}`, { stack: error.stack });
+        res.status(500).render('error', { message: "Erreur interne du serveur.", error });
     }
 });
 
+// Route to manage user's jobs (POST)
+router.post('/my_jobs', requireAffiliation, [
+    body('idFiche').notEmpty().withMessage('ID de la fiche requis')
+], async function(req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        req.session.message = errors.array().map(e => e.msg).join(', ');
+        req.session.messageType = 'error';
+        return res.redirect('/jobs/my_jobs');
+    }
 
-router.post('/my_jobs', requireAffiliation, async function(req, res, next) {
     try {
-        let { idFiche } = req.body;
+        const { idFiche } = req.body;
 
         if (!await FichePoste.isUserLegitimate(idFiche, req.session.userAffiliation)) {
-            // METTRE UN MESSAGE D'ERREUR
-            res.redirect('/dashboard');
-            return;
+            req.session.message = "Vous n'avez pas les droits pour gérer cette fiche.";
+            req.session.messageType = 'error';
+            return res.redirect('/dashboard');
         }
 
         await FichePoste.delete(idFiche);
+        req.session.message = 'La fiche a été supprimée avec succès.';
+        req.session.messageType = 'notification';
         res.redirect('/jobs/my_jobs');
-
     } catch (error) {
-        next(error);
+        logger.error(`Erreur lors de la suppression de la fiche: ${error.message}`, { stack: error.stack });
+        res.status(500).render('error', { message: "Erreur interne du serveur.", error });
     }
 });
 
-
-router.get('/apply', function(req, res, next) {
-    // GET APPLICATION DETAILS
+// Route to apply for a job (GET)
+router.get('/apply', readMessage, function(req, res) {
     res.render('jobs/apply');
 });
 

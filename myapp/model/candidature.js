@@ -143,6 +143,11 @@ const Candidature = {
 
         return results;
 
+    },
+
+    async updateCandidateEmail(oldEmail, newEmail) {
+        const query = `UPDATE AssociationFichiers SET IdCandidat = ? WHERE IdCandidat = ?;`;
+        await pool.query(query, [newEmail, oldEmail]);
     }
 
 };

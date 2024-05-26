@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Utilisateurs</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+</head>
+<body>
+<%- include("../navbar.ejs") %>
+<%- include("../message.ejs") %>
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <h1 class="mb-4">Liste des Utilisateurs</h1>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Date de Création</th>
+                    <th>Statut du Compte</th>
+                    <th>Type de Compte</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% users.forEach(function(user) { %>
+                    <tr>
+                        <td><%= user.Nom %></td>
+                        <td><%= user.Prenom %></td>
+                        <td><%= user.Email %></td>
+                        <td><%= user.Telephone %></td>
+                        <td><%= new Date(user.DateCreation).toLocaleDateString("fr-FR") %></td>
+                        <td><%= user.StatutCompte %></td>
+                        <td><%= user.TypeCompte %></td>
+                        <td>
+                            <form action="/users/profile" method="post" class="d-inline">
+                                <input type="hidden" name="userId" value="<%= user.Email %>">
+                                <button type="submit" class="btn btn-primary mb-2">Voir Profil</button>
+                            </form>
+                            <form action="/users/delete" method="post" class="d-inline">
+                                <input type="hidden" name="userId" value="<%= user.Email %>">
+                                <button type="submit" class="btn btn-danger mb-2">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

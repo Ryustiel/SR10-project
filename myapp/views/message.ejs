@@ -1,0 +1,17 @@
+<% if (message) { %>
+    <div id="message-popup"
+         class="alert alert-<%= messageType === 'error' ? 'danger' : 'success' %> alert-dismissible fade show"
+         role="alert">
+        <%= message %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <script>
+        setTimeout(() => {
+            const messagePopup = document.getElementById('message-popup');
+            if (messagePopup) {
+                messagePopup.classList.remove('show');
+                messagePopup.addEventListener('transitionend', () => messagePopup.remove());
+            }
+        }, 5000); // Adjust the timeout duration as needed
+    </script>
+<% } %>

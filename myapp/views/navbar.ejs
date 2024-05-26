@@ -1,36 +1,59 @@
-<% var currentPage = typeof activePage !== 'undefined' ? activePage : ''; %>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">Plateforme de Recrutement</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link <%= currentPage === 'dashboard' ? 'active' : '' %>" href="/dashboard">Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <%= currentPage === 'add_job' ? 'active' : '' %>" href="/jobs/add_job">Ajouter un Poste</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <%= currentPage === 'add_offer' ? 'active' : '' %>" href="/jobs/add_offer">Ajouter une Offre</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <%= currentPage === 'browse_offers' ? 'active' : '' %>" href="/jobs/browse_offers" id="espaceRecruteur">Postuler</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <%= currentPage === 'my_applications' ? 'active' : '' %>" href="/applications/my-applications">Voir mes Candidatures</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <%= currentPage === 'incoming_applications' ? 'active' : '' %>" href="/applications/incoming-applications">Voir les Candidatures</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <%= currentPage === 'my_offers' ? 'active' : '' %>" href="/jobs/my_offers">Voir mes Offres</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <%= currentPage === 'my_profile' ? 'active' : '' %>" href="/users/my_profile">Mon Profil</a>
-                </li>
+                <% if (userRole === 'candidat' || userRole === 'recruteur en attente' || userRole === 'recruteur' || userRole === 'administrateur') { %>
+                    <li class="nav-item">
+                        <a class="nav-link <%= activePage === 'dashboard' ? 'active' : '' %>" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= activePage === '/users/profile' ? 'active' : '' %>"
+                           href="/users/profile">Mon Profil</a>
+                    </li>
+                <% } %>
+                <% if (userRole === 'candidat' || userRole === 'recruteur en attente' || userRole === 'recruteur') { %>
+                    <li class="nav-item">
+                        <a class="nav-link <%= activePage === '/applications/my-applications' ? 'active' : '' %>"
+                           href="/applications/my-applications">Voir mes Candidatures</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= activePage === '/jobs/browse_offers' ? 'active' : '' %>"
+                           href="/jobs/browse_offers" id="espaceRecruteur">Postuler</a>
+                    </li>
+                <% } %>
+                <% if (userRole === 'recruteur') { %>
+                    <li class="nav-item">
+                        <a class="nav-link <%= activePage === '/jobs/add_job' ? 'active' : '' %>" href="/jobs/add_job">Ajouter
+                            un Poste</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= activePage === '/jobs/add_offer' ? 'active' : '' %>"
+                           href="/jobs/add_offer">Ajouter une Offre</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= activePage === '/applications/incoming-applications' ? 'active' : '' %>"
+                           href="/applications/incoming-applications">Voir les Candidatures</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= activePage === '/jobs/my_offers' ? 'active' : '' %>"
+                           href="/jobs/my_offers">Voir mes Offres</a>
+                    </li>
+                <% } %>
+                <% if (userRole === 'administrateur') { %>
+                    <li class="nav-item">
+                        <a class="nav-link <%= activePage === 'manage_requests' ? 'active' : '' %>"
+                           href="/organizations/manage_requests">Gérer les demandes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= activePage === '/users/userslist' ? 'active' : '' %>"
+                           href="/users/userslist">Liste des Utilisateurs</a>
+                    </li>
+                <% } %>
             </ul>
         </div>
     </div>
