@@ -7,6 +7,8 @@ const registerRouter = require('./register');
 const dashboardRouter = require('./dashboard');
 const jobsRouter = require('./jobs');
 const applicationsRouter = require('./applications');
+const usersRouter = require('./users');
+const organisationsRouter = require('./organizations');
 const logger = require("../logger");
 
 // Redirection principale vers la page de login
@@ -25,6 +27,8 @@ router.get('/logout', (req, res) => {
 router.use('/login', loginRouter);
 router.use('/register', registerRouter);
 router.use('/dashboard', dashboardRouter);
+router.use('/users', usersRouter);
+router.use('/organizations', organisationsRouter);
 
 router.use('/candidat', dashboardRouter);
 router.use('/recruteur', dashboardRouter);

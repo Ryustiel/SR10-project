@@ -160,8 +160,10 @@ router.post('/request-recruiter', isLoggedIn, canEditProfile, [
             await handleExistingOrganisationRequest(userId, existingOrganisation);
         }
 
-        // Update session user type
-        req.session.userType = 'recruteur en attente';
+        if (userId === req.session.userEmail) {
+            // Mise à jour de la session
+            req.session.userType = 'recruteur en attente';
+        }
 
         req.session.message = "Demande de changement de type de compte réussie.";
         req.session.messageType = 'notification';
@@ -192,8 +194,10 @@ router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req,
             await Utilisateur.updateTypeCompteWithOrganisation(userId, 'candidat', null);
         }
 
-        // Update session user type
-        req.session.userType = 'candidat';
+        if (userId === req.session.userEmail) {
+            // Mise à jour de la session si l'utilisateur est connecté
+            req.session.userType = 'candidat';
+        }
 
         logger.info("Type de compte mis à jour en 'candidat' et organisation dissociée.");
 

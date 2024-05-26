@@ -19,16 +19,33 @@ const Utilisateur = {
         return results[0];
     },
 
-    async update(email, { motDePasse, nom, prenom, telephone, dateCreation, statutCompte, typeCompte, idOrganisation }) {
+    async update(email, fields) {
+        const allowedFields = ['MotDePasse', 'Nom', 'Prenom', 'Telephone', 'DateCreation', 'StatutCompte', 'TypeCompte', 'IdOrganisation', 'Email'];
+        const setClauses = [];
+        const values = [];
+
+        for (const field of allowedFields) {
+            if (fields[field] !== undefined) {
+                setClauses.push(`${field} = ?`);
+                values.push(fields[field]);
+            }
+        }
+
+        if (setClauses.length === 0) {
+            throw new Error('No fields to update');
+        }
+
         const query = `
       UPDATE Utilisateur 
-      SET MotDePasse = ?, Nom = ?, Prenom = ?, Telephone = ?, DateCreation = ?, StatutCompte = ?, TypeCompte = ?, IdOrganisation = ?
+      SET ${setClauses.join(', ')}
       WHERE Email = ?;
     `;
-        const values = [motDePasse, nom, prenom, telephone, dateCreation, statutCompte, typeCompte, idOrganisation, email];
+        values.push(email);
+
         await pool.query(query, values);
         return this.read(email);
     },
+
 
     async delete(email) {
         const query = `DELETE FROM Utilisateur WHERE Email = ?;`;
@@ -79,6 +96,39 @@ const Utilisateur = {
         } else {
             return null;
         }
+    },
+
+    async updateTypeCompte(email, typeCompte) {
+        const query = `
+          UPDATE Utilisateur 
+          SET TypeCompte = ?
+          WHERE Email = ?;
+        `;
+        const values = [typeCompte, email];
+
+        await pool.query(query, values);
+        return this.read(email);
+    },
+
+    async updateTypeCompteWithOrganisation(email, typeCompte, idOrganisation) {
+        const query = `
+          UPDATE Utilisateur 
+          SET TypeCompte = ?, IdOrganisation = ?
+          WHERE Email = ?;
+        `;
+        const values = [typeCompte, idOrganisation, email];
+
+        await pool.query(query, values);
+        return this.read(email);
+    },
+
+    async getRecruiterRequests() {
+        const query = `
+      SELECT * FROM Utilisateur 
+      WHERE TypeCompte = 'recruteur en attente';
+    `;
+        const [rows] = await pool.query(query);
+        return rows;
     }
 };
 

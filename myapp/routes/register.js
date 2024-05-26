@@ -32,7 +32,7 @@ router.post('/', [
         req.session.message = errors.array().map(error => error.msg).join(', ');
         req.session.messageType = 'error';
         logger.warn(`Erreur de validation lors de l'inscription : ${JSON.stringify(errors.array())}`);
-        return res.redirect('/');
+        return res.redirect('/register');
     }
 
     const {firstname, lastname, email, phone, password} = req.body;
