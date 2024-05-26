@@ -53,6 +53,8 @@ router.post('/', [
         req.session.userAffiliation = await Utilisateur.getOrganisationId(email);
         req.session.notification = '';
         logger.info(`Nouveau utilisateur inscrit : ${email}`);
+        req.session.message = `Bienvenue ${firstname} ${lastname}, votre compte a été créé avec succès.`;
+        req.session.messageType = 'notification';
         res.redirect('/dashboard');
     } catch (error) {
         logger.error(`Erreur lors de l'enregistrement de l'utilisateur : ${error.message}`, {stack: error.stack});
