@@ -27,7 +27,7 @@ router.post('/', [
         .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/).trim().escape(),
     body('confirmPassword', 'Les mots de passe ne correspondent pas')
         .custom((value, {req}) => value === req.body.password)
-], async (req, res) => {
+], async (req, res,next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         req.session.message = errors.array().map(error => error.msg).join(', ');
@@ -81,11 +81,10 @@ router.post('/', [
         req.session.messageType = 'notification';
         res.redirect('/dashboard');
     } catch (error) {
-        logger.error(`Erreur lors de l'enregistrement de l'utilisateur : ${error.message}`, { stack: error.stack });
-        res.status(500).render('error', {
-            message: "Erreur interne du serveur lors de l'inscription",
-            error: error // Pass the actual error object
-        });
+        logger.error(`Erreur lors de l\'enregistrement de l\'utilisateur : ${error}`);
+        error.status = 500;
+        error.message = 'Erreur lors de l\'enregistrement de l\'utilisateur.';
+        next(error);
     }
 });
 

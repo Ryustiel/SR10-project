@@ -17,9 +17,9 @@ app.use((req, res, next) => {
 app.use(sessions({
     secret: "jddjzodkezjfzoc,azzqc@€ecjzakexzm,ac45z1525z45",
     saveUninitialized: true,
-    cookie: {maxAge: 1000 * 60 * 15, httpOnly: true, sameSite: 'Lax'},
+    cookie: {maxAge: 1000 * 60 * 15, httpOnly: true, sameSite: 'Lax'}, // 15 minutes d'inactivité
     resave: false,
-    rolling: true
+    rolling: true // Reset the cookie Max-Age on every request
 }));
 
 // Ajout du parsing JSON et URL-encoded pour gérer les données POST
@@ -39,7 +39,7 @@ app.use(sessionMiddleware);
 // Middleware pour vérifier les sessions et les rôles
 app.all("*", function (req, res, next) {
     const nonSecurePaths = ["/login", "/register"];
-    const adminPaths = ["/admin"]; // Liste des URLs admin
+    const adminPaths = []; // Liste des URLs admin
 
     if (nonSecurePaths.includes(req.path)) return next();
 
@@ -53,11 +53,8 @@ app.all("*", function (req, res, next) {
         }
     } else {
         if (req.session.userEmail) {
-            logger.info(`Accès autorisé par ${req.session.userEmail} à ${req.path}`);
             return next();
         } else {
-            req.session.message = "Vous n'êtes pas connecté.";
-            req.session.messageType = "error";
             logger.error(`Tentative de connexion sans être authentifié par ${req.ip} à ${req.path}`);
             req.session.returnTo = req.originalUrl || '/';
             return res.redirect("/login");
@@ -71,19 +68,22 @@ const indexRouter = require('./routes/index');
 // Appliquer les routes
 app.use('/', indexRouter);
 
-// Gestion des erreurs - Capture des routes non traitées
+// Gestion des erreurs - Capture des routes non traitées (404)
 app.use(function (req, res, next) {
-    res.status(404).render('error', {message: "La page que vous avez demandée n'existe pas.", error: {status: 404}});
+    const error = new Error("La page que vous avez demandée n'existe pas.");
+    error.status = 404;
+    next(error);
 });
 
 // Gestion des erreurs - Middleware d'erreur
 app.use(function (err, req, res, next) {
     // Log de l'erreur
     logger.error(`Erreur : ${err.status || 500} - ${err.message}, Stack: ${err.stack}`);
+
     // Réponse de l'erreur
     res.status(err.status || 500).render('error', {
-        message: "Une erreur est survenue sur le serveur.",
-        error: req.app.get('env') === 'development' ? err : {}
+        message: err.message || "Une erreur est survenue sur le serveur.",
+        error: req.app.get('env') === 'development' ? err : { status: err.status }
     });
 });
 

@@ -46,7 +46,9 @@ router.get('/browse_offers', isLoggedIn, readMessage, async function (req, res, 
         });
     } catch (error) {
         logger.error(`Erreur lors de la récupération des offres d'emploi: ${error.message}`, {stack: error.stack});
-        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
+        error.status = 500;
+        error.message = "Erreur interne du serveur lors de la récupération des offres d'emploi.";
+        next(error);
     }
 });
 
@@ -65,7 +67,9 @@ router.post('/view_offer', isLoggedIn, async function (req, res, next) {
         res.render('jobs/view_offer', {offre, idOffre, isCandidate});
     } catch (error) {
         logger.error(`Erreur lors de la récupération de l'offre: ${error.message}`, {stack: error.stack});
-        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
+        error.status = 500;
+        error.message = "Erreur interne du serveur lors de la récupération de l'offre.";
+        next(error);
     }
 });
 
@@ -77,7 +81,9 @@ router.get('/add_offer', requireAffiliation, readMessage, async function (req, r
         res.render('jobs/add_offer', {fiches});
     } catch (error) {
         logger.error(`Erreur lors de la récupération des fiches de poste: ${error.message}`, {stack: error.stack});
-        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
+        error.status = 500;
+        error.message = "Erreur interne du serveur lors de la récupération des fiches de poste.";
+        next(error);
     }
 });
 
@@ -127,7 +133,9 @@ router.post('/add_offer', requireAffiliation, [
         res.redirect('/jobs/add_offer');
     } catch (error) {
         logger.error(`Erreur lors de l'ajout de l'offre d'emploi: ${error.message}`, {stack: error.stack});
-        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
+        error.status = 500;
+        error.message = "Erreur interne du serveur lors de l'ajout de l'offre d'emploi.";
+        next(error);
     }
 });
 
@@ -184,7 +192,9 @@ router.post('/add_job', requireAffiliation, [
         res.redirect('/jobs/add_job');
     } catch (error) {
         logger.error(`Erreur lors de l'ajout de la fiche de poste: ${error.message}`, {stack: error.stack});
-        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
+        error.status = 500;
+        error.message = "Erreur interne du serveur lors de l'ajout de la fiche de poste.";
+        next(error);
     }
 });
 
@@ -196,7 +206,9 @@ router.get('/my_offers', requireRecruitorStatus, readMessage, async function (re
         res.render('jobs/my_offers', {offers});
     } catch (error) {
         logger.error(`Erreur lors de la récupération des offres de l'utilisateur: ${error.message}`, {stack: error.stack});
-        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
+        error.status = 500;
+        error.message = "Erreur interne du serveur lors de la récupération des offres de l'utilisateur.";
+        next(error);
     }
 });
 
@@ -213,7 +225,7 @@ router.post('/my_offers', requireAffiliation, [
     }
 
     try {
-        const { idOffre, action } = req.body;
+        const {idOffre, action} = req.body;
 
         if (!await OffreEmploi.isUserLegitimate(idOffre, req.session.userEmail)) {
             req.session.message = "Vous n'avez pas les droits pour gérer cette offre.";
@@ -224,9 +236,9 @@ router.post('/my_offers', requireAffiliation, [
         logger.info(`Action : ${action} sur l'offre ${idOffre} par ${req.session.userEmail}`);
 
         if (action === '1') {
-            await OffreEmploi.update(idOffre, { Etat: 'publié' });
+            await OffreEmploi.update(idOffre, {Etat: 'publié'});
         } else if (action === '2') {
-            await OffreEmploi.update(idOffre, { Etat: 'non publié' });
+            await OffreEmploi.update(idOffre, {Etat: 'non publié'});
         } else if (action === '3') {
             await OffreEmploi.delete(idOffre);
         }
@@ -235,8 +247,10 @@ router.post('/my_offers', requireAffiliation, [
         req.session.messageType = 'notification';
         res.redirect('/jobs/my_offers');
     } catch (error) {
-        logger.error(`Erreur lors de la gestion de l'offre: ${error.message}`, { stack: error.stack });
-        res.status(500).render('error', { message: "Erreur interne du serveur.", error });
+        logger.error(`Erreur lors de la gestion de l'offre: ${error.message}`, {stack: error.stack});
+        error.status = 500;
+        error.message = "Erreur interne du serveur lors de la gestion de l'offre.";
+        next(error);
     }
 });
 
@@ -248,7 +262,9 @@ router.get('/my_jobs', requireAffiliation, readMessage, async function (req, res
         res.render('jobs/my_jobs', {fiches});
     } catch (error) {
         logger.error(`Erreur lors de la récupération des fiches de l'organisation: ${error.message}`, {stack: error.stack});
-        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
+        error.status = 500;
+        error.message = "Erreur interne du serveur lors de la récupération des fiches de l'organisation.";
+        next(error);
     }
 });
 
@@ -277,8 +293,10 @@ router.post('/my_jobs', requireAffiliation, [
         req.session.messageType = 'notification';
         res.redirect('/jobs/my_jobs');
     } catch (error) {
-        logger.error(`Erreur lors de la suppression de la fiche: ${error.message}`, {stack: error.stack });
-        res.status(500).render('error', { message: "Erreur interne du serveur.", error });
+        logger.error(`Erreur lors de la suppression de la fiche: ${error.message}`, { stack: error.stack });
+        error.status = 500;
+        error.message = "Erreur interne du serveur lors de la suppression de la fiche.";
+        next(error);
     }
 });
 

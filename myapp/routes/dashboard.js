@@ -7,7 +7,7 @@ const Organisation = require('../model/organisation');
 const isLoggedIn = require('../middleware/isLoggedIn');
 const isAdmin = require('../middleware/isAdmin');
 
-router.get('/', isLoggedIn, async (req, res) => {
+router.get('/', isLoggedIn, async (req, res,next) => {
     logger.debug("Accès au dashboard...");
     try {
         const email = req.session.userEmail;
@@ -27,12 +27,14 @@ router.get('/', isLoggedIn, async (req, res) => {
         }
 
     } catch (error) {
-        logger.error("Erreur lors de l'accès au dashboard:", error);
-        res.status(500).render('error', { message: "Erreur de serveur.", error: error });
+        logger.error(`Erreur lors de l\'accès au dashboard : ${error}`);
+        error.status = 500;
+        error.message = "Erreur lors de l'accès au dashboard";
+        next(error);
     }
 });
 
-router.get('/administrateur', isLoggedIn, isAdmin, async (req, res) => {
+router.get('/administrateur', isLoggedIn, isAdmin, async (req, res,next) => {
     logger.debug("Accès au dashboard administrateur...");
     try {
         const email = req.session.userEmail;
@@ -45,8 +47,10 @@ router.get('/administrateur', isLoggedIn, isAdmin, async (req, res) => {
         logger.info("Utilisateur trouvé, rendu du dashboard administrateur.");
         res.render('dashboards/administrateur', { user: userDetails, activePage: 'dashboard' });
     } catch (error) {
-        logger.error("Erreur lors de l'accès au dashboard administrateur:", error);
-        res.status(500).render('error', { message: "Erreur de serveur.", error: error });
+        logger.error(`Erreur lors de l'accès au dashboard administrateur : ${error}`);
+        error.status = 500;
+        error.message = "Erreur lors de l'accès au dashboard administrateur.";
+        next(error);
     }
 });
 

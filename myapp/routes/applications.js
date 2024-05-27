@@ -71,8 +71,9 @@ router.post('/apply', upload.array('formFileLg'), isLoggedIn, [
         req.session.messageType = 'notification';
         res.redirect('/jobs/browse_offers');
     } catch (error) {
-        logger.error(`Erreur lors de la candidature: ${error.message}`, {stack: error.stack});
-        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
+        error.status = 500;
+        error.message = 'Erreur lors de la candidature :' + error.message;
+        next(error);
     }
 });
 
@@ -104,11 +105,15 @@ router.post('/attachments', isLoggedIn, [
                 fichiers: fichiers
             });
         } else {
-            res.status(403).send('Unauthorized');
+            let error = new Error();
+            error.message = "Vous n'êtes pas autorisé à accéder à cette page.";
+            error.status = 403;
+            next(error);
         }
     } catch (error) {
-        logger.error(`Erreur lors de la récupération des pièces jointes: ${error.message}`, {stack: error.stack});
-        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
+        error.status = 500;
+        error.message = "Une erreur est survenue lors de la récupération des pièces jointes :"+error.message;
+        next(error);
     }
 });
 
@@ -118,7 +123,10 @@ router.get('/download-attachment', isLoggedIn, async function (req, res, next) {
         const {fichier} = req.query;
         const result = await AssociationFichier.readFichier(fichier);
         if (!result) {
-            res.status(403).send('Unauthorized');
+            let error = new Error();
+            error.message = "Vous n'êtes pas autorisé à accéder à cette page.";
+            error.status = 403;
+            next(error);
         } else {
             logger.warn(`DOWNLOAD ATTACHMENT : ${JSON.stringify(result)}`);
             if (
@@ -128,12 +136,16 @@ router.get('/download-attachment', isLoggedIn, async function (req, res, next) {
                 const filePath = path.join(__dirname, '..', 'uploads', fichier);
                 res.download(filePath, fichier);
             } else {
-                res.status(403).send('Unauthorized');
+                let error = new Error();
+                error.message = "Vous n'êtes pas autorisé à accéder à cette page.";
+                error.status = 403;
+                next(error);
             }
         }
     } catch (error) {
-        logger.error(`Erreur lors du téléchargement de la pièce jointe: ${error.message}`, {stack: error.stack});
-        res.status(500).render('error', {message: "Erreur interne du serveur.", error});
+        error.status = 500;
+        error.message = 'Erreur lors du téléchargement de la pièce jointe :' + error.message;
+        next(error);
     }
 });
 
@@ -183,8 +195,9 @@ router.post('/cancel-application', isLoggedIn, readReturnTo, [
 
         res.redirect(req.returnTo);
     } catch (error) {
-        logger.error(`Erreur lors de l'annulation de la candidature: ${error.message}`, { stack: error.stack });
-        res.status(500).render('error', { message: "Erreur interne du serveur.", error });
+        error.status = 500;
+        error.message = 'Une erreur est survenue lors de l\'annulation de la candidature :' + error.message;
+        next(error);
     }
 });
 
@@ -195,8 +208,9 @@ router.get('/my-applications', isLoggedIn, readMessage, async function(req, res,
         req.session.returnTo = "/applications/my-applications";
         res.render('applications/my_applications.ejs', { candidatures });
     } catch (error) {
-        logger.error(`Erreur lors de la récupération des candidatures: ${error.message}`, { stack: error.stack });
-        res.status(500).render('error', { message: "Erreur interne du serveur.", error });
+        error.status = 500;
+        error.message = 'Erreur lors de la récupération des candidatures :' + error.message;
+        next(error);
     }
 });
 
@@ -207,8 +221,9 @@ router.get('/incoming-applications', requireRecruitorStatus, readMessage, async 
         req.session.returnTo = "/applications/incoming-applications";
         res.render('applications/incoming_applications.ejs', { candidatures });
     } catch (error) {
-        logger.error(`Erreur lors de la récupération des candidatures entrantes: ${error.message}`, { stack: error.stack });
-        res.status(500).render('error', { message: "Erreur interne du serveur.", error });
+        error.status = 500;
+        error.message = "Erreur lors de la récupération des candidatures entrantes :" + error.message;
+        next(error);
     }
 });
 

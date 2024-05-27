@@ -21,7 +21,7 @@ router.get('/', readMessage, (req, res) => {
 router.post('/', readReturnTo, [
     body('email', 'Veuillez entrer un email valide').isEmail().trim().escape(),
     body('password', 'Le mot de passe est requis').notEmpty().trim().escape()
-], async (req, res) => {
+], async (req, res,next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         req.session.message = errors.array().map(error => error.msg).join(', ');
@@ -57,11 +57,10 @@ router.post('/', readReturnTo, [
             res.redirect('/');
         }
     } catch (error) {
-        logger.error(`Erreur dans POST /login : ${error.message}`, {stack: error.stack});
-        res.status(500).render('error', {
-            message: "Erreur interne du serveur",
-            error: req.app.get('env') === 'development' ? error : {}
-        });
+        logger.error(`Erreur lors de la connexion : ${error.message}`, {stack: error.stack});
+        error.status = 500;
+        error.message = 'Erreur lors de la connexion';
+        next(error);
     }
 });
 

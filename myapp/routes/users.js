@@ -31,32 +31,32 @@ router.get('/userslist', isLoggedIn, isAdmin, readMessage, async (req, res, next
             totalPages
         });
     } catch (error) {
-        res.status(500).render('error', {
-            message: "Erreur interne du serveur lors de la récupération de la liste des utilisateurs",
-            error
-        });
+        logger.error(`Erreur lors de la récupération de la liste des utilisateurs : ${error}`);
+        error.status = 500;
+        error.message = "Erreur interne du serveur lors de la récupération de la liste des utilisateurs";
+        next(error);
     }
 });
 
 
 // Route pour afficher le profil de l'utilisateur avec un argument par défaut
-router.get('/profile', isLoggedIn, async (req, res) => {
+router.get('/profile', isLoggedIn, async (req, res,next) => {
     const userId = req.session.userEmail;
     logger.info(`Accès au profil de l'utilisateur ${userId}`);
-    await renderProfileView(req, res, userId);
+    await renderProfileView(req, res, userId,next);
 });
 
 // Route pour afficher le profil d'un utilisateur spécifique
-router.post('/profile', isLoggedIn, canViewProfile, async (req, res) => {
+router.post('/profile', isLoggedIn, canViewProfile, async (req, res,next) => {
     const userId = req.body.userId || req.session.userEmail;
     logger.info(`Accès au profil de l'utilisateur ${userId}`);
-    await renderProfileView(req, res, userId);
+    await renderProfileView(req, res, userId,next);
 });
 
 // Route pour mettre à jour l'email de l'utilisateur
 router.post('/update-email', isLoggedIn, canEditProfile, [
     body('newEmail').isEmail().withMessage('Email invalide.')
-], async (req, res) => {
+], async (req, res,next) => {
     const errors = validationResult(req);
     const userId = req.body.userId || req.session.userEmail;
     if (!errors.isEmpty()) {
@@ -90,14 +90,17 @@ router.post('/update-email', isLoggedIn, canEditProfile, [
     } catch (error) {
         // Rollback the transaction in case of error
         await pool.query('ROLLBACK');
-        res.status(500).render('error', {message: "Erreur de serveur.", error});
+        logger.error(`Une erreur s\'est produite lors de la mise à jour de l\'adresse e-mail : ${error}`);
+        error.status = 500; // Assurez-vous que l'erreur a une propriété status
+        error.message = 'Une erreur s\'est produite lors de la mise à jour de l\'adresse e-mail.';
+        next(error); // Passez l'erreur au middleware de gestion des erreurs
     }
 });
 
 // Route pour mettre à jour le téléphone de l'utilisateur
 router.post('/update-telephone', isLoggedIn, canEditProfile, [
     body('newTelephone').isMobilePhone('fr-FR').withMessage('Numéro de téléphone mobile invalide.')
-], async (req, res) => {
+], async (req, res,next) => {
     const errors = validationResult(req);
     const userId = req.body.userId || req.session.userEmail;
     if (!errors.isEmpty()) {
@@ -117,12 +120,15 @@ router.post('/update-telephone', isLoggedIn, canEditProfile, [
             <script>document.getElementById('redirectForm').submit();</script>
         `);
     } catch (error) {
-        res.status(500).render('error', {message: "Erreur de serveur.", error});
+        logger.error(`Erreur lors de la mise à jour du téléphone de l'utilisateur : ${error}`);
+        error.status = 500;
+        error.message = "Erreur lors de la mise à jour du téléphone de l'utilisateur.";
+        next(error);
     }
 });
 
 // Route pour réinitialiser le mot de passe de l'utilisateur (Admin)
-router.post('/reset-password', isLoggedIn, isAdmin, async (req, res) => {
+router.post('/reset-password', isLoggedIn, isAdmin, async (req, res,next) => {
     const userId = req.body.userId || req.session.userEmail;
     try {
         const defaultPassword = 'password'; // Mot de passe par défaut
@@ -138,7 +144,10 @@ router.post('/reset-password', isLoggedIn, isAdmin, async (req, res) => {
             <script>document.getElementById('redirectForm').submit();</script>
         `);
     } catch (error) {
-        res.status(500).render('error', {message: "Erreur de serveur.", error});
+        logger.error(`Une erreur est survenue lors de la réinitialisation du mot de passe : ${error}`);
+        error.status = 500;
+        error.message = "Une erreur est survenue lors de la réinitialisation du mot de passe.";
+        next(error);
     }
 });
 
@@ -148,7 +157,7 @@ router.post('/update-password', isLoggedIn, [
     body('newPassword', 'Le nouveau mot de passe doit contenir au moins 8 caractères, incluant une majuscule, une minuscule, un chiffre et un caractère spécial.')
         .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/),
     body('confirmPassword', 'Les mots de passe ne correspondent pas').custom((value, {req}) => value === req.body.newPassword)
-], async (req, res) => {
+], async (req, res,next) => {
     const errors = validationResult(req);
     const userId = req.session.userEmail;
     if (!errors.isEmpty()) {
@@ -173,12 +182,15 @@ router.post('/update-password', isLoggedIn, [
         req.session.messageType = 'notification';
         res.redirect(`/users/profile`);
     } catch (error) {
-        res.status(500).render('error', {message: "Erreur de serveur.", error});
+        logger.error(`Erreur lors de la mise à jour du mot de passe: ${error}`);
+        error.status = 500;
+        error.message = "Errur lors de la mise à jour du mot de passe."
+        next(error);
     }
 });
 
 //Route pour supprimer un utilisateur
-router.post('/delete', isLoggedIn, isAdmin, async (req, res) => {
+router.post('/delete', isLoggedIn, isAdmin, async (req, res,next) => {
     const userId = req.body.userId;
     try {
         await userModel.delete(userId);
@@ -186,12 +198,15 @@ router.post('/delete', isLoggedIn, isAdmin, async (req, res) => {
         req.session.messageType = 'notification';
         res.redirect('/users/userslist');
     } catch (error) {
-        res.status(500).render('error', { message: "Erreur de serveur.", error });
+        logger.error(`Erreur lors de la suppression de l'utilisateur: ${error}`);
+        error.status = 500;
+        error.message = "Erreur lors de la suppression de l'utilisateur."
+        next(error);
     }
 });
 
 // Route pour promouvoir un utilisateur en administrateur
-router.post('/make-admin', isLoggedIn, isAdmin, async (req, res) => {
+router.post('/make-admin', isLoggedIn, isAdmin, async (req, res,next) => {
     const userId = req.body.userId;
     try {
         await userModel.update(userId, { TypeCompte: 'administrateur' });
@@ -199,7 +214,10 @@ router.post('/make-admin', isLoggedIn, isAdmin, async (req, res) => {
         req.session.messageType = 'notification';
         res.redirect('/users/userslist');
     } catch (error) {
-        res.status(500).render('error', { message: "Erreur de serveur.", error });
+        logger.error(`Erreur lors de la promotion de l'utilisateur. ${error}`);
+        error.status = 500;
+        error.message = "Erreur lors de la promotion de l'utilisateur."
+        next(error);
     }
 });
 

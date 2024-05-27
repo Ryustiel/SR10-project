@@ -24,7 +24,7 @@ router.post('/request-organisation-change', isLoggedIn, canEditProfile, [
     body('newOrganisationNameEdit').optional({checkFalsy: true}).notEmpty().withMessage("Nom de l'organisation requis"),
     body('newOrganisationTypeEdit').optional({checkFalsy: true}).notEmpty().withMessage("Type de l'organisation requis"),
     body('newOrganisationAddressEdit').optional({checkFalsy: true}).notEmpty().withMessage("Adresse de l'organisation requise")
-], async (req, res) => {
+], async (req, res,next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         req.session.message = errors.array().map(e => e.msg).join(', ');
@@ -95,7 +95,10 @@ router.post('/request-organisation-change', isLoggedIn, canEditProfile, [
             <script>document.getElementById('redirectForm').submit();</script>
         `);
     } catch (error) {
-        res.status(500).render('error', {message: "Erreur de serveur.", error});
+        logger.error(`Erreur lors de la demande de changement d'organisation : ${error}`);
+        error.status = 500;
+        error.message = "Erreur lors de la demande de changement d'organisation";
+        next(error);
     }
 });
 
@@ -106,7 +109,7 @@ router.post('/request-recruiter', isLoggedIn, canEditProfile, [
     body('newOrganisationName').optional({checkFalsy: true}).notEmpty().withMessage("Nom de l'organisation requis"),
     body('newOrganisationType').optional({checkFalsy: true}).notEmpty().withMessage("Type de l'organisation requis"),
     body('newOrganisationAddress').optional({checkFalsy: true}).notEmpty().withMessage("Adresse de l'organisation requise")
-], async (req, res) => {
+], async (req, res,next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         req.session.message = errors.array().map(e => e.msg).join(', ');
@@ -167,7 +170,7 @@ router.post('/request-recruiter', isLoggedIn, canEditProfile, [
             req.session.userType = 'recruteur en attente';
         }
 
-        req.session.message = "Demande de changement de type de compte réussie.";
+        req.session.message = "Demande de changement de type de compte et/ou d'ajout d'organisation réussie.";
         req.session.messageType = 'notification';
         res.send(`
             <form id="redirectForm" method="post" action="/users/profile">
@@ -176,12 +179,15 @@ router.post('/request-recruiter', isLoggedIn, canEditProfile, [
             <script>document.getElementById('redirectForm').submit();</script>
         `);
     } catch (error) {
-        res.status(500).render('error', {message: "Erreur de serveur.", error});
+        logger.error(`Impossible de mettre à jour le type de compte/l'organisation : ${error}`);
+        error.status = 500;
+        error.message = "Impossible de mettre à jour le type de compte/l'organisation.";
+        next(error);
     }
 });
 
 // Route pour annuler la demande de devenir recruteur
-router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req, res) => {
+router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req, res,next) => {
     logger.debug("Annulation de la demande de changement de type de compte...");
     try {
         const userId = req.body.userId || req.session.userEmail;
@@ -218,12 +224,15 @@ router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req,
             <script>document.getElementById('redirectForm').submit();</script>
         `);
     } catch (error) {
-        res.status(500).render('error', {message: "Erreur de serveur.", error});
+        logger.error(`Erreur lors de la gestion du compte/de l'organisation : ${error}`);
+        error.status = 500;
+        error.message = "Erreur lors de la gestion du compte/de l'organisation.";
+        next(error);
     }
 });
 
 // Route pour gérer les demandes de recruteur avec recherche et pagination
-router.get('/manage_requests', isLoggedIn, isAdmin, readMessage, async (req, res) => {
+router.get('/manage_requests', isLoggedIn, isAdmin, readMessage, async (req, res,next) => {
     const search = req.query.search || '';
     const page = parseInt(req.query.page) || 1;
     const limit = 10; // Number of requests per page
@@ -242,11 +251,14 @@ router.get('/manage_requests', isLoggedIn, isAdmin, readMessage, async (req, res
             activePage: 'manage_requests'
         });
     } catch (error) {
-        res.status(500).render('error', {message: "Erreur de serveur.", error});
+        logger.error(`Erreur lors de la récupération des demandes de recrutement : ${error}`);
+        error.status = 500;
+        error.message = "Erreur lors de la récupération des demandes de recrutement.";
+        next(error);
     }
 });
 
-router.post('/accept_request', isLoggedIn, isAdmin, async (req, res) => {
+router.post('/accept_request', isLoggedIn, isAdmin, async (req, res,next) => {
     logger.debug("Acceptation de la demande de changement de type de compte...");
     try {
         const {email, organisationNumber} = req.body;
@@ -267,11 +279,14 @@ router.post('/accept_request', isLoggedIn, isAdmin, async (req, res) => {
         req.session.messageType = 'notification';
         res.redirect('/organizations/manage_requests');
     } catch (error) {
-        res.status(500).render('error', {message: "Erreur de serveur.", error});
+        logger.error(`Erreur lors de l'acceptation de la demande de changement de type de compte/d'organisation : ${error}`);
+        error.status = 500;
+        error.message = "Erreur lors de l'acceptation de la demande de changement de type de compte/d'organisation.";
+        next(error);
     }
 });
 
-router.post('/reject_request', isLoggedIn, isAdmin, async (req, res) => {
+router.post('/reject_request', isLoggedIn, isAdmin, async (req, res,next) => {
     logger.debug("Rejet de la demande de changement de type de compte...");
     try {
         const {email} = req.body;
@@ -292,7 +307,10 @@ router.post('/reject_request', isLoggedIn, isAdmin, async (req, res) => {
         req.session.messageType = 'notification';
         res.redirect('/organizations/manage_requests');
     } catch (error) {
-        res.status(500).render('error', { message: "Erreur de serveur.", error });
+        logger.error(`Erreur lors du rejet de la demande : ${error}`);
+        error.status = 500;
+        error.message = "Erreur lors du rejet de la demande.";
+        next(error);
     }
 });
 

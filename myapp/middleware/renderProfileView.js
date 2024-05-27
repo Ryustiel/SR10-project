@@ -3,7 +3,7 @@ const logger = require('../logger');
 const readMessage = require('../middleware/readMessage');
 
 // Fonction d'aide pour rendre la vue du profil
-async function renderProfileView(req, res, userId) {
+async function renderProfileView(req, res, userId,next) {
     try {
         // Appeler le middleware readMessage
         await new Promise((resolve, reject) => {
@@ -19,8 +19,10 @@ async function renderProfileView(req, res, userId) {
             organisations
         });
     } catch (error) {
-        logger.error(`Erreur lors de l'accès au profil: ${error.message}`, { stack: error.stack });
-        res.status(500).render('error', { message: "Erreur de serveur.", error });
+        logger.error(`Erreur lors de l\'accès au profil: ${error}`);
+        error.status = 500;
+        error.message = 'Erreur lors de l\'accès au profil';
+        next(error);
     }
 }
 
