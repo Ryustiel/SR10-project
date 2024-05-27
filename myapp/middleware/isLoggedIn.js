@@ -3,7 +3,6 @@ function isLoggedIn(req, res, next) {
         next();
     } else {
         req.session.returnTo = req.originalUrl || '/'; // save current page
-        res.redirect('/login');
     }
 }
 
