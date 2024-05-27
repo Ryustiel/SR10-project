@@ -7,10 +7,10 @@
     <p><strong>Rythme:</strong> <%= offre.Rythme %></p>
     <p><strong>Salaire:</strong> <%= offre.Salaire %> €</p>
     <p><strong>Valide jusqu'à:</strong> <%= new Date(offre.DateValidite).toLocaleDateString("fr-FR") %></p>
-    <p><strong>Organisation:</strong> <%= offre.nom %></p>
+    <p><strong>Organisation:</strong> <%= offre.organisationNom %></p>
 
     <% if (isCandidate) { %>
-        <h3>Vous postulez déjà à cette offre</h3>
+        <h3>Vous avez déjà postulé à cette offre</h3>
     <% } else { %>
         <h3>Postuler à cette Offre</h3>
         <p>Les pièces suivantes sont demandées :<br><%= offre.ListePieces %></p>

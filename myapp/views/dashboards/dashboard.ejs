@@ -8,9 +8,10 @@
 </head>
 <body>
 
-<%- include("../navbar.ejs")%>
+<%- include("../navbar.ejs") %>
 
 <div class="container my-5">
+    <%- include("../message.ejs") %>
     <div class="row">
         <div class="col-md-10 offset-md-1">
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -24,14 +25,16 @@
                 <div class="card-body">
                     <p class="card-text"><strong>Email :</strong> <%= user.Email %></p>
                     <p class="card-text"><strong>Téléphone :</strong> <%= user.Telephone %></p>
-                    <p class="card-text"><strong>Date de création :</strong> <%= new Date(user.DateCreation).toLocaleDateString("fr-FR") %></p>
+                    <p class="card-text"><strong>Date de création
+                            :</strong> <%= new Date(user.DateCreation).toLocaleDateString("fr-FR") %></p>
                     <p class="card-text"><strong>Statut du Compte :</strong> <%= user.StatutCompte %></p>
                     <p class="card-text"><strong>Type de Compte :</strong> <%= user.TypeCompte %></p>
-                    <p class="card-text"><strong>Organisation :</strong> <%= user.IdOrganisation %></p>
+                    <% if (user.TypeCompte.toLowerCase() === 'recruteur') { %>
+                        <p class="card-text"><strong>Organisation :</strong> <%= user.IdOrganisation %></p>
+                    <% } %>
                 </div>
             </div>
-            <!-- Ajout de quelques options de gestion, visible si l'utilisateur est admin par exemple -->
-            <% if (user.TypeCompte.toLowerCase() === 'admin') { %>
+            <% if (userRole === 'administrateur') { %>
                 <div class="mt-4">
                     <a href="/manage-users" class="btn btn-secondary">Gérer les Utilisateurs</a>
                 </div>
@@ -39,6 +42,7 @@
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

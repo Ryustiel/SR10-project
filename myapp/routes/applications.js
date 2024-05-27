@@ -19,17 +19,18 @@ const readReturnTo = require('../middleware/readReturnTo');
 // Set storage engine
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/'); // Folder to save the files
+        cb(null, 'uploads/'); // Dossier pour enregistrer les fichiers
     },
-    filename: function (req, file, cb) {
+    filename: async function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+        const formattedFilename = uniqueSuffix + '-' + file.originalname;
+        cb(null, formattedFilename);
     }
 });
-const upload = multer({storage: storage});
+const upload = multer({ storage: storage });
 
 // Route to apply for a job (POST)
-router.post('/apply', upload.array('formFileLg'), isLoggedIn, [
+router.post('/apply', isLoggedIn, upload.array('files'), [
     body('idOffre').notEmpty().withMessage("ID de l'offre requis")
 ], async function (req, res, next) {
     const errors = validationResult(req);
@@ -49,21 +50,12 @@ router.post('/apply', upload.array('formFileLg'), isLoggedIn, [
             return res.redirect('/jobs/browse_offers');
         }
 
-        // Process and save files
-        const filenames = files.map(file => file.filename);
-        logger.info(`uploaded ${files.length} files as ${JSON.stringify(filenames)}`);
-
-        const {idOffre} = req.body;
+        const { idOffre } = req.body;
         const idCandidat = req.session.userEmail;
         const dateCandidature = new Date();
 
         // CREATE APPLICATION
-        await Candidature.create(
-            idCandidat,
-            idOffre,
-            dateCandidature,
-            filenames
-        );
+        await Candidature.create(idCandidat, idOffre, dateCandidature, files);
 
         // NOTIFY
         const nom = await OffreEmploi.getNom(idOffre);
@@ -90,7 +82,7 @@ router.post('/attachments', isLoggedIn, [
     }
 
     try {
-        const {idCandidat, idOffre} = req.body;
+        const { idCandidat, idOffre } = req.body;
         if (
             req.session.userEmail === idCandidat || // Est candidat associé ?
             await OffreEmploi.isUserLegitimate(idOffre, req.session.userEmail) // Est recruteur associé ?
@@ -102,7 +94,10 @@ router.post('/attachments', isLoggedIn, [
             res.render('applications/attachments.ejs', {
                 nom_candidat: nom_candidat,
                 nom_offre: nom_offre,
-                fichiers: fichiers
+                fichiers: fichiers.map(file => ({
+                    Fichier: file.Fichier,
+                    NomOriginal: file.NomOriginal
+                }))
             });
         } else {
             let error = new Error();
@@ -112,7 +107,7 @@ router.post('/attachments', isLoggedIn, [
         }
     } catch (error) {
         error.status = 500;
-        error.message = "Une erreur est survenue lors de la récupération des pièces jointes :"+error.message;
+        error.message = "Une erreur est survenue lors de la récupération des pièces jointes :" + error.message;
         next(error);
     }
 });
@@ -120,7 +115,7 @@ router.post('/attachments', isLoggedIn, [
 // Route to download attachment (GET)
 router.get('/download-attachment', isLoggedIn, async function (req, res, next) {
     try {
-        const {fichier} = req.query;
+        const { fichier } = req.query;
         const result = await AssociationFichier.readFichier(fichier);
         if (!result) {
             let error = new Error();
@@ -134,7 +129,7 @@ router.get('/download-attachment', isLoggedIn, async function (req, res, next) {
                 await OffreEmploi.isOrganisationLegitimate(result.IdOffre, req.session.userEmail) // Fait partie de l'organisation associée ?
             ) {
                 const filePath = path.join(__dirname, '..', 'uploads', fichier);
-                res.download(filePath, fichier);
+                res.download(filePath, result.NomOriginal); // Utilisation du nom original pour le téléchargement
             } else {
                 let error = new Error();
                 error.message = "Vous n'êtes pas autorisé à accéder à cette page.";

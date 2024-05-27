@@ -258,10 +258,10 @@ router.get('/manage_requests', isLoggedIn, isAdmin, readMessage, async (req, res
     }
 });
 
-router.post('/accept_request', isLoggedIn, isAdmin, async (req, res,next) => {
+router.post('/accept_request', isLoggedIn, isAdmin, async (req, res, next) => {
     logger.debug("Acceptation de la demande de changement de type de compte...");
     try {
-        const {email, organisationNumber} = req.body;
+        const {email, organisationNumber, search, page} = req.body;
         const userDetails = await Utilisateur.read(email);
         if (!userDetails) {
             throw new Error("Détails de l'utilisateur non trouvés.");
@@ -277,7 +277,7 @@ router.post('/accept_request', isLoggedIn, isAdmin, async (req, res,next) => {
         await Utilisateur.updateTypeCompte(email, 'recruteur');
         req.session.message = "Demande acceptée et type de compte mis à jour en 'recruteur'.";
         req.session.messageType = 'notification';
-        res.redirect('/organizations/manage_requests');
+        res.redirect(`/organizations/manage_requests?search=${encodeURIComponent(search)}&page=${page}`);
     } catch (error) {
         logger.error(`Erreur lors de l'acceptation de la demande de changement de type de compte/d'organisation : ${error}`);
         error.status = 500;
@@ -286,10 +286,11 @@ router.post('/accept_request', isLoggedIn, isAdmin, async (req, res,next) => {
     }
 });
 
-router.post('/reject_request', isLoggedIn, isAdmin, async (req, res,next) => {
+
+router.post('/reject_request', isLoggedIn, isAdmin, async (req, res, next) => {
     logger.debug("Rejet de la demande de changement de type de compte...");
     try {
-        const {email} = req.body;
+        const {email, search, page} = req.body;
         const userDetails = await Utilisateur.read(email);
         if (!userDetails) {
             throw new Error("Détails de l'utilisateur non trouvés.");
@@ -305,7 +306,7 @@ router.post('/reject_request', isLoggedIn, isAdmin, async (req, res,next) => {
 
         req.session.message = "Demande rejetée et type de compte mis à jour en 'candidat'.";
         req.session.messageType = 'notification';
-        res.redirect('/organizations/manage_requests');
+        res.redirect(`/organizations/manage_requests?search=${encodeURIComponent(search)}&page=${page}`);
     } catch (error) {
         logger.error(`Erreur lors du rejet de la demande : ${error}`);
         error.status = 500;
@@ -313,5 +314,6 @@ router.post('/reject_request', isLoggedIn, isAdmin, async (req, res,next) => {
         next(error);
     }
 });
+
 
 module.exports = router;

@@ -17,7 +17,7 @@ CREATE TABLE Utilisateur
     Nom            VARCHAR(255),
     Prenom         VARCHAR(255),
     Telephone      VARCHAR(10),
-    DateCreation   TIMESTAMP,
+    DateCreation   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     StatutCompte   VARCHAR(255),
     TypeCompte     VARCHAR(255),
     IdOrganisation VARCHAR(255),
@@ -61,7 +61,7 @@ CREATE TABLE OffreEmploi
 -- Table Candidature
 CREATE TABLE Candidature
 (
-    DateCandidature TIMESTAMP,
+    DateCandidature TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     IdCandidat      VARCHAR(255),
     IdOffre         INT,
     PRIMARY KEY (IdCandidat, IdOffre),
@@ -75,6 +75,7 @@ CREATE TABLE AssociationFichiers
     IdCandidat VARCHAR(255),
     IdOffre    INT,
     Fichier    VARCHAR(255),
+    NomOriginal VARCHAR(255),
     PRIMARY KEY (IdCandidat, IdOffre, Fichier),
     FOREIGN KEY (IdCandidat, IdOffre) REFERENCES Candidature (IdCandidat, IdOffre) ON UPDATE CASCADE
 );

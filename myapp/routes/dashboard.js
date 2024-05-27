@@ -6,8 +6,9 @@ const Organisation = require('../model/organisation');
 //import is admin and is logged in functions from middleware folder
 const isLoggedIn = require('../middleware/isLoggedIn');
 const isAdmin = require('../middleware/isAdmin');
+const readMessage = require('../middleware/readMessage');
 
-router.get('/', isLoggedIn, async (req, res,next) => {
+router.get('/', isLoggedIn, readMessage, async (req, res,next) => {
     logger.debug("Accès au dashboard...");
     try {
         const email = req.session.userEmail;
@@ -34,7 +35,7 @@ router.get('/', isLoggedIn, async (req, res,next) => {
     }
 });
 
-router.get('/administrateur', isLoggedIn, isAdmin, async (req, res,next) => {
+router.get('/administrateur', isLoggedIn, isAdmin, readMessage, async (req, res,next) => {
     logger.debug("Accès au dashboard administrateur...");
     try {
         const email = req.session.userEmail;

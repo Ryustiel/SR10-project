@@ -189,38 +189,41 @@ router.post('/update-password', isLoggedIn, [
     }
 });
 
-//Route pour supprimer un utilisateur
-router.post('/delete', isLoggedIn, isAdmin, async (req, res,next) => {
+// Route pour supprimer un utilisateur
+router.post('/delete', isLoggedIn, isAdmin, async (req, res, next) => {
     const userId = req.body.userId;
+    const search = req.body.search || '';
+    const page = req.body.page || 1;
     try {
         await userModel.delete(userId);
         req.session.message = "Utilisateur supprimé avec succès.";
         req.session.messageType = 'notification';
-        res.redirect('/users/userslist');
+        res.redirect(`/users/userslist?search=${encodeURIComponent(search)}&page=${page}`);
     } catch (error) {
         logger.error(`Erreur lors de la suppression de l'utilisateur: ${error}`);
         error.status = 500;
-        error.message = "Erreur lors de la suppression de l'utilisateur."
+        error.message = "Erreur lors de la suppression de l'utilisateur.";
         next(error);
     }
 });
 
 // Route pour promouvoir un utilisateur en administrateur
-router.post('/make-admin', isLoggedIn, isAdmin, async (req, res,next) => {
+router.post('/make-admin', isLoggedIn, isAdmin, async (req, res, next) => {
     const userId = req.body.userId;
+    const search = req.body.search || '';
+    const page = req.body.page || 1;
     try {
-        await userModel.update(userId, { TypeCompte: 'administrateur' });
+        await userModel.update(userId, {TypeCompte: 'administrateur'});
         req.session.message = "Utilisateur promu en administrateur avec succès.";
         req.session.messageType = 'notification';
-        res.redirect('/users/userslist');
+        res.redirect(`/users/userslist?search=${encodeURIComponent(search)}&page=${page}`);
     } catch (error) {
         logger.error(`Erreur lors de la promotion de l'utilisateur. ${error}`);
         error.status = 500;
-        error.message = "Erreur lors de la promotion de l'utilisateur."
+        error.message = "Erreur lors de la promotion de l'utilisateur.";
         next(error);
     }
 });
-
 
 //export router and functions
 module.exports = router;

@@ -5,16 +5,13 @@
 <% } %>
 
 <% candidatures.forEach((candidature) => { %>
-
     <div class="card">
         <div class="card-body">
             <h5 class="card-title"> <%= candidature.Prenom %> <%= candidature.Nom %> pour <%= candidature.Intitule %> </h5>
             <p class="card-text"> le <%= candidature.DateCandidature %> </p>
             <div class="btn-group" role="group">
-
-                <form method="POST" action="/applications/cancel-application">
-                    <input type="hidden" name="idCandidat" value="<%= candidature.IdCandidat %>">
-                    <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
+                <form method="POST" action="/users/profile">
+                    <input type="hidden" name="userId" value="<%= candidature.IdCandidat %>">
                     <button type="submit" class="btn btn-primary">Voir le Profil</button>
                 </form>
                 <form method="POST" action="/applications/attachments">
@@ -30,5 +27,4 @@
             </div>
         </div>
     </div>
-
 <% }) %>

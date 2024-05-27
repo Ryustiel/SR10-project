@@ -44,11 +44,15 @@
                             </form>
                             <form action="/users/delete" method="post" class="d-inline">
                                 <input type="hidden" name="userId" value="<%= user.Email %>">
+                                <input type="hidden" name="search" value="<%= search %>">
+                                <input type="hidden" name="page" value="<%= currentPage %>">
                                 <button type="submit" class="btn btn-danger mb-2">Supprimer</button>
                             </form>
-                            <% if (user.Email !== currentUserEmail && user.TypeCompte !== 'admin') { %>
+                            <% if (user.TypeCompte !== 'administrateur') { %>
                                 <form action="/users/make-admin" method="post" class="d-inline">
                                     <input type="hidden" name="userId" value="<%= user.Email %>">
+                                    <input type="hidden" name="search" value="<%= search %>">
+                                    <input type="hidden" name="page" value="<%= currentPage %>">
                                     <button type="submit" class="btn btn-warning mb-2">Promouvoir en Admin</button>
                                 </form>
                             <% } %>

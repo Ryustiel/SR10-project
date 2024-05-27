@@ -4,39 +4,41 @@
     <% if (offre.NombrePieces > 0) { %>
         <div class="mb-3">
             <label for="formFileLg" class="form-label">Télécharger des Pièces Justificatives</label>
-            <input class="form-control form-control-lg" id="formFileLg" name="formFileLg" type="file" multiple/>
+            <input class="form-control form-control-lg" id="formFileLg" name="files" type="file" multiple/>
         </div>
+        <div id="fileCount" class="mb-3">Pièces justificatives fournies : 0 / <%= offre.NombrePieces %></div>
         <button id="submitButton" type="submit" class="btn btn-secondary" disabled>Postuler</button>
     <% } else { %>
         <button type="submit" class="btn btn-success">Postuler</button>
     <% } %>
 </form>
 
-<div id="fileCount"></div>
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const fileInput = document.getElementById('formFileLg');
-        const fileCountDisplay = document.getElementById('fileCount');
-        const submitButton = document.getElementById('submitButton');
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('shown.bs.modal', () => {
+                const fileInput = modal.querySelector('#formFileLg');
+                const fileCountDisplay = modal.querySelector('#fileCount');
+                const submitButton = modal.querySelector('#submitButton');
 
-        fileInput.addEventListener('change', () => {
-            const files = fileInput.files;
-            const fileCount = files.length;
-            fileCountDisplay.textContent = `
-                Pièces justificatives fournies : ${fileCount} / <%= offre.NombrePieces %>
-            `;
+                if (fileInput) {
+                    fileInput.addEventListener('change', () => {
+                        const files = fileInput.files;
+                        const fileCount = files.length;
+                        fileCountDisplay.textContent = `Pièces justificatives fournies : ${fileCount} / <%= offre.NombrePieces %>`;
 
-            // Change button type based on the number of files
-            if (fileCount === <%= offre.NombrePieces %>) {
-                submitButton.classList.remove('btn-secondary');
-                submitButton.classList.add('btn-success');
-                submitButton.disabled = false;
-            } else {
-                submitButton.classList.remove('btn-success');
-                submitButton.classList.add('btn-secondary');
-                submitButton.disabled = true;
-            }
+                        if (fileCount === <%= offre.NombrePieces %>) {
+                            submitButton.classList.remove('btn-secondary');
+                            submitButton.classList.add('btn-success');
+                            submitButton.disabled = false;
+                        } else {
+                            submitButton.classList.remove('btn-success');
+                            submitButton.classList.add('btn-secondary');
+                            submitButton.disabled = true;
+                        }
+                    });
+                }
+            });
         });
     });
 </script>

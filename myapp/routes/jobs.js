@@ -22,12 +22,14 @@ router.get('/browse_offers', isLoggedIn, readMessage, async function (req, res, 
     const page = parseInt(req.query.page) || 1;
     const limit = 10; // Number of offers per page
     const offset = (page - 1) * limit;
+    const excludeOrganisationId = req.session.userAffiliation;
+    const userRole = req.session.userType;
 
     try {
         const {
             offres,
             totalOffres
-        } = await OffreEmploi.browseOffers(search, sort, typeMetier, minSalaire, maxSalaire, limit, offset);
+        } = await OffreEmploi.browseOffers(search, sort, typeMetier, minSalaire, maxSalaire, limit, offset, excludeOrganisationId, userRole);
         const totalPages = Math.ceil(totalOffres / limit);
         const typesMetier = await OffreEmploi.getTypesMetier();
 
@@ -42,12 +44,11 @@ router.get('/browse_offers', isLoggedIn, readMessage, async function (req, res, 
             currentPage: page,
             totalPages,
             typesMetier,
-            user: req.session.userEmail
+            user: req.session.userEmail,
+            userRole: userRole
         });
     } catch (error) {
-        logger.error(`Erreur lors de la récupération des offres d'emploi: ${error.message}`, {stack: error.stack});
-        error.status = 500;
-        error.message = "Erreur interne du serveur lors de la récupération des offres d'emploi.";
+        logger.error(`Erreur lors de la récupération des offres d'emploi: ${error.message}`, { stack: error.stack });
         next(error);
     }
 });
@@ -60,15 +61,13 @@ router.get('/view_offer', function (req, res) {
 // Route to view offer (POST)
 router.post('/view_offer', isLoggedIn, async function (req, res, next) {
     try {
-        const {idOffre} = req.body;
+        const { idOffre } = req.body;
         const offre = await OffreEmploi.candidateViewOffer(idOffre);
         const isCandidate = await Candidature.isCandidate(req.session.userEmail, idOffre);
         logger.info(`Détails de l'offre ${idOffre} récupérés avec succès.`);
-        res.render('jobs/view_offer', {offre, idOffre, isCandidate});
+        res.render('jobs/offer_details', { offre, idOffre, isCandidate });
     } catch (error) {
-        logger.error(`Erreur lors de la récupération de l'offre: ${error.message}`, {stack: error.stack});
-        error.status = 500;
-        error.message = "Erreur interne du serveur lors de la récupération de l'offre.";
+        logger.error(`Erreur lors de la récupération de l'offre: ${error.message}`, { stack: error.stack });
         next(error);
     }
 });
@@ -81,8 +80,6 @@ router.get('/add_offer', requireAffiliation, readMessage, async function (req, r
         res.render('jobs/add_offer', {fiches});
     } catch (error) {
         logger.error(`Erreur lors de la récupération des fiches de poste: ${error.message}`, {stack: error.stack});
-        error.status = 500;
-        error.message = "Erreur interne du serveur lors de la récupération des fiches de poste.";
         next(error);
     }
 });
@@ -133,8 +130,6 @@ router.post('/add_offer', requireAffiliation, [
         res.redirect('/jobs/add_offer');
     } catch (error) {
         logger.error(`Erreur lors de l'ajout de l'offre d'emploi: ${error.message}`, {stack: error.stack});
-        error.status = 500;
-        error.message = "Erreur interne du serveur lors de l'ajout de l'offre d'emploi.";
         next(error);
     }
 });
@@ -192,8 +187,6 @@ router.post('/add_job', requireAffiliation, [
         res.redirect('/jobs/add_job');
     } catch (error) {
         logger.error(`Erreur lors de l'ajout de la fiche de poste: ${error.message}`, {stack: error.stack});
-        error.status = 500;
-        error.message = "Erreur interne du serveur lors de l'ajout de la fiche de poste.";
         next(error);
     }
 });
@@ -206,8 +199,6 @@ router.get('/my_offers', requireRecruitorStatus, readMessage, async function (re
         res.render('jobs/my_offers', {offers});
     } catch (error) {
         logger.error(`Erreur lors de la récupération des offres de l'utilisateur: ${error.message}`, {stack: error.stack});
-        error.status = 500;
-        error.message = "Erreur interne du serveur lors de la récupération des offres de l'utilisateur.";
         next(error);
     }
 });
@@ -248,8 +239,6 @@ router.post('/my_offers', requireAffiliation, [
         res.redirect('/jobs/my_offers');
     } catch (error) {
         logger.error(`Erreur lors de la gestion de l'offre: ${error.message}`, {stack: error.stack});
-        error.status = 500;
-        error.message = "Erreur interne du serveur lors de la gestion de l'offre.";
         next(error);
     }
 });
@@ -262,8 +251,6 @@ router.get('/my_jobs', requireAffiliation, readMessage, async function (req, res
         res.render('jobs/my_jobs', {fiches});
     } catch (error) {
         logger.error(`Erreur lors de la récupération des fiches de l'organisation: ${error.message}`, {stack: error.stack});
-        error.status = 500;
-        error.message = "Erreur interne du serveur lors de la récupération des fiches de l'organisation.";
         next(error);
     }
 });
@@ -294,8 +281,6 @@ router.post('/my_jobs', requireAffiliation, [
         res.redirect('/jobs/my_jobs');
     } catch (error) {
         logger.error(`Erreur lors de la suppression de la fiche: ${error.message}`, { stack: error.stack });
-        error.status = 500;
-        error.message = "Erreur interne du serveur lors de la suppression de la fiche.";
         next(error);
     }
 });

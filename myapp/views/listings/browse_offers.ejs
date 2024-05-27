@@ -2,9 +2,9 @@
     <div class="row">
         <div class="col-md-12">
             <form action="/jobs/browse_offers" method="get" class="mb-4">
+                <!-- Formulaire de recherche et de filtrage -->
                 <div class="input-group mb-3">
-                    <input type="text" name="search" class="form-control" placeholder="Rechercher par intitulé"
-                           value="<%= search %>">
+                    <input type="text" name="search" class="form-control" placeholder="Rechercher par intitulé" value="<%= search %>">
                     <button type="submit" class="btn btn-primary">Rechercher</button>
                 </div>
                 <div class="input-group mb-3">
@@ -24,11 +24,9 @@
                 </div>
                 <div class="input-group mb-3">
                     <label class="input-group-text" for="minSalaire">Salaire min</label>
-                    <input type="number" name="minSalaire" class="form-control" placeholder="Salaire min"
-                           value="<%= minSalaire %>">
+                    <input type="number" name="minSalaire" class="form-control" placeholder="Salaire min" value="<%= minSalaire %>">
                     <label class="input-group-text" for="maxSalaire">Salaire max</label>
-                    <input type="number" name="maxSalaire" class="form-control" placeholder="Salaire max"
-                           value="<%= maxSalaire %>">
+                    <input type="number" name="maxSalaire" class="form-control" placeholder="Salaire max" value="<%= maxSalaire %>">
                     <button type="submit" class="btn btn-secondary">Filtrer</button>
                 </div>
             </form>
@@ -39,11 +37,9 @@
                     <div class="card mb-3">
                         <div class="card-body">
                             <h5 class="card-title"><%= offre.Intitule %></h5>
-                            <p class="card-text">Date de
-                                validité: <%= new Date(offre.DateValidite).toLocaleDateString("fr-FR") %></p>
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                    data-bs-target="#modal<%= offre.IdOffre %>">Voir les Détails
-                            </button>
+                            <p class="card-text">Date de validité: <%= new Date(offre.DateValidite).toLocaleDateString("fr-FR") %></p>
+                            <input type="hidden" name="idOffre" value="<%= offre.IdOffre %>">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal<%= offre.IdOffre %>">Voir les Détails</button>
                         </div>
                     </div>
                     <%- include('../modal', {

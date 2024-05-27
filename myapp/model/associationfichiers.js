@@ -4,14 +4,13 @@ const path = require('path');
 const fs = require('fs');
 
 const AssociationFichiers = {
-
-    async create(idCandidat, idOffre, fichier) {
+    async create(idCandidat, idOffre, fichier, originalName) {
         const query = `
-            INSERT INTO AssociationFichiers (IdCandidat, IdOffre, Fichier)
-            VALUES (?, ?, ?);
+            INSERT INTO AssociationFichiers (IdCandidat, IdOffre, Fichier, NomOriginal)
+            VALUES (?, ?, ?, ?);
         `;
 
-        const values = [idCandidat, idOffre, fichier];
+        const values = [idCandidat, idOffre, fichier, originalName];
         await pool.query(query, values);
         return this.read(idCandidat, idOffre, fichier);
     },
@@ -26,18 +25,18 @@ const AssociationFichiers = {
         return results[0];
     },
 
-    async update({idCandidat, idOffre, fichier}) {
+    async update({ idCandidat, idOffre, fichier, originalName }) {
         const query = `
             UPDATE AssociationFichiers
-            SET Fichier = ?
+            SET Fichier = ?, NomOriginal = ?
             WHERE IdCandidat = ? AND IdOffre = ?;
         `;
-        const values = [fichier, idCandidat, idOffre];
+        const values = [fichier, originalName, idCandidat, idOffre];
         await pool.query(query, values);
-        return this.read({idCandidat, idOffre});
+        return this.read({ idCandidat, idOffre });
     },
 
-    async delete({idCandidat, idOffre, fichier}) {
+    async delete({ idCandidat, idOffre, fichier }) {
         const query = `DELETE
                        FROM AssociationFichiers
                        WHERE IdCandidat = ?
@@ -47,7 +46,7 @@ const AssociationFichiers = {
     },
 
     async listFiles(idCandidat, idOffre) {
-        const query = `SELECT Fichier
+        const query = `SELECT Fichier, NomOriginal
                        FROM AssociationFichiers
                        WHERE IdCandidat = ?
                          AND IdOffre = ?;`;
@@ -76,10 +75,9 @@ const AssociationFichiers = {
         await pool.query(query, [idCandidat, idOffre]);
     },
 
-
     async readFichier(fichier) {
         // Possible grâce à la contrainte UNIQUE sur Fichier
-        const query = `SELECT IdCandidat, IdOffre FROM AssociationFichiers WHERE Fichier = ?;`;
+        const query = `SELECT IdCandidat, IdOffre, NomOriginal FROM AssociationFichiers WHERE Fichier = ?;`;
         const results = await pool.query(query, [fichier]);
         if (results.length === 0) {
             return null;

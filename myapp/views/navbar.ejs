@@ -1,3 +1,7 @@
+<% function isActive(route) {
+    return activePage.startsWith(route);
+} %>
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">Plateforme de Recrutement</a>
@@ -18,39 +22,39 @@
                 <% } %>
                 <% if (userRole === 'candidat' || userRole === 'recruteur en attente' || userRole === 'recruteur') { %>
                     <li class="nav-item">
-                        <a class="nav-link <%= activePage === '/applications/my-applications' ? 'active' : '' %>"
+                        <a class="nav-link <%= isActive('/applications/my-applications') ? 'active' : '' %>"
                            href="/applications/my-applications">Voir mes Candidatures</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <%= activePage === '/jobs/browse_offers' ? 'active' : '' %>"
+                        <a class="nav-link <%= isActive('/jobs/browse_offers') ? 'active' : '' %>"
                            href="/jobs/browse_offers" id="espaceRecruteur">Postuler</a>
                     </li>
                 <% } %>
                 <% if (userRole === 'recruteur') { %>
                     <li class="nav-item">
-                        <a class="nav-link <%= activePage === '/jobs/add_job' ? 'active' : '' %>" href="/jobs/add_job">Ajouter
+                        <a class="nav-link <%= isActive('/jobs/add_job') ? 'active' : '' %>" href="/jobs/add_job">Ajouter
                             un Poste</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <%= activePage === '/jobs/add_offer' ? 'active' : '' %>"
+                        <a class="nav-link <%= isActive('/jobs/add_offer') ? 'active' : '' %>"
                            href="/jobs/add_offer">Ajouter une Offre</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <%= activePage === '/applications/incoming-applications' ? 'active' : '' %>"
+                        <a class="nav-link <%= isActive('/applications/incoming-applications') ? 'active' : '' %>"
                            href="/applications/incoming-applications">Voir les Candidatures</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <%= activePage === '/jobs/my_offers' ? 'active' : '' %>"
+                        <a class="nav-link <%= isActive('/jobs/my_offers') ? 'active' : '' %>"
                            href="/jobs/my_offers">Voir mes Offres</a>
                     </li>
                 <% } %>
                 <% if (userRole === 'administrateur') { %>
                     <li class="nav-item">
-                        <a class="nav-link <%= activePage === 'manage_requests' ? 'active' : '' %>"
+                        <a class="nav-link <%= isActive('manage_requests') ? 'active' : '' %>"
                            href="/organizations/manage_requests">Gérer les demandes</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <%= activePage === '/users/userslist' ? 'active' : '' %>"
+                        <a class="nav-link <%= isActive('/users/userslist') ? 'active' : '' %>"
                            href="/users/userslist">Liste des Utilisateurs</a>
                     </li>
                 <% } %>
