@@ -1,4 +1,6 @@
 const pool = require('./db');
+const OffreEmploi = require('./offreemploi');
+const logger = require('../logger');
 
 const FichePoste = {
     async create({ intitule, statutPoste, responsableHierarchique, typeMetier, lieuMission, rythme, salaire, description, idOrganisation }) {
@@ -48,7 +50,12 @@ const FichePoste = {
     },
 
     async listFiches(idOrganisation) {
-        const query = `SELECT IdFiche, Intitule FROM FichePoste WHERE IdOrganisation = ?;`;
+        const query = `
+            SELECT F.IdFiche, F.Intitule, F.StatutPoste, F.ResponsableHierarchique, F.TypeMetier, F.LieuMission, F.Rythme, F.Salaire, F.Description, F.IdOrganisation, O.Nom AS OrganisationNom
+            FROM FichePoste F
+                     JOIN Organisation O ON F.IdOrganisation = O.NumeroSiren
+            WHERE F.IdOrganisation = ?;
+        `;
         const [results] = await pool.query(query, [idOrganisation]);
         return results;
     },
@@ -57,6 +64,30 @@ const FichePoste = {
         const query = `SELECT COUNT(*) FROM FichePoste WHERE IdFiche = ? AND IdOrganisation = ?`;
         const [results] = await pool.query(query, [idFiche, idOrganisationRecruteur]);
         return results[0]['COUNT(*)'] > 0;
+    },
+
+    async hasDependents(idFiche) {
+        return await OffreEmploi.countByFiche(idFiche) > 0;
+    },
+
+    async deleteWithDependents(idFiche) {
+        try {
+            await pool.query('START TRANSACTION');
+            await OffreEmploi.deleteByFiche(idFiche);
+            await pool.query(`DELETE FROM FichePoste WHERE IdFiche = ?`, [idFiche]);
+            await pool.query('COMMIT');
+            logger.info(`Suppression de la fiche ${idFiche} réussie.`);
+        } catch (error) {
+            await pool.query('ROLLBACK');
+            logger.error(`Erreur lors de la suppression de la fiche ${idFiche}: ${error.message}`);
+            throw error;
+        }
+    },
+
+    async listFichesForOrganization(idOrganisation) {
+        const query = `SELECT IdFiche, Intitule FROM FichePoste WHERE IdOrganisation = ?;`;
+        const [results] = await pool.query(query, [idOrganisation]);
+        return results;
     }
 };
 

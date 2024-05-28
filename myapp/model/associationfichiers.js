@@ -75,6 +75,11 @@ const AssociationFichiers = {
         await pool.query(query, [idCandidat, idOffre]);
     },
 
+    async deleteFilesByOffre(idOffre) {
+        const query = `DELETE FROM AssociationFichiers WHERE IdOffre = ?`;
+        await pool.query(query, [idOffre]);
+    },
+
     async readFichier(fichier) {
         // Possible grâce à la contrainte UNIQUE sur Fichier
         const query = `SELECT IdCandidat, IdOffre, NomOriginal FROM AssociationFichiers WHERE Fichier = ?;`;

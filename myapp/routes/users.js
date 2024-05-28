@@ -17,7 +17,7 @@ router.get('/userslist', isLoggedIn, isAdmin, readMessage, async (req, res, next
     const page = parseInt(req.query.page) || 1;
     const limit = 5; // Number of users per page
     const offset = (page - 1) * limit;
-
+    const placeholder = "Rechercher par email";
     try {
         const {users, totalUsers} = await userModel.readAllWithPagination(search, limit, offset);
         const totalPages = Math.ceil(totalUsers / limit);
@@ -28,7 +28,8 @@ router.get('/userslist', isLoggedIn, isAdmin, readMessage, async (req, res, next
             users: users || [],
             search,
             currentPage: page,
-            totalPages
+            totalPages,
+            placeholder
         });
     } catch (error) {
         logger.error(`Erreur lors de la récupération de la liste des utilisateurs : ${error}`);
@@ -154,8 +155,8 @@ router.post('/reset-password', isLoggedIn, isAdmin, async (req, res,next) => {
 // Route pour mettre à jour le mot de passe de l'utilisateur
 router.post('/update-password', isLoggedIn, [
     body('currentPassword', 'Votre mot de passe actuel est requis').notEmpty(),
-    body('newPassword', 'Le nouveau mot de passe doit contenir au moins 8 caractères, incluant une majuscule, une minuscule, un chiffre et un caractère spécial.')
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/),
+    body('newPassword', 'Le nouveau mot de passe doit contenir au moins 12 caractères, incluant une majuscule, une minuscule, un chiffre et un caractère spécial.')
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/),
     body('confirmPassword', 'Les mots de passe ne correspondent pas').custom((value, {req}) => value === req.body.newPassword)
 ], async (req, res,next) => {
     const errors = validationResult(req);

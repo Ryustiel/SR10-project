@@ -87,7 +87,29 @@ const Candidature = {
     async updateCandidateEmail(oldEmail, newEmail) {
         const query = `UPDATE AssociationFichiers SET IdCandidat = ? WHERE IdCandidat = ?;`;
         await pool.query(query, [newEmail, oldEmail]);
+    },
+
+    async deleteByOffre(idOffre) {
+        // Supprimer les fichiers associés
+        await AssociationFichiers.deleteFilesByOffre(idOffre);
+
+        // Supprimer les candidatures
+        const query = `DELETE FROM Candidature WHERE IdOffre = ?`;
+        await pool.query(query, [idOffre]);
+    },
+    async getApplicationsForOrganisation(idOrganisation) {
+        const query = `
+            SELECT O.IdOffre, C.IdCandidat, U.Nom, U.Prenom, F.Intitule, C.DateCandidature
+            FROM Candidature AS C
+            JOIN OffreEmploi AS O ON C.IdOffre = O.IdOffre
+            JOIN Utilisateur AS U ON C.IdCandidat = U.email
+            JOIN FichePoste AS F ON F.IdFiche = O.IdFiche
+            WHERE F.IdOrganisation = ?;
+        `;
+        const [results] = await pool.query(query, [idOrganisation]);
+        return results;
     }
+
 };
 
 module.exports = Candidature;

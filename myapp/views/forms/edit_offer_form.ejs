@@ -1,0 +1,25 @@
+<form action="/jobs/edit_offer" method="post">
+    <input type="hidden" name="idOffre" value="<%= offre.IdOffre %>">
+
+    <div class="mb-3">
+        <label for="dateValidité" class="form-label">Date de Validité</label>
+        <input type="date" class="form-control" id="dateValidité" name="dateValidité" value="<%= offre.DateValidite.toISOString().split('T')[0] %>" required>
+    </div>
+    <div class="mb-3">
+        <label for="listePieces" class="form-label">Liste des Pièces</label>
+        <input type="text" class="form-control" id="listePieces" name="listePieces" value="<%= offre.ListePieces %>" required>
+    </div>
+    <div class="mb-3">
+        <label for="nombrePieces" class="form-label">Nombre de Pièces</label>
+        <input type="number" class="form-control" id="nombrePieces" name="nombrePieces" value="<%= offre.NombrePieces %>" required>
+    </div>
+    <div class="mb-3">
+        <label for="idFiche" class="form-label">ID de la Fiche</label>
+        <select class="form-control" id="idFiche" name="idFiche" required>
+            <% fiches.forEach(function(fiche) { %>
+                <option value="<%= fiche.IdFiche %>" <%= fiche.IdFiche === offre.IdFiche ? 'selected' : '' %>><%= fiche.Intitule %></option>
+            <% }) %>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Mettre à Jour</button>
+</form>

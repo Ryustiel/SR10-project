@@ -1,0 +1,49 @@
+<%- include('../search_pagination.ejs', { search, currentPage, totalPages }) %>
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th>Nom</th>
+        <th>Prénom</th>
+        <th>Email</th>
+        <th>Téléphone</th>
+        <th>Date de Création</th>
+        <th>Statut du Compte</th>
+        <th>Type de Compte</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% users.forEach(function(user) { %>
+        <tr>
+            <td><%= user.Nom %></td>
+            <td><%= user.Prenom %></td>
+            <td><%= user.Email %></td>
+            <td><%= user.Telephone %></td>
+            <td><%= new Date(user.DateCreation).toLocaleDateString("fr-FR") %></td>
+            <td><%= user.StatutCompte %></td>
+            <td><%= user.TypeCompte %></td>
+            <td>
+                <form action="/users/profile" method="post" class="d-inline">
+                    <input type="hidden" name="userId" value="<%= user.Email %>">
+                    <button type="submit" class="btn btn-primary mb-2">Voir Profil</button>
+                </form>
+                <form action="/users/delete" method="post" class="d-inline">
+                    <input type="hidden" name="userId" value="<%= user.Email %>">
+                    <input type="hidden" name="search" value="<%= search %>">
+                    <input type="hidden" name="page" value="<%= currentPage %>">
+                    <button type="submit" class="btn btn-danger mb-2">Supprimer</button>
+                </form>
+                <% if (user.TypeCompte !== 'administrateur') { %>
+                    <form action="/users/make-admin" method="post" class="d-inline">
+                        <input type="hidden" name="userId" value="<%= user.Email %>">
+                        <input type="hidden" name="search" value="<%= search %>">
+                        <input type="hidden" name="page" value="<%= currentPage %>">
+                        <button type="submit" class="btn btn-warning mb-2">Promouvoir en Admin</button>
+                    </form>
+                <% } %>
+            </td>
+        </tr>
+    <% }); %>
+    </tbody>
+</table>
+<%- include('../pagination.ejs', { currentPage, totalPages, search }) %>

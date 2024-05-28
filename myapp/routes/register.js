@@ -23,8 +23,8 @@ router.post('/', [
     body('confirmEmail', 'Les emails ne correspondent pas')
         .custom((value, {req}) => value === req.body.email).trim().escape(),
     body('phone', 'Numéro de téléphone non valide').isMobilePhone('fr-FR'),
-    body('password', 'Le mot de passe doit contenir au moins 8 caractères, incluant une majuscule, une minuscule, un chiffre et un caractère spécial.')
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/).trim().escape(),
+    body('password', 'Le mot de passe doit contenir au moins 12 caractères, incluant une majuscule, une minuscule, un chiffre et un caractère spécial.')
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/).trim().escape(),
     body('confirmPassword', 'Les mots de passe ne correspondent pas')
         .custom((value, {req}) => value === req.body.password)
 ], async (req, res,next) => {

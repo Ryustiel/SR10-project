@@ -1,60 +1,54 @@
-<div class="container my-5">
-    <div class="row">
-        <div class="col-md-12">
-            <form action="/jobs/browse_offers" method="get" class="mb-4">
-                <!-- Formulaire de recherche et de filtrage -->
-                <div class="input-group mb-3">
-                    <input type="text" name="search" class="form-control" placeholder="Rechercher par intitulé" value="<%= search %>">
-                    <button type="submit" class="btn btn-primary">Rechercher</button>
-                </div>
-                <div class="input-group mb-3">
-                    <label class="input-group-text" for="sort">Trier par</label>
-                    <select name="sort" class="form-select">
-                        <option value="date" <%= sort === 'date' ? 'selected' : '' %>>Date</option>
-                        <option value="lieu" <%= sort === 'lieu' ? 'selected' : '' %>>Lieu</option>
-                        <option value="salaire" <%= sort === 'salaire' ? 'selected' : '' %>>Salaire</option>
-                    </select>
-                    <label class="input-group-text" for="typeMetier">Type de métier</label>
-                    <select name="typeMetier" class="form-select">
-                        <option value="">Tous les types de métier</option>
-                        <% typesMetier.forEach(function(type) { %>
-                            <option value="<%= type %>" <%= selectedTypeMetier === type ? 'selected' : '' %>><%= type %></option>
-                        <% }); %>
-                    </select>
-                </div>
-                <div class="input-group mb-3">
-                    <label class="input-group-text" for="minSalaire">Salaire min</label>
-                    <input type="number" name="minSalaire" class="form-control" placeholder="Salaire min" value="<%= minSalaire %>">
-                    <label class="input-group-text" for="maxSalaire">Salaire max</label>
-                    <input type="number" name="maxSalaire" class="form-control" placeholder="Salaire max" value="<%= maxSalaire %>">
-                    <button type="submit" class="btn btn-secondary">Filtrer</button>
-                </div>
-            </form>
-            <% if (offres.length === 0) { %>
-                <p>Aucune Offre d'emploi n'est disponible</p>
-            <% } else { %>
-                <% offres.forEach((offre) => { %>
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <h5 class="card-title"><%= offre.Intitule %></h5>
-                            <p class="card-text">Date de validité: <%= new Date(offre.DateValidite).toLocaleDateString("fr-FR") %></p>
-                            <input type="hidden" name="idOffre" value="<%= offre.IdOffre %>">
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal<%= offre.IdOffre %>">Voir les Détails</button>
-                        </div>
-                    </div>
-                    <%- include('../modal', {
-                    modalId: `modal${offre.IdOffre}`,
-                    modalLabelId: `modalLabel${offre.IdOffre}`,
-                    modalTitle: offre.Intitule,
-                    modalBody: 'jobs/offer_details',
-                    organisations: [],
-                    user: user,
-                    offre: offre,
-                    isCandidate: false // This will be updated dynamiquement
-                    }) %>
-                <% }); %>
-                <%- include('../pagination', { currentPage, totalPages, search, sort, selectedTypeMetier, minSalaire, maxSalaire }) %>
-            <% } %>
+<form action="/jobs/browse_offers" method="get" class="mb-4">
+    <!-- Formulaire de recherche et de filtrage -->
+    <div class="input-group mb-3">
+        <label class="input-group-text" for="sort">Trier par</label>
+        <select name="sort" class="form-select">
+            <option value="date" <%= sort === 'date' ? 'selected' : '' %>>Date</option>
+            <option value="lieu" <%= sort === 'lieu' ? 'selected' : '' %>>Lieu</option>
+            <option value="salaire" <%= sort === 'salaire' ? 'selected' : '' %>>Salaire</option>
+        </select>
+        <label class="input-group-text" for="typeMetier">Type de métier</label>
+        <select name="typeMetier" class="form-select">
+            <option value="">Tous les types de métier</option>
+            <% typesMetier.forEach(function(type) { %>
+                <option value="<%= type %>" <%= selectedTypeMetier === type ? 'selected' : '' %>><%= type %></option>
+            <% }); %>
+        </select>
+    </div>
+    <div class="input-group mb-3">
+        <label class="input-group-text" for="minSalaire">Salaire min</label>
+        <input type="number" name="minSalaire" class="form-control" placeholder="Salaire min" value="<%= minSalaire %>">
+        <label class="input-group-text" for="maxSalaire">Salaire max</label>
+        <input type="number" name="maxSalaire" class="form-control" placeholder="Salaire max" value="<%= maxSalaire %>">
+        <button type="submit" class="btn btn-secondary">Filtrer</button>
+    </div>
+</form>
+<% if (offres.length === 0) { %>
+    <div class="card">
+        <div class="card-body">
+            <p>Aucune Offre d'emploi n'est disponible</p>
         </div>
     </div>
-</div>
+<% } else { %>
+    <% offres.forEach((offre) => { %>
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title"><%= offre.Intitule %></h5>
+                <p class="card-text">Date de validité: <%= new Date(offre.DateValidite).toLocaleDateString("fr-FR") %></p>
+                <input type="hidden" name="idOffre" value="<%= offre.IdOffre %>">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal<%= offre.IdOffre %>">Voir les Détails</button>
+            </div>
+        </div>
+        <%- include('../modal', {
+        modalId: `modal${offre.IdOffre}`,
+        modalLabelId: `modalLabel${offre.IdOffre}`,
+        modalTitle: offre.Intitule,
+        modalBody: 'jobs/offer_details',
+        organisations: [],
+        user: user,
+        offre: offre,
+        isCandidate: false // This will be updated dynamiquement
+        }) %>
+    <% }); %>
+    <%- include('../pagination', { currentPage, totalPages, search, sort, selectedTypeMetier, minSalaire, maxSalaire }) %>
+<% } %>

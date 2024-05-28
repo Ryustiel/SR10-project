@@ -1,4 +1,6 @@
 const pool = require('./db');
+const Candidature = require('./candidature');
+const logger = require('../logger');
 const bcrypt = require('bcryptjs');
 
 const Utilisateur = {
@@ -48,12 +50,27 @@ const Utilisateur = {
         return this.read(email);
     },
 
-
     async delete(email) {
-        const query = `DELETE
-                       FROM Utilisateur
-                       WHERE Email = ?;`;
-        await pool.query(query, [email]);
+        const connection = await pool.query;
+        try {
+            await connection('START TRANSACTION');
+
+            // Lire toutes les candidatures de l'utilisateur
+            const candidatures = await Candidature.getApplicationsCandidat(email);
+            for (const candidature of candidatures) {
+                // Supprimer chaque candidature
+                await Candidature.delete(email, candidature.IdOffre);
+            }
+
+            // Supprimer l'utilisateur
+            const deleteUserQuery = `DELETE FROM Utilisateur WHERE Email = ?;`;
+            await connection(deleteUserQuery, [email]);
+
+            await connection('COMMIT');
+        } catch (error) {
+            await connection('ROLLBACK');
+            throw error;
+        }
     },
 
     async readall() {

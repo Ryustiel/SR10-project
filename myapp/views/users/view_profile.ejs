@@ -11,8 +11,8 @@
 <%- include("../navbar.ejs") %>
 <div class="container my-5">
     <%- include("../message.ejs") %>
-    <div class="row">
-        <div class="col-md-10 offset-md-1">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">Profil de <%= user.Prenom %> <%= user.Nom %></h2>
                 <% if (currentUserEmail === user.Email) { %>
@@ -41,8 +41,7 @@
                         <% } %>
                     </p>
                     <p class="card-text">
-                        <strong>Date de création
-                            :</strong> <%= new Date(user.DateCreation).toLocaleDateString("fr-FR") %>
+                        <strong>Date de création :</strong> <%= new Date(user.DateCreation).toLocaleDateString("fr-FR") %>
                     </p>
                     <p class="card-text">
                         <strong>Statut du Compte :</strong> <%= user.StatutCompte %>

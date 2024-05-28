@@ -1,30 +1,37 @@
 <% if (fiches.length === 0) { %>
-    <p>
-        Vous n'avez pas encore de fiche de poste.
-    </p>
-    <p>
-        Vous pouvez en créer une <a href="/jobs/add_job">ici</a>.
-    </p>
+    <p>Vous n'avez pas encore de fiche de poste.</p>
+    <p>Vous pouvez en créer une <a href="/jobs/add_job">ici</a>.</p>
 <% } %>
 
 <% fiches.forEach((fiche) => { %>
-
-    <div class="card">
+    <div class="card mb-3">
         <div class="card-body">
-            <h5 class="card-title"> <%= fiche.Intitule %> </h5>
+            <h5 class="card-title"><%= fiche.Intitule %></h5>
             <div class="btn-group" role="group">
-
                 <form method="post" action="/jobs/edit_job">
                     <input type="hidden" name="idFiche" value="<%= fiche.IdFiche %>">
                     <button type="submit" class="btn btn-primary">Editer</button>
                 </form>
-                <form method="post" action="/jobs/my_jobs">
-                    <input type="hidden" name="idFiche" value="<%= fiche.IdFiche %>">
-                    <button type="submit" class="btn btn-danger">Supprimer</button>
-                </form>
-
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#detailsModal<%= fiche.IdFiche %>">Détails</button>
+                <button type="button" class="btn btn-danger delete-button" data-id="<%= fiche.IdFiche %>">Supprimer</button>
             </div>
         </div>
     </div>
 
+    <!-- Modal pour les détails de la fiche de poste -->
+    <%- include('../modal', {
+    modalId: `detailsModal${fiche.IdFiche}`,
+    modalLabelId: `detailsModalLabel${fiche.IdFiche}`,
+    modalTitle: 'Détails de la Fiche de Poste',
+    modalBody: 'jobs/fiche_details.ejs',
+    fiche: fiche
+    }) %>
 <% }); %>
+
+<!-- Inclure le modal de confirmation de suppression -->
+<%- include('../modal', {
+modalId: 'deleteModal',
+modalLabelId: 'deleteModalLabel',
+modalTitle: 'Confirmation de suppression',
+modalBody: 'confirmation_body.ejs'
+}) %>

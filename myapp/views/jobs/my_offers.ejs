@@ -2,16 +2,17 @@
 <html lang="fr">
 <head>
     <%- include('../head.ejs') %>
-    <title>Connexion</title>
+    <title>Voir les Offres de l'Organisation</title>
 </head>
 <body>
 
 <%- include('../navbar.ejs') %>
 
 <div class="container mt-5">
-    <div class = "row">
+    <%- include('../message.ejs') %> <!-- Inclusion des messages -->
+    <div class="row">
         <div class="col-md-6 offset-md-3">
-            <h1>Mes Offres</h1>
+            <h1>Offres de mon Organisation</h1>
         </div>
     </div>
     <div class="row">
@@ -20,6 +21,6 @@
         </div>
     </div>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

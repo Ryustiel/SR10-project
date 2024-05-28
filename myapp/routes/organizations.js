@@ -237,6 +237,7 @@ router.get('/manage_requests', isLoggedIn, isAdmin, readMessage, async (req, res
     const page = parseInt(req.query.page) || 1;
     const limit = 10; // Number of requests per page
     const offset = (page - 1) * limit;
+    const placeholder = "Rechercher par email";
 
     logger.debug("Accès à la gestion des demandes...");
     try {
@@ -248,7 +249,8 @@ router.get('/manage_requests', isLoggedIn, isAdmin, readMessage, async (req, res
             search,
             currentPage: page,
             totalPages,
-            activePage: 'manage_requests'
+            activePage: 'manage_requests',
+            placeholder
         });
     } catch (error) {
         logger.error(`Erreur lors de la récupération des demandes de recrutement : ${error}`);

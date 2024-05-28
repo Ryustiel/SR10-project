@@ -2,14 +2,28 @@
 <html lang="fr">
 <head>
     <%- include('../head.ejs') %>
-    <title>Connexion</title>
+    <title>Fiches de Poste</title>
+    <style>
+        .btn-group > .btn:first-of-type {
+            border-top-left-radius: .25rem;
+            border-bottom-left-radius: .25rem;
+        }
+        .btn-group > .btn:last-of-type {
+            border-top-right-radius: .25rem;
+            border-bottom-right-radius: .25rem;
+        }
+        .btn {
+            border-radius: .25rem !important;
+        }
+    </style>
 </head>
 <body>
 
 <%- include('../navbar.ejs') %>
 
 <div class="container mt-5">
-    <div class = "row">
+    <%- include('../message.ejs') %> <!-- Inclusion des messages -->
+    <div class="row">
         <div class="col-md-6 offset-md-3">
             <h1>Fiches de Poste de Mon Organisation</h1>
         </div>
@@ -20,6 +34,51 @@
         </div>
     </div>
 </div>
+
+<!-- Inclure uniquement le JS de Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        const deleteButtons = document.querySelectorAll('.delete-button');
+        const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+        let ficheIdToDelete;
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                ficheIdToDelete = this.getAttribute('data-id');
+                fetch(`/jobs/check_dependents?idFiche=${ficheIdToDelete}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.hasDependents) {
+                            deleteModal.show();
+                        } else {
+                            submitDeletionForm(ficheIdToDelete);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+
+        confirmDeleteButton.addEventListener('click', function () {
+            submitDeletionForm(ficheIdToDelete);
+        });
+
+        function submitDeletionForm(idFiche) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/jobs/my_jobs';
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'idFiche';
+            input.value = idFiche;
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+</script>
 
 </body>
 </html>

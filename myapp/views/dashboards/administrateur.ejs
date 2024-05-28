@@ -10,8 +10,8 @@
 <%- include("../navbar.ejs") %>
 <div class="container my-5">
     <%- include("../message.ejs") %>
-    <div class="row">
-        <div class="col-md-10 offset-md-1">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="mb-0">Admin Dashboard</h1>
                 <a href="/logout" class="btn btn-danger">Se déconnecter</a>
@@ -23,8 +23,7 @@
                 <div class="card-body">
                     <p class="card-text"><strong>Email :</strong> <%= user.Email %></p>
                     <p class="card-text"><strong>Téléphone :</strong> <%= user.Telephone %></p>
-                    <p class="card-text"><strong>Date de création
-                            :</strong> <%= new Date(user.DateCreation).toLocaleDateString("fr-FR") %></p>
+                    <p class="card-text"><strong>Date de création :</strong> <%= new Date(user.DateCreation).toLocaleDateString("fr-FR") %></p>
                     <p class="card-text"><strong>Statut du Compte :</strong> <%= user.StatutCompte %></p>
                     <p class="card-text"><strong>Type de Compte :</strong> <%= user.TypeCompte %></p>
                     <p class="card-text"><strong>Organisation :</strong> <%= user.IdOrganisation %></p>

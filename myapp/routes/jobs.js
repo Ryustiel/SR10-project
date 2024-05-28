@@ -6,6 +6,7 @@ const {body, validationResult} = require('express-validator');
 const FichePoste = require('../model/ficheposte');
 const OffreEmploi = require('../model/offreemploi');
 const Candidature = require('../model/candidature');
+const Organisation = require('../model/organisation');
 
 const isLoggedIn = require('../middleware/isLoggedIn.js');
 const requireRecruitorStatus = require('../middleware/requireRecruitorStatus.js');
@@ -24,6 +25,7 @@ router.get('/browse_offers', isLoggedIn, readMessage, async function (req, res, 
     const offset = (page - 1) * limit;
     const excludeOrganisationId = req.session.userAffiliation;
     const userRole = req.session.userType;
+    const placeholder = "Rechercher par intitulé";
 
     try {
         const {
@@ -45,7 +47,8 @@ router.get('/browse_offers', isLoggedIn, readMessage, async function (req, res, 
             totalPages,
             typesMetier,
             user: req.session.userEmail,
-            userRole: userRole
+            userRole: userRole,
+            placeholder
         });
     } catch (error) {
         logger.error(`Erreur lors de la récupération des offres d'emploi: ${error.message}`, { stack: error.stack });
@@ -75,11 +78,11 @@ router.post('/view_offer', isLoggedIn, async function (req, res, next) {
 // Route to add offer (GET)
 router.get('/add_offer', requireAffiliation, readMessage, async function (req, res, next) {
     try {
-        const fiches = await FichePoste.list();
+        const fiches = await FichePoste.listFichesForOrganization(req.session.userAffiliation);
         logger.info("Fiches de poste récupérées avec succès.");
-        res.render('jobs/add_offer', {fiches});
+        res.render('jobs/add_offer', { fiches });
     } catch (error) {
-        logger.error(`Erreur lors de la récupération des fiches de poste: ${error.message}`, {stack: error.stack});
+        logger.error(`Erreur lors de la récupération des fiches de poste: ${error.message}`, { stack: error.stack });
         next(error);
     }
 });
@@ -88,9 +91,18 @@ router.get('/add_offer', requireAffiliation, readMessage, async function (req, r
 router.post('/add_offer', requireAffiliation, [
     body('dateValidité')
         .isISO8601()
-        .withMessage('Date de validité invalide. Utilisez le format jj/mm/aaaa ou aaaa/mm/jj'),
+        .withMessage('Date de validité invalide. Utilisez le format jj/mm/aaaa ou aaaa/mm/jj')
+        .custom((value) => {
+            const inputDate = new Date(value);
+            const currentDate = new Date();
+            // Comparer uniquement les dates (ignorer les heures)
+            if (inputDate.setHours(0,0,0,0) < currentDate.setHours(0,0,0,0)) {
+                throw new Error('La date de validité doit être postérieure ou égale à la date actuelle.');
+            }
+            return true;
+        }),
     body('listePieces').notEmpty().withMessage('Liste des pièces requises'),
-    body('nombrePieces').isInt({min: 1}).withMessage('Nombre de pièces doit être un entier positif'),
+    body('nombrePieces').isInt({ min: 1 }).withMessage('Nombre de pièces doit être un entier positif'),
     body('idFiche').notEmpty().withMessage('ID de la fiche requis')
 ], async function (req, res, next) {
     const errors = validationResult(req);
@@ -101,7 +113,7 @@ router.post('/add_offer', requireAffiliation, [
     }
 
     try {
-        const {dateValidité, listePieces, nombrePieces, idFiche} = req.body;
+        const { dateValidité, listePieces, nombrePieces, idFiche } = req.body;
         const idRecruteur = req.session.userEmail;
         const etat = "non publié";
 
@@ -129,7 +141,7 @@ router.post('/add_offer', requireAffiliation, [
 
         res.redirect('/jobs/add_offer');
     } catch (error) {
-        logger.error(`Erreur lors de l'ajout de l'offre d'emploi: ${error.message}`, {stack: error.stack});
+        logger.error(`Erreur lors de l'ajout de l'offre d'emploi: ${error.message}`, { stack: error.stack });
         next(error);
     }
 });
@@ -193,12 +205,28 @@ router.post('/add_job', requireAffiliation, [
 
 // Route to list user's offers (GET)
 router.get('/my_offers', requireRecruitorStatus, readMessage, async function (req, res, next) {
+    const search = req.query.search || '';
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10; // Number of offers per page
+    const offset = (page - 1) * limit;
+    const idOrganisation = req.session.userAffiliation;
+    const placeholder = "Rechercher par intitulé";
+
     try {
-        const offers = await OffreEmploi.listRecruitorsOffers(req.session.userEmail);
-        logger.info(`Offres de l'utilisateur ${req.session.userEmail} récupérées avec succès.`);
-        res.render('jobs/my_offers', {offers});
+        const offers = await OffreEmploi.listOffersForOrganisation(idOrganisation, search, limit, offset);
+        const totalOffers = await OffreEmploi.countOffersForOrganisation(idOrganisation, search);
+        const totalPages = Math.ceil(totalOffers / limit);
+
+        logger.info(`Offres de l'organisation ${idOrganisation} récupérées avec succès.`);
+        res.render('jobs/my_offers', {
+            offers,
+            search,
+            currentPage: page,
+            totalPages,
+            placeholder // Pass the placeholder to the view
+        });
     } catch (error) {
-        logger.error(`Erreur lors de la récupération des offres de l'utilisateur: ${error.message}`, {stack: error.stack});
+        logger.error(`Erreur lors de la récupération des offres de l'organisation: ${error.message}`, { stack: error.stack });
         next(error);
     }
 });
@@ -218,7 +246,7 @@ router.post('/my_offers', requireAffiliation, [
     try {
         const {idOffre, action} = req.body;
 
-        if (!await OffreEmploi.isUserLegitimate(idOffre, req.session.userEmail)) {
+        if (!await OffreEmploi.isUserInOrganisation(idOffre, req.session.userEmail)) {
             req.session.message = "Vous n'avez pas les droits pour gérer cette offre.";
             req.session.messageType = 'error';
             return res.redirect('/dashboard');
@@ -248,9 +276,9 @@ router.get('/my_jobs', requireAffiliation, readMessage, async function (req, res
     try {
         const fiches = await FichePoste.listFiches(req.session.userAffiliation);
         logger.info(`Fiches de l'organisation ${req.session.userAffiliation} récupérées avec succès.`);
-        res.render('jobs/my_jobs', {fiches});
+        res.render('jobs/my_jobs', { fiches });
     } catch (error) {
-        logger.error(`Erreur lors de la récupération des fiches de l'organisation: ${error.message}`, {stack: error.stack});
+        logger.error(`Erreur lors de la récupération des fiches de l'organisation: ${error.message}`, { stack: error.stack });
         next(error);
     }
 });
@@ -267,7 +295,8 @@ router.post('/my_jobs', requireAffiliation, [
     }
 
     try {
-        const {idFiche} = req.body;
+        const { idFiche } = req.body;
+        logger.info(`ID de la fiche reçu: ${idFiche}`);
 
         if (!await FichePoste.isUserLegitimate(idFiche, req.session.userAffiliation)) {
             req.session.message = "Vous n'avez pas les droits pour gérer cette fiche.";
@@ -275,9 +304,16 @@ router.post('/my_jobs', requireAffiliation, [
             return res.redirect('/dashboard');
         }
 
-        await FichePoste.delete(idFiche);
-        req.session.message = 'La fiche a été supprimée avec succès.';
-        req.session.messageType = 'notification';
+        const hasDependents = await FichePoste.hasDependents(idFiche);
+        if (hasDependents) {
+            await FichePoste.deleteWithDependents(idFiche);
+            req.session.message = "La fiche et ses dépendances ont été supprimées avec succès.";
+            req.session.messageType = 'notification';
+        } else {
+            await FichePoste.delete(idFiche);
+            req.session.message = 'La fiche a été supprimée avec succès.';
+            req.session.messageType = 'notification';
+        }
         res.redirect('/jobs/my_jobs');
     } catch (error) {
         logger.error(`Erreur lors de la suppression de la fiche: ${error.message}`, { stack: error.stack });
@@ -288,6 +324,87 @@ router.post('/my_jobs', requireAffiliation, [
 // Route to apply for a job (GET)
 router.get('/apply', readMessage, function (req, res) {
     res.render('jobs/apply');
+});
+
+// Route to check if a fiche has dependent offers
+router.get('/check_dependents', async function (req, res, next) {
+    try {
+        const { idFiche } = req.query;
+        const hasDependents = await FichePoste.hasDependents(idFiche);
+        res.json({ hasDependents });
+    } catch (error) {
+        logger.error(`Erreur lors de la vérification des dépendances: ${error.message}`, { stack: error.stack });
+        next(error);
+    }
+});
+
+// Route to edit offer (GET)
+router.get('/edit_offer', requireAffiliation, readMessage, async function (req, res, next) {
+    try {
+        const { idOffre } = req.query;
+        if (!idOffre) {
+            req.session.message = 'ID de l\'offre requis.';
+            req.session.messageType = 'error';
+            return res.redirect('/jobs/my_offers');
+        }
+
+        const offre = await OffreEmploi.read(idOffre);
+        const fiches = await FichePoste.listFichesForOrganization(req.session.userAffiliation);
+        logger.info(`Détails de l'offre ${idOffre} récupérés avec succès.`);
+        res.render('jobs/edit_offer', { offre, fiches });
+    } catch (error) {
+        logger.error(`Erreur lors de la récupération de l'offre: ${error.message}`, { stack: error.stack });
+        next(error);
+    }
+});
+
+// Route to edit offer (POST)
+router.post('/edit_offer', requireAffiliation, [
+    body('idOffre').notEmpty().withMessage("ID de l'offre requis"),
+    body('dateValidité')
+        .isISO8601()
+        .withMessage('Date de validité invalide. Utilisez le format jj/mm/aaaa ou aaaa/mm/jj')
+        .custom((value) => {
+            const inputDate = new Date(value);
+            const currentDate = new Date();
+            if (inputDate.setHours(0, 0, 0, 0) < currentDate.setHours(0, 0, 0, 0)) {
+                throw new Error('La date de validité doit être postérieure ou égale à la date actuelle.');
+            }
+            return true;
+        }),
+    body('listePieces').notEmpty().withMessage('Liste des pièces requises'),
+    body('nombrePieces').isInt({ min: 1 }).withMessage('Nombre de pièces doit être un entier positif'),
+    body('idFiche').notEmpty().withMessage('ID de la fiche requis')
+], async function (req, res, next) {
+    const errors = validationResult(req);
+    const { idOffre } = req.body;
+
+    if (!errors.isEmpty()) {
+        req.session.message = errors.array().map(e => e.msg).join(', ');
+        req.session.messageType = 'error';
+        return res.redirect(`/jobs/edit_offer?idOffre=${idOffre}`);
+    }
+
+    try {
+        const { dateValidité, listePieces, nombrePieces, idFiche } = req.body;
+
+        const fields = {
+            DateValidite: new Date(dateValidité).toISOString().split('T')[0],
+            ListePieces: listePieces,
+            NombrePieces: parseInt(nombrePieces, 10),
+            IdFiche: idFiche
+        };
+
+        await OffreEmploi.update(idOffre, fields);
+
+        req.session.message = "L'offre d'emploi a été mise à jour avec succès.";
+        req.session.messageType = 'notification';
+        res.redirect('/jobs/my_offers');
+    } catch (error) {
+        logger.error(`Erreur lors de la mise à jour de l'offre d'emploi: ${error.message}`);
+        error.status = 500;
+        next(error);
+    }
 });
 
 module.exports = router;

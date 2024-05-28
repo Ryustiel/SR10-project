@@ -2,29 +2,34 @@
     <p>
         Aucune candidature n'a été envoyée pour le moment.
     </p>
-<% } %>
-
-<% candidatures.forEach((candidature) => { %>
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title"> <%= candidature.Prenom %> <%= candidature.Nom %> pour <%= candidature.Intitule %> </h5>
-            <p class="card-text"> le <%= candidature.DateCandidature %> </p>
-            <div class="btn-group" role="group">
-                <form method="POST" action="/users/profile">
-                    <input type="hidden" name="userId" value="<%= candidature.IdCandidat %>">
-                    <button type="submit" class="btn btn-primary">Voir le Profil</button>
-                </form>
-                <form method="POST" action="/applications/attachments">
-                    <input type="hidden" name="idCandidat" value="<%= candidature.IdCandidat %>">
-                    <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
-                    <button type="submit" class="btn btn-success">Consulter les Pièces</button>
-                </form>
-                <form method="POST" action="/applications/cancel-application">
-                    <input type="hidden" name="idCandidat" value="<%= candidature.IdCandidat %>">
-                    <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
-                    <button type="submit" class="btn btn-danger">Refuser</button>
-                </form>
+<% } else { %>
+    <% candidatures.forEach((candidature) => { %>
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title"><%= candidature.Prenom %> <%= candidature.Nom %> pour <%= candidature.Intitule %> </h5>
+                <p class="card-text"> le <%= new Date(candidature.DateCandidature).toLocaleDateString("fr-FR") %> </p>
+                <div class="btn-group" role="group">
+                    <form method="POST" action="/users/profile">
+                        <input type="hidden" name="userId" value="<%= candidature.IdCandidat %>">
+                        <button type="submit" class="btn btn-primary">Voir le Profil</button>
+                    </form>
+                    <form method="POST" action="/applications/attachments">
+                        <input type="hidden" name="idCandidat" value="<%= candidature.IdCandidat %>">
+                        <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
+                        <button type="submit" class="btn btn-success">Consulter les Pièces</button>
+                    </form>
+                    <form method="POST" action="/applications/cancel-application">
+                        <input type="hidden" name="idCandidat" value="<%= candidature.IdCandidat %>">
+                        <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
+                        <button type="submit" class="btn btn-danger">Refuser</button>
+                    </form>
+                    <form method="POST" action="/applications/download-candidate-folder">
+                        <input type="hidden" name="idCandidat" value="<%= candidature.IdCandidat %>">
+                        <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
+                        <button type="submit" class="btn btn-info">Télécharger le Dossier</button>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
-<% }) %>
+    <% }); %>
+<% } %>

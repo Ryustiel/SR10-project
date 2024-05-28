@@ -1,0 +1,46 @@
+<%- include('../search_pagination.ejs', { search, currentPage, totalPages }) %>
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th>Nom</th>
+        <th>Prénom</th>
+        <th>Email</th>
+        <th>Organisation</th>
+        <th>Statut de l'Organisation</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% requests.forEach(function(request) { %>
+        <tr>
+            <td><%= request.Nom %></td>
+            <td><%= request.Prenom %></td>
+            <td><%= request.Email %></td>
+            <td><%= request.OrganisationNom %> (<%= request.IdOrganisation %>)</td>
+            <td>
+                <% if (request.StatutOrganisation === 'en attente') { %>
+                    Nouvelle organisation
+                <% } else { %>
+                    Organisation approuvée
+                <% } %>
+            </td>
+            <td>
+                <form action="/organizations/accept_request" method="post" class="d-inline">
+                    <input type="hidden" name="email" value="<%= request.Email %>">
+                    <input type="hidden" name="organisationNumber" value="<%= request.IdOrganisation %>">
+                    <input type="hidden" name="search" value="<%= search %>">
+                    <input type="hidden" name="page" value="<%= currentPage %>">
+                    <button type="submit" class="btn btn-success">Accepter</button>
+                </form>
+                <form action="/organizations/reject_request" method="post" class="d-inline">
+                    <input type="hidden" name="email" value="<%= request.Email %>">
+                    <input type="hidden" name="search" value="<%= search %>">
+                    <input type="hidden" name="page" value="<%= currentPage %>">
+                    <button type="submit" class="btn btn-danger">Refuser</button>
+                </form>
+            </td>
+        </tr>
+    <% }); %>
+    </tbody>
+</table>
+<%- include('../pagination.ejs', { currentPage, totalPages, search }) %>

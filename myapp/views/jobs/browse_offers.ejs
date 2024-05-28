@@ -5,20 +5,32 @@
     <title>Offres d'Emploi</title>
 </head>
 <body>
-
 <%- include('../navbar.ejs') %>
-
 <%- include('../message.ejs') %>
 
 <div class="container mt-5">
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
             <h1>Parcourir les Offres</h1>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <%- include('../listings/browse_offers.ejs', { offres, search, sort, selectedTypeMetier, minSalaire, maxSalaire, currentPage, totalPages, typesMetier, user, userRole }) %>
+            <!-- Include the search form partial view -->
+            <%- include('../search_pagination', {
+            action: '/jobs/browse_offers',
+            placeholder: 'Rechercher par intitulé',
+            search: search
+            }) %>
+            <%- include('../listings/browse_offers.ejs', {
+            offres,
+            search,
+            sort,
+            selectedTypeMetier,
+            minSalaire,
+            maxSalaire,
+            currentPage,
+            totalPages,
+            typesMetier,
+            user,
+            userRole
+            }) %>
         </div>
     </div>
 </div>

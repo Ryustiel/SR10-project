@@ -2,21 +2,16 @@
 <html lang="fr">
 <head>
     <%- include('../head.ejs') %>
-    <title>Candidatures Reçues</title>
+    <title>Modifier l'Offre</title>
 </head>
 <body>
 <%- include('../navbar.ejs') %>
-<%- include('../message.ejs') %>
-
 <div class="container mt-5">
+    <%- include('../message.ejs') %>
     <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <h1>Candidatures Reçues</h1>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <%- include('../listings/incoming_applications.ejs') %>
+        <div class="col-md-8 offset-md-2">
+            <h1>Éditer l'Offre d'Emploi</h1>
+            <%- include('../forms/edit_offer_form', { offre, fiches }) %>
         </div>
     </div>
 </div>

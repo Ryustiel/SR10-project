@@ -1,4 +1,5 @@
 const pool = require('./db');
+const Candidature = require('./candidature');
 const logger = require('../logger.js');
 
 const OffreEmploi = {
@@ -47,16 +48,16 @@ const OffreEmploi = {
         `;
         values.push(id);
 
-        logger.info(`Executing query: ${query}`);
-        logger.info(`With values: ${JSON.stringify(values)}`);
-
         await pool.query(query, values);
         return this.read(id);
     },
 
-    async delete(id) {
-        const query = `DELETE FROM OffreEmploi WHERE IdOffre = ?;`;
-        await pool.query(query, [id]);
+    async delete(idOffre) {
+        // Suppression des candidatures associées
+        await Candidature.deleteByOffre(idOffre);
+
+        const query = `DELETE FROM OffreEmploi WHERE IdOffre = ?`;
+        await pool.query(query, [idOffre]);
     },
 
     async readall() {
@@ -155,16 +156,17 @@ const OffreEmploi = {
 
     async browseOffers(search, sort, typeMetier, minSalaire, maxSalaire, limit, offset, excludeOrganisationId, userRole) {
         let query = `
-            SELECT IdOffre, Intitule, Description, StatutPoste, ResponsableHierarchique, 
-                   TypeMetier, LieuMission, Rythme, Salaire, DateValidite, ListePieces, 
-                   NombrePieces, F.IdOrganisation 
-            FROM OffreEmploi AS O 
-            JOIN FichePoste AS F 
-            ON O.IdFiche = F.IdFiche
-            WHERE Etat = 'publié' 
-            AND Intitule LIKE ? 
-            AND Salaire BETWEEN ? AND ?
-        `;
+        SELECT IdOffre, Intitule, Description, StatutPoste, ResponsableHierarchique, 
+               TypeMetier, LieuMission, Rythme, Salaire, DateValidite, ListePieces, 
+               NombrePieces, F.IdOrganisation 
+        FROM OffreEmploi AS O 
+        JOIN FichePoste AS F 
+        ON O.IdFiche = F.IdFiche
+        WHERE Etat = 'publié' 
+        AND Intitule LIKE ? 
+        AND Salaire BETWEEN ? AND ?
+        AND DateValidite >= CURDATE()
+    `;
         let values = [`%${search}%`, minSalaire, maxSalaire];
 
         if (typeMetier) {
@@ -191,14 +193,15 @@ const OffreEmploi = {
         const [offres] = await pool.query(query, values);
 
         let countQuery = `
-            SELECT COUNT(*) as totalOffres 
-            FROM OffreEmploi AS O 
-            JOIN FichePoste AS F 
-            ON O.IdFiche = F.IdFiche
-            WHERE Etat = 'publié' 
-            AND Intitule LIKE ? 
-            AND Salaire BETWEEN ? AND ?
-        `;
+        SELECT COUNT(*) as totalOffres 
+        FROM OffreEmploi AS O 
+        JOIN FichePoste AS F 
+        ON O.IdFiche = F.IdFiche
+        WHERE Etat = 'publié' 
+        AND Intitule LIKE ? 
+        AND Salaire BETWEEN ? AND ?
+        AND DateValidite >= CURDATE()
+    `;
         let countValues = [`%${search}%`, minSalaire, maxSalaire];
 
         if (typeMetier) {
@@ -221,6 +224,79 @@ const OffreEmploi = {
                        FROM FichePoste`;
         const [results] = await pool.query(query);
         return results.map(row => row.TypeMetier);
+    },
+
+    async readWithFichePosteAndOrganisation(idOffre) {
+        const query = `
+            SELECT O.IdOffre, O.Etat, O.DateValidite, O.ListePieces, O.NombrePieces, 
+                   F.Intitule, F.Description, F.StatutPoste, F.ResponsableHierarchique, 
+                   F.TypeMetier, F.LieuMission, F.Rythme, F.Salaire, 
+                   Org.Nom AS OrganisationNom
+            FROM OffreEmploi AS O
+            JOIN FichePoste AS F ON O.IdFiche = F.IdFiche
+            JOIN Organisation AS Org ON F.IdOrganisation = Org.NumeroSiren
+            WHERE O.IdOffre = ?;
+        `;
+        const [results] = await pool.query(query, [idOffre]);
+        return results[0];
+    },
+
+    async countByFiche(idFiche) {
+        const query = `SELECT COUNT(*) as count FROM OffreEmploi WHERE IdFiche = ?`;
+        const [results] = await pool.query(query, [idFiche]);
+        return results[0].count;
+    },
+
+    async deleteByFiche(idFiche) {
+        // Récupérer toutes les offres d'emploi associées à la fiche
+        const [offres] = await pool.query(`SELECT IdOffre FROM OffreEmploi WHERE IdFiche = ?`, [idFiche]);
+
+        // Pour chaque offre d'emploi, supprimer les candidatures associées
+        for (const offre of offres) {
+            await Candidature.deleteByOffre(offre.IdOffre);
+        }
+
+        // Ensuite, supprimer les offres d'emploi
+        const query = `DELETE FROM OffreEmploi WHERE IdFiche = ?`;
+        await pool.query(query, [idFiche]);
+    },
+
+    async listOffersForOrganisation(idOrganisation, search, limit, offset) {
+        const query = `
+            SELECT O.IdOffre, F.Intitule, O.DateValidite, O.Etat 
+            FROM OffreEmploi AS O
+            JOIN FichePoste AS F ON O.IdFiche = F.IdFiche
+            WHERE F.IdOrganisation = ? AND F.Intitule LIKE ?
+            LIMIT ? OFFSET ?;
+        `;
+        const values = [idOrganisation, `%${search}%`, limit, offset];
+        const [results] = await pool.query(query, values);
+        return results;
+    },
+
+    async countOffersForOrganisation(idOrganisation, search) {
+        const query = `
+            SELECT COUNT(*) as totalOffers 
+            FROM OffreEmploi AS O
+            JOIN FichePoste AS F ON O.IdFiche = F.IdFiche
+            WHERE F.IdOrganisation = ? AND F.Intitule LIKE ?;
+        `;
+        const values = [idOrganisation, `%${search}%`];
+        const [[{ totalOffers }]] = await pool.query(query, values);
+        return totalOffers;
+    },
+
+    async isUserInOrganisation(idOffre, userEmail) {
+        const query = `
+            SELECT COUNT(*) FROM OffreEmploi AS O
+            JOIN FichePoste AS F ON O.IdFiche = F.IdFiche
+            JOIN Organisation AS Org ON F.IdOrganisation = Org.NumeroSiren
+            JOIN Utilisateur AS U ON Org.NumeroSiren = U.IdOrganisation
+            WHERE O.IdOffre = ? AND U.Email = ?;
+        `;
+        const [results] = await pool.query(query, [idOffre, userEmail]);
+        logger.info(`isUserInOrganisation : ${idOffre} ${userEmail} ${results[0]['COUNT(*)']}`);
+        return results[0]['COUNT(*)'] > 0;
     },
 };
 
