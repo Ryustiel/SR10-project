@@ -273,10 +273,32 @@ router.post('/my_offers', requireAffiliation, [
 
 // Route to list user's jobs (GET)
 router.get('/my_jobs', requireAffiliation, readMessage, async function (req, res, next) {
+    const search = req.query.search || '';
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10; // Nombre de fiches par page
+    const offset = (page - 1) * limit;
+    const idOrganisation = req.session.userAffiliation;
+    const placeholder = "Rechercher par intitulé";
+
     try {
-        const fiches = await FichePoste.listFiches(req.session.userAffiliation);
-        logger.info(`Fiches de l'organisation ${req.session.userAffiliation} récupérées avec succès.`);
-        res.render('jobs/my_jobs', { fiches });
+        const fiches = await FichePoste.listFichesWithPaginationAndSearch(idOrganisation, search, limit, offset);
+        const totalFiches = await FichePoste.countFichesWithSearch(idOrganisation, search);
+        const totalPages = Math.ceil(totalFiches / limit);
+
+        // Ajout des détails de l'organisation pour chaque fiche
+        for (let fiche of fiches) {
+            const organisation = await Organisation.read(fiche.IdOrganisation);
+            fiche.OrganisationNom = organisation.Nom;
+        }
+
+        logger.info(`Fiches de l'organisation ${idOrganisation} récupérées avec succès.`);
+        res.render('jobs/my_jobs', {
+            fiches,
+            search,
+            currentPage: page,
+            totalPages,
+            placeholder
+        });
     } catch (error) {
         logger.error(`Erreur lors de la récupération des fiches de l'organisation: ${error.message}`, { stack: error.stack });
         next(error);
@@ -339,6 +361,13 @@ router.get('/check_dependents', async function (req, res, next) {
 });
 
 // Route to edit offer (GET)
+function formatDateToLocalISOString(date) {
+    const offset = date.getTimezoneOffset();
+    const adjustedDate = new Date(date.getTime() - (offset * 60 * 1000));
+    return adjustedDate.toISOString().split('T')[0];
+}
+
+// Route to edit offer (GET)
 router.get('/edit_offer', requireAffiliation, readMessage, async function (req, res, next) {
     try {
         const { idOffre } = req.query;
@@ -350,7 +379,12 @@ router.get('/edit_offer', requireAffiliation, readMessage, async function (req, 
 
         const offre = await OffreEmploi.read(idOffre);
         const fiches = await FichePoste.listFichesForOrganization(req.session.userAffiliation);
+
+        // Format the DateValidite to YYYY-MM-DD in local time
+        offre.DateValiditeFormatted = formatDateToLocalISOString(new Date(offre.DateValidite));
+
         logger.info(`Détails de l'offre ${idOffre} récupérés avec succès.`);
+        logger.info("DateValidite: " + offre.DateValidite);
         res.render('jobs/edit_offer', { offre, fiches });
     } catch (error) {
         logger.error(`Erreur lors de la récupération de l'offre: ${error.message}`, { stack: error.stack });
@@ -402,6 +436,86 @@ router.post('/edit_offer', requireAffiliation, [
         res.redirect('/jobs/my_offers');
     } catch (error) {
         logger.error(`Erreur lors de la mise à jour de l'offre d'emploi: ${error.message}`);
+        error.status = 500;
+        next(error);
+    }
+});
+
+// Route pour editer les fiches de postes (GET)
+router.get('/edit_job', requireAffiliation, readMessage, async function (req, res, next) {
+    try {
+        const { idFiche } = req.query;
+        if (!idFiche) {
+            req.session.message = 'ID de la fiche requis.';
+            req.session.messageType = 'error';
+            return res.redirect('/jobs/my_jobs');
+        }
+
+        const fiche = await FichePoste.read(idFiche);
+        const organisations = await Organisation.readall();
+
+        logger.info(`Détails de la fiche ${idFiche} récupérés avec succès.`);
+        res.render('jobs/edit_job', { fiche, organisations });
+    } catch (error) {
+        logger.error(`Erreur lors de la récupération de la fiche: ${error.message}`, { stack: error.stack });
+        next(error);
+    }
+});
+
+// Route pour la mise à jour d'une fiche de poste (POST)
+router.post('/edit_job', requireAffiliation, [
+    body('idFiche').notEmpty().withMessage("ID de la fiche requis"),
+    body('intitule').notEmpty().withMessage('Intitulé requis'),
+    body('statutPoste').notEmpty().withMessage('Statut du poste requis'),
+    body('responsableHierarchique').notEmpty().withMessage('Responsable hiérarchique requis'),
+    body('typeMetier').notEmpty().withMessage('Type de métier requis'),
+    body('lieuMission').notEmpty().withMessage('Lieu de mission requis'),
+    body('rythme').notEmpty().withMessage('Rythme requis'),
+    body('salaire').isFloat({ min: 0 }).withMessage('Salaire doit être un nombre positif'),
+    body('description').notEmpty().withMessage('Description requise'),
+    body('idOrganisation').notEmpty().withMessage('ID de l\'organisation requis')
+], async function (req, res, next) {
+    const errors = validationResult(req);
+    const { idFiche } = req.body;
+
+    if (!errors.isEmpty()) {
+        req.session.message = errors.array().map(e => e.msg).join(', ');
+        req.session.messageType = 'error';
+        return res.redirect(`/jobs/edit_job?idFiche=${idFiche}`);
+    }
+
+    try {
+        const {
+            intitule,
+            statutPoste,
+            responsableHierarchique,
+            typeMetier,
+            lieuMission,
+            rythme,
+            salaire,
+            description,
+            idOrganisation
+        } = req.body;
+
+        const fields = {
+            intitule,
+            statutPoste,
+            responsableHierarchique,
+            typeMetier,
+            lieuMission,
+            rythme,
+            salaire,
+            description,
+            idOrganisation
+        };
+
+        await FichePoste.update(idFiche, fields);
+
+        req.session.message = "La fiche de poste a été mise à jour avec succès.";
+        req.session.messageType = 'notification';
+        res.redirect('/jobs/my_jobs');
+    } catch (error) {
+        logger.error(`Erreur lors de la mise à jour de la fiche de poste: ${error.message}`);
         error.status = 500;
         next(error);
     }

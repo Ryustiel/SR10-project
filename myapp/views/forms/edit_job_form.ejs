@@ -1,0 +1,45 @@
+<form action="/jobs/edit_job" method="post">
+    <input type="hidden" name="idFiche" value="<%= fiche.IdFiche %>">
+
+    <div class="mb-3">
+        <label for="intitule" class="form-label">Intitulé</label>
+        <input type="text" class="form-control" id="intitule" name="intitule" value="<%= fiche.Intitule %>" required>
+    </div>
+    <div class="mb-3">
+        <label for="statutPoste" class="form-label">Statut du Poste</label>
+        <input type="text" class="form-control" id="statutPoste" name="statutPoste" value="<%= fiche.StatutPoste %>" required>
+    </div>
+    <div class="mb-3">
+        <label for="responsableHierarchique" class="form-label">Responsable Hiérarchique</label>
+        <input type="text" class="form-control" id="responsableHierarchique" name="responsableHierarchique" value="<%= fiche.ResponsableHierarchique %>" required>
+    </div>
+    <div class="mb-3">
+        <label for="typeMetier" class="form-label">Type de Métier</label>
+        <input type="text" class="form-control" id="typeMetier" name="typeMetier" value="<%= fiche.TypeMetier %>" required>
+    </div>
+    <div class="mb-3">
+        <label for="lieuMission" class="form-label">Lieu de Mission</label>
+        <input type="text" class="form-control" id="lieuMission" name="lieuMission" value="<%= fiche.LieuMission %>" required>
+    </div>
+    <div class="mb-3">
+        <label for="rythme" class="form-label">Rythme</label>
+        <input type="text" class="form-control" id="rythme" name="rythme" value="<%= fiche.Rythme %>" required>
+    </div>
+    <div class="mb-3">
+        <label for="salaire" class="form-label">Salaire</label>
+        <input type="number" class="form-control" id="salaire" name="salaire" value="<%= fiche.Salaire %>" required>
+    </div>
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="4" required><%= fiche.Description %></textarea>
+    </div>
+    <div class="mb-3">
+        <label for="idOrganisation" class="form-label">Organisation</label>
+        <select class="form-control" id="idOrganisation" name="idOrganisation" required>
+            <% organisations.forEach(function(organisation) { %>
+                <option value="<%= organisation.NumeroSiren %>" <%= organisation.NumeroSiren === fiche.IdOrganisation ? 'selected' : '' %>><%= organisation.Nom %></option>
+            <% }) %>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Mettre à Jour</button>
+</form>

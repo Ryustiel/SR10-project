@@ -1,3 +1,5 @@
+<%- include('../search_pagination.ejs', { search, currentPage, totalPages }) %>
+
 <% if (fiches.length === 0) { %>
     <p>Vous n'avez pas encore de fiche de poste.</p>
     <p>Vous pouvez en créer une <a href="/jobs/add_job">ici</a>.</p>
@@ -8,7 +10,7 @@
         <div class="card-body">
             <h5 class="card-title"><%= fiche.Intitule %></h5>
             <div class="btn-group" role="group">
-                <form method="post" action="/jobs/edit_job">
+                <form method="get" action="/jobs/edit_job">
                     <input type="hidden" name="idFiche" value="<%= fiche.IdFiche %>">
                     <button type="submit" class="btn btn-primary">Editer</button>
                 </form>
@@ -28,10 +30,4 @@
     }) %>
 <% }); %>
 
-<!-- Inclure le modal de confirmation de suppression -->
-<%- include('../modal', {
-modalId: 'deleteModal',
-modalLabelId: 'deleteModalLabel',
-modalTitle: 'Confirmation de suppression',
-modalBody: 'confirmation_body.ejs'
-}) %>
+<%- include('../pagination.ejs', { currentPage, totalPages, search }) %>

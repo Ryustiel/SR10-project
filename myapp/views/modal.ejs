@@ -1,9 +1,9 @@
 <%
-// Définir des valeurs par défaut pour les arguments
 const defaultOrganisations = typeof organisations !== 'undefined' ? organisations : [];
 const defaultUser = typeof user !== 'undefined' ? user : {};
 const defaultOffre = typeof offre !== 'undefined' ? offre : {};
 const defaultIsCandidate = typeof isCandidate !== 'undefined' ? isCandidate : false;
+const defaultFiche = typeof fiche !== 'undefined' ? fiche : {};
 %>
 <div class="modal fade" id="<%= modalId %>" tabindex="-1" aria-labelledby="<%= modalLabelId %>" aria-hidden="true">
     <div class="modal-dialog">
@@ -13,7 +13,7 @@ const defaultIsCandidate = typeof isCandidate !== 'undefined' ? isCandidate : fa
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <%- include(modalBody, { organisations: defaultOrganisations, user: defaultUser, offre: defaultOffre, isCandidate: defaultIsCandidate }) %>
+                <%- include(modalBody, { organisations: defaultOrganisations, user: defaultUser, offre: defaultOffre, isCandidate: defaultIsCandidate, fiche: defaultFiche }) %>
             </div>
         </div>
     </div>

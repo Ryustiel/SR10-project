@@ -11,7 +11,6 @@ const FichePoste = {
         `;
         const values = [intitule, statutPoste, responsableHierarchique, typeMetier, lieuMission, rythme, salaire, description, idOrganisation];
         await pool.query(query, values);
-        // Assume it returns something meaningful
         return this.read(idOrganisation);
     },
 
@@ -23,7 +22,7 @@ const FichePoste = {
 
     async update(id, { intitule, statutPoste, responsableHierarchique, typeMetier, lieuMission, rythme, salaire, description, idOrganisation }) {
         const query = `
-            UPDATE FichePoste 
+            UPDATE FichePoste
             SET Intitule = ?, StatutPoste = ?, ResponsableHierarchique = ?, TypeMetier = ?, LieuMission = ?, Rythme = ?, Salaire = ?, Description = ?, IdOrganisation = ?
             WHERE IdFiche = ?;
         `;
@@ -53,7 +52,7 @@ const FichePoste = {
         const query = `
             SELECT F.IdFiche, F.Intitule, F.StatutPoste, F.ResponsableHierarchique, F.TypeMetier, F.LieuMission, F.Rythme, F.Salaire, F.Description, F.IdOrganisation, O.Nom AS OrganisationNom
             FROM FichePoste F
-                     JOIN Organisation O ON F.IdOrganisation = O.NumeroSiren
+            JOIN Organisation O ON F.IdOrganisation = O.NumeroSiren
             WHERE F.IdOrganisation = ?;
         `;
         const [results] = await pool.query(query, [idOrganisation]);
@@ -88,6 +87,29 @@ const FichePoste = {
         const query = `SELECT IdFiche, Intitule FROM FichePoste WHERE IdOrganisation = ?;`;
         const [results] = await pool.query(query, [idOrganisation]);
         return results;
+    },
+
+    async listFichesWithPaginationAndSearch(idOrganisation, search, limit, offset) {
+        const query = `
+        SELECT F.IdFiche, F.Intitule, F.StatutPoste, F.ResponsableHierarchique, F.TypeMetier, F.LieuMission, F.Rythme, F.Salaire, F.Description, F.IdOrganisation
+        FROM FichePoste F
+        WHERE F.IdOrganisation = ?
+        AND F.Intitule LIKE ?
+        LIMIT ? OFFSET ?;
+    `;
+        const [results] = await pool.query(query, [idOrganisation, `%${search}%`, limit, offset]);
+        return results;
+    },
+
+    async countFichesWithSearch(idOrganisation, search) {
+        const query = `
+        SELECT COUNT(*) as count
+        FROM FichePoste
+        WHERE IdOrganisation = ?
+        AND Intitule LIKE ?;
+    `;
+        const [results] = await pool.query(query, [idOrganisation, `%${search}%`]);
+        return results[0].count;
     }
 };
 
