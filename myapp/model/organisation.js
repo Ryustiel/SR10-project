@@ -59,6 +59,23 @@ const Organisation = {
         const [results] = await pool.query(query);
         return results;
     },
+
+    async readAllWithPagination(search, limit, offset) {
+        const query = `
+            SELECT * FROM Organisation
+            WHERE Nom LIKE ?
+            LIMIT ? OFFSET ?
+        `;
+        const [organisations] = await pool.query(query, [`%${search}%`, limit, offset]);
+
+        const countQuery = `
+            SELECT COUNT(*) as totalOrganisations FROM Organisation
+            WHERE Nom LIKE ?
+        `;
+        const [[{ totalOrganisations }]] = await pool.query(countQuery, [`%${search}%`]);
+
+        return { organisations, totalOrganisations };
+    }
 };
 
 module.exports = Organisation;

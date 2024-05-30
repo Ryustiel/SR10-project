@@ -74,12 +74,12 @@ const Candidature = {
 
     async getApplicationsCandidat(idCandidat) {
         const query = `
-            SELECT O.IdOffre, Intitule, DateCandidature
-            FROM Candidature AS C
-                     JOIN OffreEmploi AS O ON C.IdOffre = O.IdOffre
-                     JOIN FichePoste AS F ON F.IdFiche = O.IdFiche
-            WHERE C.IdCandidat = ?;
-        `;
+        SELECT C.IdCandidat, O.IdOffre, Intitule, DateCandidature
+        FROM Candidature AS C
+        JOIN OffreEmploi AS O ON C.IdOffre = O.IdOffre
+        JOIN FichePoste AS F ON F.IdFiche = O.IdFiche
+        WHERE C.IdCandidat = ?;
+    `;
         const [results] = await pool.query(query, [idCandidat]);
         return results;
     },

@@ -1,4 +1,4 @@
-<%- include('../search_pagination.ejs', { search, currentPage, totalPages }) %>
+<%- include('../search_pagination.ejs', { search, currentPage, totalPages, showHistory: false }) %>
 <table class="table table-bordered">
     <thead>
     <tr>
@@ -19,9 +19,9 @@
             <td><%= request.OrganisationNom %> (<%= request.IdOrganisation %>)</td>
             <td>
                 <% if (request.StatutOrganisation === 'en attente') { %>
-                    Nouvelle organisation
+                    Nouvelle organisation en attente
                 <% } else { %>
-                    Organisation approuvée
+                    Organisation existante
                 <% } %>
             </td>
             <td>
@@ -43,4 +43,4 @@
     <% }); %>
     </tbody>
 </table>
-<%- include('../pagination.ejs', { currentPage, totalPages, search }) %>
+<%- include('../pagination.ejs', { currentPage, totalPages, search, showHistory: false }) %>

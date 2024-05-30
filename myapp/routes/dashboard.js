@@ -55,5 +55,16 @@ router.get('/administrateur', isLoggedIn, isAdmin, readMessage, async (req, res,
     }
 });
 
+router.get('/switch-to-recruiter-space', isLoggedIn, (req, res) => {
+    req.session.space = 'recruteur';
+    res.redirect('/'); // Rediriger vers la page de dashboard ou toute autre page appropriée
+});
+
+router.get('/switch-to-candidate-space', isLoggedIn, (req, res) => {
+    req.session.space = 'candidat';
+    res.redirect('/'); // Rediriger vers la page de dashboard ou toute autre page appropriée
+});
+
+
 
 module.exports = router;

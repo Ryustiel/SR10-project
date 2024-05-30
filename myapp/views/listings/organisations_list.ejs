@@ -1,0 +1,31 @@
+<%- include('../search_pagination.ejs', { search, currentPage, totalPages }) %>
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th>Numéro Siren</th>
+        <th>Nom</th>
+        <th>Type</th>
+        <th>Adresse Administrative</th>
+        <th>Statut</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% organisations.forEach(function(organisation) { %>
+        <tr>
+            <td><%= organisation.NumeroSiren %></td>
+            <td><%= organisation.Nom %></td>
+            <td><%= organisation.Type %></td>
+            <td><%= organisation.AdresseAdministrative %></td>
+            <td><%= organisation.StatutOrganisation %></td>
+            <td>
+                <form action="/organizations/delete_organisation" method="post" class="d-inline">
+                    <input type="hidden" name="numeroSiren" value="<%= organisation.NumeroSiren %>">
+                    <button type="submit" class="btn btn-danger mb-2">Supprimer</button>
+                </form>
+            </td>
+        </tr>
+    <% }); %>
+    </tbody>
+</table>
+<%- include('../pagination.ejs', { currentPage, totalPages, search }) %>

@@ -4,6 +4,8 @@ const defaultUser = typeof user !== 'undefined' ? user : {};
 const defaultOffre = typeof offre !== 'undefined' ? offre : {};
 const defaultIsCandidate = typeof isCandidate !== 'undefined' ? isCandidate : false;
 const defaultFiche = typeof fiche !== 'undefined' ? fiche : {};
+const defaultCandidature = typeof candidature !== 'undefined' ? candidature : {};
+const defaultFichiers = typeof fichiers !== 'undefined' ? fichiers : [];
 %>
 <div class="modal fade" id="<%= modalId %>" tabindex="-1" aria-labelledby="<%= modalLabelId %>" aria-hidden="true">
     <div class="modal-dialog">
@@ -13,7 +15,7 @@ const defaultFiche = typeof fiche !== 'undefined' ? fiche : {};
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <%- include(modalBody, { organisations: defaultOrganisations, user: defaultUser, offre: defaultOffre, isCandidate: defaultIsCandidate, fiche: defaultFiche }) %>
+                <%- include(modalBody, { organisations: defaultOrganisations, user: defaultUser, offre: defaultOffre, isCandidate: defaultIsCandidate, fiche: defaultFiche, candidature: defaultCandidature, fichiers: defaultFichiers }) %>
             </div>
         </div>
     </div>

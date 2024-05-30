@@ -1,0 +1,33 @@
+<div>
+    <h3>Détails de la Candidature</h3>
+    <% if (organisations.length > 0) { %>
+        <p><strong>Organisation:</strong> <%= organisations[0].Nom %></p>
+    <% } %>
+    <p><strong>Offre:</strong> <%= offre.Intitule %></p>
+    <p><strong>Date de Candidature:</strong> <%= new Date(candidature.DateCandidature).toLocaleDateString("fr-FR") %></p>
+
+    <h3>Pièces Jointes</h3>
+    <ul id="existing-files">
+        <% fichiers.forEach(function(file) { %>
+            <li>
+                <a href="/applications/download-attachment?fichier=<%= file.Fichier %>"><%= file.NomOriginal %></a>
+                <button type="button" class="btn btn-danger btn-sm delete-file" data-file="<%= file.Fichier %>" data-offre-id="<%= offre.IdOffre %>" data-candidat-id="<%= candidature.IdCandidat %>">Supprimer</button>
+            </li>
+        <% }); %>
+    </ul>
+
+    <h3>Ajouter/Modifier des Pièces Jointes</h3>
+    <form id="edit-application-form" action="/applications/edit-application" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="idCandidat" value="<%= candidature.IdCandidat %>">
+        <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
+        <input type="hidden" id="filesToDelete" name="filesToDelete">
+        <div class="mb-3">
+            <label for="formFileLg" class="form-label">Télécharger des fichiers</label>
+            <input class="form-control" id="formFileLg" name="files" type="file" multiple>
+        </div>
+        <div id="fileCount" class="mb-3" data-required-files="<%= offre.NombrePieces %>">
+            Pièces justificatives fournies : <%= fichiers.length %>/<%= offre.NombrePieces %>
+        </div>
+        <button id="submitButton" type="submit" class="btn btn-secondary" disabled>Mettre à jour</button>
+    </form>
+</div>

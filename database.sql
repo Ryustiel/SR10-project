@@ -80,6 +80,27 @@ CREATE TABLE AssociationFichiers
     FOREIGN KEY (IdCandidat, IdOffre) REFERENCES Candidature (IdCandidat, IdOffre) ON UPDATE CASCADE
 );
 
+-- Table HistoriqueDemandes
+CREATE TABLE HistoriqueDemandes
+(
+    IdHistorique        INT AUTO_INCREMENT PRIMARY KEY,
+    NumeroSiren         VARCHAR(255),
+    Action              VARCHAR(255),
+    TypeDemande         VARCHAR(255),
+    DateAction          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UserId              VARCHAR(255),
+    AdministrateurEmail VARCHAR(255),
+    FOREIGN KEY (NumeroSiren) REFERENCES Organisation (NumeroSiren) ON UPDATE CASCADE,
+    FOREIGN KEY (UserId) REFERENCES Utilisateur (Email) ON UPDATE CASCADE,
+    FOREIGN KEY (AdministrateurEmail) REFERENCES Utilisateur (Email) ON UPDATE CASCADE,
+    CONSTRAINT chk_action CHECK (Action IN ('approuvée', 'refusée', 'en attente')),
+    CONSTRAINT chk_typedemande CHECK (TypeDemande IN (
+                                                      'nouveau_recruteur_nouvelle_organisation',
+                                                      'nouveau_recruteur_organisation_existante',
+                                                      'recruteur_ajout_nouvelle_organisation',
+                                                      'recruteur_changement_organisation_existante'))
+);
+
 -- Insertion dans Organisation
 INSERT INTO Organisation (NumeroSiren, Nom, Type, AdresseAdministrative, StatutOrganisation)
 VALUES ('123456789', 'Tech Solutions', 'Technologie', '123 Boulevard de l''Innovation, 75000 Paris', 'approuvée'),

@@ -179,14 +179,17 @@ const Utilisateur = {
     },
     async getRecruiterRequestsWithPagination(search, limit, offset) {
         const query = `
-            SELECT * FROM Utilisateur
-            WHERE TypeCompte = 'recruteur en attente' AND Email LIKE ?
+            SELECT U.*, O.Nom AS OrganisationNom
+            FROM Utilisateur U
+            LEFT JOIN Organisation O ON U.IdOrganisation = O.NumeroSiren
+            WHERE U.TypeCompte = 'recruteur en attente' AND U.Email LIKE ?
             LIMIT ? OFFSET ?
         `;
         const [requests] = await pool.query(query, [`%${search}%`, limit, offset]);
 
         const countQuery = `
-            SELECT COUNT(*) as totalRequests FROM Utilisateur
+            SELECT COUNT(*) as totalRequests 
+            FROM Utilisateur
             WHERE TypeCompte = 'recruteur en attente' AND Email LIKE ?
         `;
         const [[{ totalRequests }]] = await pool.query(countQuery, [`%${search}%`]);
@@ -194,6 +197,11 @@ const Utilisateur = {
         return { requests, totalRequests };
     },
 
+    async readAllByOrganisation(idOrganisation) {
+        const query = `SELECT * FROM Utilisateur WHERE IdOrganisation = ?;`;
+        const [results] = await pool.query(query, [idOrganisation]);
+        return results;
+    },
 };
 
 module.exports = Utilisateur;

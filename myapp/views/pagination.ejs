@@ -2,7 +2,7 @@
     <ul class="pagination">
         <% for(let i = 1; i <= totalPages; i++) { %>
             <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                <a class="page-link" href="?page=<%= i %>&search=<%= search %>"><%= i %></a>
+                <a class="page-link" href="?page=<%= i %>&search=<%= search %>&showHistory=<%= typeof showHistory !== 'undefined' ? showHistory : 'false' %>"><%= i %></a>
             </li>
         <% } %>
     </ul>

@@ -228,18 +228,19 @@ const OffreEmploi = {
 
     async readWithFichePosteAndOrganisation(idOffre) {
         const query = `
-            SELECT O.IdOffre, O.Etat, O.DateValidite, O.ListePieces, O.NombrePieces, 
-                   F.Intitule, F.Description, F.StatutPoste, F.ResponsableHierarchique, 
-                   F.TypeMetier, F.LieuMission, F.Rythme, F.Salaire, 
-                   Org.Nom AS OrganisationNom
-            FROM OffreEmploi AS O
-            JOIN FichePoste AS F ON O.IdFiche = F.IdFiche
-            JOIN Organisation AS Org ON F.IdOrganisation = Org.NumeroSiren
-            WHERE O.IdOffre = ?;
-        `;
+        SELECT O.IdOffre, O.Etat, O.DateValidite, O.ListePieces, O.NombrePieces, 
+               F.Intitule, F.Description, F.StatutPoste, F.ResponsableHierarchique, 
+               F.TypeMetier, F.LieuMission, F.Rythme, F.Salaire, 
+               Org.Nom AS OrganisationNom, Org.NumeroSiren AS IdOrganisation
+        FROM OffreEmploi AS O
+        JOIN FichePoste AS F ON O.IdFiche = F.IdFiche
+        JOIN Organisation AS Org ON F.IdOrganisation = Org.NumeroSiren
+        WHERE O.IdOffre = ?;
+    `;
         const [results] = await pool.query(query, [idOffre]);
         return results[0];
     },
+
 
     async countByFiche(idFiche) {
         const query = `SELECT COUNT(*) as count FROM OffreEmploi WHERE IdFiche = ?`;
@@ -298,6 +299,7 @@ const OffreEmploi = {
         logger.info(`isUserInOrganisation : ${idOffre} ${userEmail} ${results[0]['COUNT(*)']}`);
         return results[0]['COUNT(*)'] > 0;
     },
+
 };
 
 module.exports = OffreEmploi;

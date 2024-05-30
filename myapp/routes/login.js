@@ -47,6 +47,7 @@ router.post('/', readReturnTo, [
             req.session.userType = await Utilisateur.getType(email);
             req.session.userAffiliation = await Utilisateur.getOrganisationId(email);
             req.session.notification = '';
+            req.session.space = 'candidat';
             logger.info(`Utilisateur connecté : ${email} en tant que ${req.session.userType}`);
 
             res.redirect(req.returnTo || '/dashboard');

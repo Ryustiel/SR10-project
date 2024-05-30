@@ -13,6 +13,7 @@ const OffreEmploi = require('../model/offreemploi');
 const Candidature = require('../model/candidature');
 const Utilisateur = require('../model/utilisateur');
 const AssociationFichier = require('../model/associationfichiers');
+const Organisation = require('../model/organisation');
 
 const isLoggedIn = require('../middleware/isLoggedIn.js');
 const requireRecruitorStatus = require('../middleware/requireRecruitorStatus.js');
@@ -320,6 +321,78 @@ router.post('/download-candidate-folder', isLoggedIn, requireRecruitorStatus, [
         logger.error(`Une erreur est survenue lors de la création du dossier : ${error.message}`);
         error.status = 500;
         next(error);
+    }
+});
+
+// Route to get application details (POST)
+router.post('/get-application-details', isLoggedIn, async function (req, res, next) {
+    try {
+        const { idCandidat, idOffre } = req.body;
+        if (!idCandidat || !idOffre) {
+            req.session.message = "ID du candidat et de l'offre requis";
+            req.session.messageType = 'error';
+            return res.redirect('/applications/my-applications');
+        }
+
+        const candidature = await Candidature.read(idCandidat, idOffre);
+        const fichiers = await AssociationFichier.listFiles(idCandidat, idOffre);
+        const offre = await OffreEmploi.readWithFichePosteAndOrganisation(idOffre);
+        const organisation = await Organisation.read(offre.IdOrganisation);
+        logger.info(`Affichage des détails de l'organisation ${organisation.Nom}`);
+
+        res.render('applications/application_details', {
+            candidature,
+            fichiers,
+            offre,
+            organisations: [organisation] // Inclure les informations de l'organisation
+        });
+    } catch (error) {
+        logger.error(`Erreur lors de la récupération des détails de la candidature : ${error.message}`);
+        error.message = `Erreur lors de la récupération des détails de la candidature : ${error.message}`;
+        error.status = 500;
+        next(error);
+    }
+});
+
+// Route to edit application (POST)
+router.post('/edit-application', isLoggedIn, upload.array('files'), [
+    body('idCandidat').notEmpty().withMessage('ID du candidat requis'),
+    body('idOffre').notEmpty().withMessage("ID de l'offre requis")
+], async function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        req.session.message = errors.array().map(e => e.msg).join(', ');
+        req.session.messageType = 'error';
+        return res.redirect('/applications/my-applications');
+    }
+
+    try {
+        const { idCandidat, idOffre } = req.body;
+        const filesToDelete = req.body.filesToDelete ? req.body.filesToDelete.split(',') : [];
+        const files = req.files;
+
+        // Suppression des fichiers marqués pour suppression
+        if (filesToDelete.length > 0) {
+            for (const file of filesToDelete) {
+                await AssociationFichier.delete({ idCandidat, idOffre, fichier: file });
+            }
+        }
+
+        // Ajout des nouveaux fichiers
+        if (files && files.length > 0) {
+            for (const file of files) {
+                await AssociationFichier.create(idCandidat, idOffre, file.filename, file.originalname);
+            }
+        }
+
+        req.session.message = 'Candidature mise à jour avec succès';
+        req.session.messageType = 'notification';
+        return res.redirect('/applications/my-applications');
+    } catch (error) {
+        logger.error(`Erreur lors de la mise à jour de la candidature : ${error.message}`);
+        req.session.message = `Erreur lors de la mise à jour de la candidature : ${error.message}`;
+        req.session.messageType = 'error';
+        return res.redirect('/applications/my-applications');
     }
 });
 

@@ -1,24 +1,20 @@
 <% if (candidatures.length === 0) { %>
-    <p>
-        Vous n'avez candidaté à aucune offre.
-    </p>
-<% } %>
-
-<% candidatures.forEach((candidature) => { %>
-
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title"> <%= candidature.Intitule %> </h5>
-            <p class="card-text"> le <%= candidature.DateCandidature %> </p>
-            <div class="btn-group" role="group">
-
-                <form method="POST" action="/applications/cancel-application">
-                    <input type="hidden" name="idCandidat" value="self">
-                    <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
-                    <button type="submit" class="btn btn-danger">Annuler</button>
-                </form>
+    <p>Vous n'avez candidaté à aucune offre.</p>
+<% } else { %>
+    <% candidatures.forEach((candidature) => { %>
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title"><%= candidature.Intitule %></h5>
+                <p class="card-text">le <%= new Date(candidature.DateCandidature).toLocaleDateString("fr-FR") %></p>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-info view-details" data-candidat-id="<%= candidature.IdCandidat %>" data-offre-id="<%= candidature.IdOffre %>" data-bs-toggle="modal" data-bs-target="#applicationDetailsModal">Voir les détails</button>
+                    <form method="POST" action="/applications/cancel-application">
+                        <input type="hidden" name="idCandidat" value="self">
+                        <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
+                        <button type="submit" class="btn btn-danger">Annuler</button>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
-
-<% }) %>
+    <% }) %>
+<% } %>

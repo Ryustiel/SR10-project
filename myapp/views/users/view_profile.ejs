@@ -58,13 +58,15 @@
                         <button type="submit" class="btn btn-secondary">Annuler la demande</button>
                     </form>
                     <% } %>
-                    </p>
                     <% if (user.TypeCompte && user.TypeCompte.toLowerCase() === 'recruteur') { %>
                         <p class="card-text">
-                            <strong>Organisation :</strong> <%= user.IdOrganisation %>
+                            <strong>Organisation :</strong>
+                            <%
+                                const org = organisations.find(org => org.NumeroSiren === user.IdOrganisation);
+                            %>
+                            <%= org ? `${org.Nom} (${org.NumeroSiren})` : user.IdOrganisation %>
                             <% if (currentUserEmail === user.Email || userRole === 'administrateur') { %>
-                                <button class="btn btn-link" data-bs-toggle="modal"
-                                        data-bs-target="#editOrganisationModal">
+                                <button class="btn btn-link" data-bs-toggle="modal" data-bs-target="#editOrganisationModal">
                                     <i class="fas fa-edit"></i>
                                 </button>
                             <% } %>

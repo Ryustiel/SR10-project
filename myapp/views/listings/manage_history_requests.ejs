@@ -1,0 +1,41 @@
+<%- include('../search_pagination.ejs', { search, currentPage, totalPages, showHistory: true }) %>
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th>Nom</th>
+        <th>Prénom</th>
+        <th>Email</th>
+        <th>Organisation</th>
+        <th>Statut de l'Organisation</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% requests.forEach(function(request) { %>
+        <tr>
+            <td><%= request.UserNom %></td>
+            <td><%= request.UserPrenom %></td>
+            <td><%= request.UserId %></td>
+            <td><%= request.OrganisationNom %> (<%= request.NumeroSiren %>)</td>
+            <td>
+                <% if (request.Action === 'en attente') { %>
+                    <%= request.TypeDemande.includes('nouvelle') ? 'Nouvelle organisation en attente' : 'Organisation existante' %>
+                <% } else if (request.Action === 'approuvée') { %>
+                    <%= request.TypeDemande.includes('nouvelle') ? 'Nouvelle organisation approuvée' : 'Organisation existante' %>
+                <% } else if (request.Action === 'refusée') { %>
+                    <%= request.TypeDemande.includes('nouvelle') ? 'Nouvelle organisation refusée' : 'Organisation existante' %>
+                <% } %>
+            </td>
+            <td>
+                <% if (request.Action === 'en attente') { %>
+                    <%= request.TypeDemande.includes('nouvelle') ? 'Demande de rejoindre la nouvelle organisation en attente' : 'Demande de rejoindre l\'organisation existante en attente' %>
+                <% } else { %>
+                    <%= request.TypeDemande.includes('nouvelle') ? 'Demande de rejoindre la nouvelle organisation ' : 'Demande de rejoindre l\'organisation existante ' %>
+                    <%= request.Action %> par <%= request.AdministrateurEmail %>
+                <% } %>
+            </td>
+        </tr>
+    <% }); %>
+    </tbody>
+</table>
+<%- include('../pagination.ejs', { currentPage, totalPages, search, showHistory: true }) %>

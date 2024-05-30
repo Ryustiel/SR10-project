@@ -21,7 +21,7 @@ const AssociationFichiers = {
                        WHERE IdCandidat = ?
                          AND IdOffre = ?
                          AND Fichier = ?;`;
-        const results = await pool.query(query, [idCandidat, idOffre, fichier]);
+        const [results] = await pool.query(query, [idCandidat, idOffre, fichier]);
         return results[0];
     },
 
@@ -33,7 +33,7 @@ const AssociationFichiers = {
         `;
         const values = [fichier, originalName, idCandidat, idOffre];
         await pool.query(query, values);
-        return this.read({ idCandidat, idOffre });
+        return this.read(idCandidat, idOffre, fichier);
     },
 
     async delete({ idCandidat, idOffre, fichier }) {
@@ -43,6 +43,16 @@ const AssociationFichiers = {
                          AND IdOffre = ?
                          AND Fichier = ?;`;
         await pool.query(query, [idCandidat, idOffre, fichier]);
+
+        // Delete the file from the disk
+        const filePath = path.join(__dirname, '..', 'uploads', fichier);
+        fs.unlink(filePath, (err) => {
+            if (err) {
+                logger.error(`Failed to delete file: ${filePath}. Error: ${err.message}`);
+            } else {
+                logger.info(`Deleted file: ${filePath}`);
+            }
+        });
     },
 
     async listFiles(idCandidat, idOffre) {
@@ -83,11 +93,11 @@ const AssociationFichiers = {
     async readFichier(fichier) {
         // Possible grâce à la contrainte UNIQUE sur Fichier
         const query = `SELECT IdCandidat, IdOffre, NomOriginal FROM AssociationFichiers WHERE Fichier = ?;`;
-        const results = await pool.query(query, [fichier]);
+        const [results] = await pool.query(query, [fichier]);
         if (results.length === 0) {
             return null;
         }
-        return results[0][0];
+        return results[0];
     },
 
     async readall() {

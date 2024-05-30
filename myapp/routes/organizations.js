@@ -3,28 +3,27 @@ const router = express.Router();
 const isLoggedIn = require("../middleware/isLoggedIn");
 const isAdmin = require("../middleware/isAdmin");
 const logger = require('../logger');
-const {body, validationResult} = require('express-validator');
+const { body, validationResult } = require('express-validator');
 const Utilisateur = require('../model/utilisateur');
 const Organisation = require('../model/organisation');
-const {validateNewOrganisation} = require('../middleware/validationUtils');
+const HistoriqueDemandes = require('../model/historiquedemandes'); // Importer le modèle HistoriqueDemandes
+const FichePoste = require('../model/ficheposte');
+const { validateNewOrganisation } = require('../middleware/validationUtils');
 const {
     handleNewOrganisationRequest,
     handleExistingOrganisationRequest
 } = require('../middleware/userUtils');
-const {canEditProfile} = require("../middleware/profile_properties");
-const readMessage = require('../middleware/readMessage'); // Import the new middleware
+const { canEditProfile } = require("../middleware/profile_properties");
+const readMessage = require('../middleware/readMessage');
 
 // Route pour demander un changement d'organisation
 router.post('/request-organisation-change', isLoggedIn, canEditProfile, [
     body('existingOrganisationEdit').notEmpty().withMessage('Une organisation existante doit être sélectionnée ou une nouvelle doit être créée'),
-    body('newOrganisationSirenEdit').optional({checkFalsy: true}).isLength({
-        min: 9,
-        max: 9
-    }).withMessage('SIREN invalide'),
-    body('newOrganisationNameEdit').optional({checkFalsy: true}).notEmpty().withMessage("Nom de l'organisation requis"),
-    body('newOrganisationTypeEdit').optional({checkFalsy: true}).notEmpty().withMessage("Type de l'organisation requis"),
-    body('newOrganisationAddressEdit').optional({checkFalsy: true}).notEmpty().withMessage("Adresse de l'organisation requise")
-], async (req, res,next) => {
+    body('newOrganisationSirenEdit').optional({ checkFalsy: true }).isLength({ min: 9, max: 9 }).withMessage('SIREN invalide'),
+    body('newOrganisationNameEdit').optional({ checkFalsy: true }).notEmpty().withMessage("Nom de l'organisation requis"),
+    body('newOrganisationTypeEdit').optional({ checkFalsy: true }).notEmpty().withMessage("Type de l'organisation requis"),
+    body('newOrganisationAddressEdit').optional({ checkFalsy: true }).notEmpty().withMessage("Adresse de l'organisation requise")
+], async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         req.session.message = errors.array().map(e => e.msg).join(', ');
@@ -44,6 +43,9 @@ router.post('/request-organisation-change', isLoggedIn, canEditProfile, [
         } = req.body;
 
         let errorMessage = null;
+        let typeDemande = '';
+        let organisationId = existingOrganisationEdit === 'new' ? newOrganisationSirenEdit : existingOrganisationEdit;
+
         if (existingOrganisationEdit === 'new') {
             errorMessage = await validateNewOrganisation({
                 newOrganisationSiren: newOrganisationSirenEdit,
@@ -51,6 +53,7 @@ router.post('/request-organisation-change', isLoggedIn, canEditProfile, [
                 newOrganisationType: newOrganisationTypeEdit,
                 newOrganisationAddress: newOrganisationAddressEdit
             });
+            typeDemande = 'recruteur_ajout_nouvelle_organisation';
         } else if (!existingOrganisationEdit) {
             errorMessage = "Une organisation existante doit être sélectionnée.";
         } else {
@@ -58,6 +61,8 @@ router.post('/request-organisation-change', isLoggedIn, canEditProfile, [
             const existingOrg = await Organisation.read(existingOrganisationEdit);
             if (!existingOrg) {
                 errorMessage = "L'organisation sélectionnée n'existe pas.";
+            } else {
+                typeDemande = 'recruteur_changement_organisation_existante';
             }
         }
 
@@ -81,12 +86,18 @@ router.post('/request-organisation-change', isLoggedIn, canEditProfile, [
         }
 
         if (userId === req.session.userEmail) {
-            // Update session user type
             req.session.userType = 'recruteur en attente';
         }
 
         req.session.message = "Demande de changement d'organisation réussie.";
         req.session.messageType = 'notification';
+        await HistoriqueDemandes.create(
+            organisationId,
+            'en attente',
+            typeDemande,
+            userId
+        );
+
         // Redirect to the profile POST route with the userId using a hidden form
         res.send(`
             <form id="redirectForm" method="post" action="/users/profile">
@@ -105,11 +116,11 @@ router.post('/request-organisation-change', isLoggedIn, canEditProfile, [
 // Route pour demander à devenir recruteur
 router.post('/request-recruiter', isLoggedIn, canEditProfile, [
     body('existingOrganisation').notEmpty().withMessage('Une organisation existante doit être sélectionnée ou une nouvelle doit être créée'),
-    body('newOrganisationSiren').optional({checkFalsy: true}).isLength({min: 9, max: 9}).withMessage('SIREN invalide'),
-    body('newOrganisationName').optional({checkFalsy: true}).notEmpty().withMessage("Nom de l'organisation requis"),
-    body('newOrganisationType').optional({checkFalsy: true}).notEmpty().withMessage("Type de l'organisation requis"),
-    body('newOrganisationAddress').optional({checkFalsy: true}).notEmpty().withMessage("Adresse de l'organisation requise")
-], async (req, res,next) => {
+    body('newOrganisationSiren').optional({ checkFalsy: true }).isLength({ min: 9, max: 9 }).withMessage('SIREN invalide'),
+    body('newOrganisationName').optional({ checkFalsy: true }).notEmpty().withMessage("Nom de l'organisation requis"),
+    body('newOrganisationType').optional({ checkFalsy: true }).notEmpty().withMessage("Type de l'organisation requis"),
+    body('newOrganisationAddress').optional({ checkFalsy: true }).notEmpty().withMessage("Adresse de l'organisation requise")
+], async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         req.session.message = errors.array().map(e => e.msg).join(', ');
@@ -129,6 +140,9 @@ router.post('/request-recruiter', isLoggedIn, canEditProfile, [
         } = req.body;
 
         let errorMessage = null;
+        let typeDemande = '';
+        let organisationId = existingOrganisation === 'new' ? newOrganisationSiren : existingOrganisation;
+
         if (existingOrganisation === 'new') {
             errorMessage = await validateNewOrganisation({
                 newOrganisationSiren,
@@ -136,6 +150,7 @@ router.post('/request-recruiter', isLoggedIn, canEditProfile, [
                 newOrganisationType,
                 newOrganisationAddress
             });
+            typeDemande = 'nouveau_recruteur_nouvelle_organisation';
         } else if (!existingOrganisation) {
             errorMessage = "Une organisation existante doit être sélectionnée.";
         } else {
@@ -143,6 +158,8 @@ router.post('/request-recruiter', isLoggedIn, canEditProfile, [
             const existingOrg = await Organisation.read(existingOrganisation);
             if (!existingOrg) {
                 errorMessage = "L'organisation sélectionnée n'existe pas.";
+            } else {
+                typeDemande = 'nouveau_recruteur_organisation_existante';
             }
         }
 
@@ -164,14 +181,20 @@ router.post('/request-recruiter', isLoggedIn, canEditProfile, [
             logger.debug("Utilisateur s'associe à une organisation existante...");
             await handleExistingOrganisationRequest(userId, existingOrganisation);
         }
-
+        // Mise à jour de la session
         if (userId === req.session.userEmail) {
-            // Mise à jour de la session
             req.session.userType = 'recruteur en attente';
         }
 
         req.session.message = "Demande de changement de type de compte et/ou d'ajout d'organisation réussie.";
         req.session.messageType = 'notification';
+        await HistoriqueDemandes.create(
+            organisationId,
+            'en attente',
+            typeDemande,
+            userId
+        );
+
         res.send(`
             <form id="redirectForm" method="post" action="/users/profile">
                 <input type="hidden" name="userId" value="${userId}">
@@ -187,7 +210,7 @@ router.post('/request-recruiter', isLoggedIn, canEditProfile, [
 });
 
 // Route pour annuler la demande de devenir recruteur
-router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req, res,next) => {
+router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req, res, next) => {
     logger.debug("Annulation de la demande de changement de type de compte...");
     try {
         const userId = req.body.userId || req.session.userEmail;
@@ -201,9 +224,8 @@ router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req,
         if (user.IdOrganisation) {
             await Utilisateur.updateTypeCompteWithOrganisation(userId, 'candidat', null);
         }
-
+        // Mise à jour de la session si l'utilisateur est connecté
         if (userId === req.session.userEmail) {
-            // Mise à jour de la session si l'utilisateur est connecté
             req.session.userType = 'candidat';
         }
 
@@ -214,6 +236,9 @@ router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req,
             await Organisation.delete(user.IdOrganisation);
             logger.info("Organisation supprimée.");
         }
+
+        // Supprimer l'entrée en attente de l'historique
+        await HistoriqueDemandes.deletePendingRequest(userId);
 
         req.session.message = "Demande de changement de type de compte annulée avec succès.";
         req.session.messageType = 'notification';
@@ -232,26 +257,43 @@ router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req,
 });
 
 // Route pour gérer les demandes de recruteur avec recherche et pagination
-router.get('/manage_requests', isLoggedIn, isAdmin, readMessage, async (req, res,next) => {
+router.get('/manage_requests', isLoggedIn, isAdmin, readMessage, async (req, res, next) => {
     const search = req.query.search || '';
     const page = parseInt(req.query.page) || 1;
-    const limit = 10; // Number of requests per page
+    const limit = 10; // Nombre de demandes par page
     const offset = (page - 1) * limit;
     const placeholder = "Rechercher par email";
+    const showHistory = req.query.showHistory === 'true';
 
     logger.debug("Accès à la gestion des demandes...");
     try {
-        const {requests, totalRequests} = await Utilisateur.getRecruiterRequestsWithPagination(search, limit, offset);
-        const totalPages = Math.ceil(totalRequests / limit);
+        if (showHistory) {
+            const { requests, totalRequests } = await HistoriqueDemandes.readAllWithPagination(search, limit, offset);
+            const totalPages = Math.ceil(totalRequests / limit);
 
-        res.render('applications/manage_requests', {
-            requests,
-            search,
-            currentPage: page,
-            totalPages,
-            activePage: 'manage_requests',
-            placeholder
-        });
+            res.render('applications/manage_history', {
+                requests,
+                search,
+                currentPage: page,
+                totalPages,
+                activePage: '/organizations/manage_requests?showHistory=true',
+                placeholder,
+                showHistory
+            });
+        } else {
+            const { requests, totalRequests } = await Utilisateur.getRecruiterRequestsWithPagination(search, limit, offset);
+            const totalPages = Math.ceil(totalRequests / limit);
+
+            res.render('applications/manage_requests', {
+                requests,
+                search,
+                currentPage: page,
+                totalPages,
+                activePage: '/organizations/manage_requests?showHistory=false',
+                placeholder,
+                showHistory
+            });
+        }
     } catch (error) {
         logger.error(`Erreur lors de la récupération des demandes de recrutement : ${error}`);
         error.status = 500;
@@ -263,7 +305,7 @@ router.get('/manage_requests', isLoggedIn, isAdmin, readMessage, async (req, res
 router.post('/accept_request', isLoggedIn, isAdmin, async (req, res, next) => {
     logger.debug("Acceptation de la demande de changement de type de compte...");
     try {
-        const {email, organisationNumber, search, page} = req.body;
+        const { email, organisationNumber, search, page } = req.body;
         const userDetails = await Utilisateur.read(email);
         if (!userDetails) {
             throw new Error("Détails de l'utilisateur non trouvés.");
@@ -277,6 +319,7 @@ router.post('/accept_request', isLoggedIn, isAdmin, async (req, res, next) => {
         }
 
         await Utilisateur.updateTypeCompte(email, 'recruteur');
+        await HistoriqueDemandes.updateAction(organisationNumber, email, 'approuvée', req.session.userEmail);
         req.session.message = "Demande acceptée et type de compte mis à jour en 'recruteur'.";
         req.session.messageType = 'notification';
         res.redirect(`/organizations/manage_requests?search=${encodeURIComponent(search)}&page=${page}`);
@@ -288,11 +331,10 @@ router.post('/accept_request', isLoggedIn, isAdmin, async (req, res, next) => {
     }
 });
 
-
 router.post('/reject_request', isLoggedIn, isAdmin, async (req, res, next) => {
     logger.debug("Rejet de la demande de changement de type de compte...");
     try {
-        const {email, search, page} = req.body;
+        const { email, search, page } = req.body;
         const userDetails = await Utilisateur.read(email);
         if (!userDetails) {
             throw new Error("Détails de l'utilisateur non trouvés.");
@@ -306,6 +348,7 @@ router.post('/reject_request', isLoggedIn, isAdmin, async (req, res, next) => {
             logger.info("Organisation en attente supprimée.");
         }
 
+        await HistoriqueDemandes.updateAction(userDetails.IdOrganisation, email, 'refusée', req.session.userEmail);
         req.session.message = "Demande rejetée et type de compte mis à jour en 'candidat'.";
         req.session.messageType = 'notification';
         res.redirect(`/organizations/manage_requests?search=${encodeURIComponent(search)}&page=${page}`);
@@ -313,6 +356,71 @@ router.post('/reject_request', isLoggedIn, isAdmin, async (req, res, next) => {
         logger.error(`Erreur lors du rejet de la demande : ${error}`);
         error.status = 500;
         error.message = "Erreur lors du rejet de la demande.";
+        next(error);
+    }
+});
+
+// Route pour lister toutes les organisations avec pagination et recherche
+router.get('/list_organisations', isLoggedIn, isAdmin, readMessage, async (req, res, next) => {
+    const search = req.query.search || '';
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5; // Number of organisations per page
+    const offset = (page - 1) * limit;
+    const placeholder = "Rechercher par nom d'organisation";
+
+    try {
+        const { organisations, totalOrganisations } = await Organisation.readAllWithPagination(search, limit, offset);
+        const totalPages = Math.ceil(totalOrganisations / limit);
+
+        logger.info("Liste des organisations récupérée avec succès.");
+        res.render('applications/list_organisations', {
+            title: 'Liste des Organisations',
+            organisations: organisations || [],
+            search,
+            currentPage: page,
+            totalPages,
+            placeholder
+        });
+    } catch (error) {
+        logger.error(`Erreur lors de la récupération de la liste des organisations : ${error}`);
+        error.status = 500;
+        error.message = "Erreur interne du serveur lors de la récupération de la liste des organisations";
+        next(error);
+    }
+});
+
+
+// Route pour supprimer une organisation
+// Route pour supprimer une organisation
+router.post('/delete_organisation', isLoggedIn, isAdmin, async (req, res, next) => {
+    const { numeroSiren } = req.body;
+    try {
+        // Récupérer tous les recruteurs de l'organisation et les repasser en candidats
+        const utilisateurs = await Utilisateur.readAllByOrganisation(numeroSiren);
+        for (const utilisateur of utilisateurs) {
+            await Utilisateur.updateTypeCompteWithOrganisation(utilisateur.Email, 'candidat', null);
+        }
+
+        // Supprimer toutes les fiches de poste et les offres d'emploi associées
+        const fichesPoste = await FichePoste.listFichesForOrganization(numeroSiren);
+        for (const fiche of fichesPoste) {
+            await OffreEmploi.deleteByFiche(fiche.IdFiche);
+            await FichePoste.delete(fiche.IdFiche);
+        }
+
+        // Supprimer l'historique des demandes associées à l'organisation
+        await HistoriqueDemandes.deleteByOrganisation(numeroSiren);
+
+        // Supprimer l'organisation
+        await Organisation.delete(numeroSiren);
+
+        req.session.message = "Organisation supprimée avec succès.";
+        req.session.messageType = 'notification';
+        res.redirect('/organizations/list_organisations');
+    } catch (error) {
+        logger.error(`Erreur lors de la suppression de l'organisation : ${error}`);
+        error.status = 500;
+        error.message = "Erreur lors de la suppression de l'organisation.";
         next(error);
     }
 });

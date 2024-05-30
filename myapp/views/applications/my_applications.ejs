@@ -3,25 +3,102 @@
 <head>
     <%- include('../head.ejs') %>
     <title>Mes Candidatures</title>
+    <style>
+        .btn-group > .btn:first-of-type {
+            border-top-left-radius: .25rem;
+            border-bottom-left-radius: .25rem;
+        }
+        .btn-group > .btn:last-of-type {
+            border-top-right-radius: .25rem;
+            border-bottom-right-radius: .25rem;
+        }
+        .btn {
+            border-radius: .25rem !important;
+        }
+    </style>
 </head>
 <body>
-
 <%- include('../navbar.ejs') %>
-
 <%- include('../message.ejs') %>
 
 <div class="container mt-5">
-    <div class = "row">
+    <div class="row">
         <div class="col-md-6 offset-md-3">
             <h1>Mes Candidatures</h1>
         </div>
     </div>
     <div class="row">
         <div class="col-md-6 offset-md-3">
-            <%- include('../listings/outgoing_applications.ejs') %>
+            <%- include('../listings/outgoing_applications.ejs', { candidatures: candidatures }) %>
         </div>
     </div>
 </div>
+<%- include('../modal.ejs', { modalId: 'applicationDetailsModal', modalLabelId: 'applicationDetailsModalLabel', modalTitle: 'Détails de la Candidature', modalBody: 'applications/application_details' }) %>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.view-details').forEach(button => {
+            button.addEventListener('click', function() {
+                const candidatId = this.getAttribute('data-candidat-id');
+                const offreId = this.getAttribute('data-offre-id');
+
+                fetch('/applications/get-application-details', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ idCandidat: candidatId, idOffre: offreId })
+                })
+                    .then(response => response.text())
+                    .then(html => {
+                        document.querySelector('#applicationDetailsModal .modal-body').innerHTML = html;
+                        initializeFileHandlers();
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+
+        function initializeFileHandlers() {
+            const submitButton = document.getElementById('submitButton');
+            const fileInput = document.getElementById('formFileLg');
+            const fileCount = document.getElementById('fileCount');
+            const existingFiles = document.getElementById('existing-files');
+            const filesToDeleteInput = document.getElementById('filesToDelete');
+            const requiredFiles = parseInt(fileCount.getAttribute('data-required-files'));
+            let initialFileCount = existingFiles.children.length;
+
+            let newFilesCount = 0;
+
+            function updateSubmitButtonState() {
+                const totalFiles = initialFileCount + newFilesCount - filesToDeleteInput.value.split(',').filter(Boolean).length;
+                const hasChanges = newFilesCount > 0 || filesToDeleteInput.value.length > 0 || totalFiles !== initialFileCount;
+
+                submitButton.disabled = totalFiles < requiredFiles || !hasChanges;
+                submitButton.classList.toggle('btn-success', totalFiles >= requiredFiles && hasChanges);
+                submitButton.classList.toggle('btn-secondary', totalFiles < requiredFiles || !hasChanges);
+                fileCount.innerText = `Pièces justificatives fournies : ${totalFiles}/${requiredFiles}`;
+            }
+
+            fileInput.addEventListener('change', function() {
+                newFilesCount = fileInput.files.length;
+                updateSubmitButtonState();
+            });
+
+            existingFiles.addEventListener('click', function(event) {
+                if (event.target.classList.contains('delete-file')) {
+                    const file = event.target.getAttribute('data-file');
+                    const filesToDelete = filesToDeleteInput.value ? filesToDeleteInput.value.split(',') : [];
+                    filesToDelete.push(file);
+                    filesToDeleteInput.value = filesToDelete.join(',');
+                    event.target.parentElement.remove();
+                    updateSubmitButtonState();
+                }
+            });
+
+            updateSubmitButtonState(); // Initial call to set the state based on existing files
+        }
+    });
+</script>
 </body>
 </html>

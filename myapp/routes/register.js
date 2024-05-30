@@ -76,6 +76,7 @@ router.post('/', [
         req.session.userType = await Utilisateur.getType(email);
         req.session.userAffiliation = await Utilisateur.getOrganisationId(email);
         req.session.notification = '';
+        req.session.space = 'candidat';
         logger.info(`Nouveau utilisateur inscrit : ${email}`);
         req.session.message = `Bienvenue ${firstname} ${lastname}, votre compte a été créé avec succès.`;
         req.session.messageType = 'notification';
