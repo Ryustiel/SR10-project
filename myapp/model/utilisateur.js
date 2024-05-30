@@ -170,7 +170,7 @@ const Utilisateur = {
 
     async getRecruiterRequestsWithPagination(search, limit, offset) {
         const query = `
-            SELECT U.*, O.Nom AS OrganisationNom
+            SELECT U.*, O.Nom AS OrganisationNom, O.StatutOrganisation
             FROM Utilisateur U
             LEFT JOIN Organisation O ON U.IdOrganisation = O.NumeroSiren
             WHERE U.TypeCompte = 'recruteur en attente' AND U.Email LIKE ?
@@ -191,6 +191,12 @@ const Utilisateur = {
     async readAllByOrganisation(idOrganisation) {
         const query = `SELECT * FROM Utilisateur WHERE IdOrganisation = ?;`;
         const [results] = await pool.query(query, [idOrganisation]);
+        return results;
+    },
+
+    async readAllOrderedByDateCreation() {
+        const query = `SELECT * FROM Utilisateur ORDER BY DateCreation DESC;`;
+        const [results] = await pool.query(query);
         return results;
     },
 };

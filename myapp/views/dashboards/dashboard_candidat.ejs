@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <%- include('../head') %>
+    <title>Dashboard Candidat</title>
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+<%- include('../navbar', { activePage: 'dashboard' }) %>
+<div class="container mx-auto my-8 p-4">
+    <section id="overview" class="mb-8">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Aperçu</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-blue-600 text-white shadow-lg rounded-lg p-6">
+                <h3 class="text-xl">Candidature<%= candidatures.length > 1 ? 's' : '' %> envoyée<%= candidatures.length > 1 ? 's' : '' %></h3>
+                <p class="text-4xl"><%= candidatures.length %></p>
+            </div>
+            <div class="bg-green-500 text-white shadow-lg rounded-lg p-6">
+                <h3 class="text-xl">Offre<%= offres.length > 1 ? 's' : '' %> publiée<%= offres.length > 1 ? 's' : '' %></h3>
+                <p class="text-4xl"><%= offres.length %></p>
+            </div>
+        </div>
+    </section>
+
+    <section id="applications" class="mb-8">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Mes Candidatures</h2>
+        <div class="overflow-x-auto bg-white shadow-lg rounded-lg">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-200">
+                <tr>
+                    <th class="w-1/4 py-2">Offre</th>
+                    <th class="w-1/4 py-2">Date de candidature</th>
+                    <th class="w-1/4 py-2 text-center">État</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% candidatures.slice(0, 5).forEach(candidature => { %>
+                    <tr class="hover:bg-gray-100">
+                        <td class="py-2 px-4"><%= candidature.Intitule %></td>
+                        <td class="py-2 px-4"><%= new Date(candidature.DateCandidature).toLocaleDateString() %></td>
+                        <td class="py-2 px-4 text-center">En cours</td>
+                    </tr>
+                <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-4 text-right">
+            <a href="/applications/my-applications" class="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg">Voir toutes les candidatures</a>
+        </div>
+    </section>
+
+    <section id="latest-jobs">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Dernières Offres</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <% offres.slice(0, 5).forEach(offre => { %>
+                <div class="bg-white shadow-lg rounded-lg p-6">
+                    <h5 class="text-xl font-semibold"><%= offre.Intitule %></h5>
+                    <p class="text-gray-700">Lieu: <%= offre.LieuMission %></p>
+                    <p class="text-gray-700">Salaire: <%= offre.Salaire %>€</p>
+                    <p class="text-gray-500 text-sm">Publié il y a <%= Math.floor((new Date() - new Date(offre.DateValidite)) / (1000 * 60 * 60 * 24)) %> jours</p>
+                </div>
+            <% }) %>
+        </div>
+        <div class="mt-4 text-right">
+            <a href="/jobs/browse_offers" class="btn btn-success bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg">Voir toutes les offres d'emploi</a>
+        </div>
+    </section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

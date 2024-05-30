@@ -104,7 +104,8 @@ const Candidature = {
         `;
         const [results] = await pool.query(query, [idOrganisation]);
         return results;
-    }
+    },
+
 
 };
 

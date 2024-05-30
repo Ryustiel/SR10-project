@@ -6,7 +6,7 @@ CREATE TABLE Organisation
     Type                  VARCHAR(255),
     AdresseAdministrative VARCHAR(255),
     StatutOrganisation    VARCHAR(255),
-    CONSTRAINT chk_statut_organisation CHECK (StatutOrganisation IN ('approuvée', 'en attente'))
+    CONSTRAINT chk_statut_organisation CHECK (StatutOrganisation IN ('approuvée', 'en attente', 'refusée'))
 );
 
 -- Table Utilisateur

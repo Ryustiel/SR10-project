@@ -268,7 +268,28 @@ const OffreEmploi = {
         logger.info(`isUserInOrganisation : ${idOffre} ${userEmail} ${results[0]['COUNT(*)']}`);
         return results[0]['COUNT(*)'] > 0;
     },
+    async getLatestOffers(idCandidat, excludeOrganisationId = null) {
+        let query = `
+            SELECT F.Intitule, F.LieuMission, F.Salaire, O.DateValidite
+            FROM OffreEmploi O
+            JOIN FichePoste F ON O.IdFiche = F.IdFiche
+            WHERE O.Etat = 'publié'
+              AND O.IdOffre NOT IN (
+                SELECT C.IdOffre FROM Candidature C WHERE C.IdCandidat = ?
+            )
+        `;
+        let values = [idCandidat];
 
+        if (excludeOrganisationId) {
+            query += ` AND F.IdOrganisation != ?`;
+            values.push(excludeOrganisationId);
+        }
+
+        query += ` ORDER BY O.DateValidite DESC LIMIT 3`;
+
+        const [results] = await pool.query(query, values);
+        return results;
+    }
 };
 
 module.exports = OffreEmploi;

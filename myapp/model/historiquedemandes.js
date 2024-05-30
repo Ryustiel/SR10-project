@@ -36,6 +36,12 @@ const HistoriqueDemandes = {
         return results;
     },
 
+    async readEnAttente() {
+        const query = `SELECT * FROM HistoriqueDemandes WHERE Action = 'en attente';`;
+        const [results] = await pool.query(query);
+        return results;
+    },
+
     async updateAction(numeroSiren, userId, newAction, administrateurEmail) {
         const query = `
             UPDATE HistoriqueDemandes
@@ -66,6 +72,7 @@ const HistoriqueDemandes = {
                      LEFT JOIN Organisation O ON H.NumeroSiren = O.NumeroSiren
                      LEFT JOIN Utilisateur U ON H.UserId = U.Email
             WHERE H.UserId LIKE ? OR H.AdministrateurEmail LIKE ?
+            ORDER BY H.DateAction DESC
             LIMIT ? OFFSET ?
         `;
         const [requests] = await pool.query(query, [`%${search}%`, `%${search}%`, limit, offset]);

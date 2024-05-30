@@ -1,4 +1,4 @@
-<%- include('../search_pagination.ejs', { search, currentPage, totalPages, showHistory: true }) %>
+<%- include('../search_pagination', { search, currentPage, totalPages, showHistory: true }) %>
 <table class="table table-bordered">
     <thead>
     <tr>
@@ -8,6 +8,7 @@
         <th>Organisation</th>
         <th>Statut de l'Organisation</th>
         <th>Action</th>
+        <th>Date de l'Action</th>
     </tr>
     </thead>
     <tbody>
@@ -34,8 +35,9 @@
                     <%= request.Action %> par <%= request.AdministrateurEmail %>
                 <% } %>
             </td>
+            <td><%= new Date(request.DateAction).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
         </tr>
     <% }); %>
     </tbody>
 </table>
-<%- include('../pagination.ejs', { currentPage, totalPages, search, showHistory: true }) %>
+<%- include('../pagination', { currentPage, totalPages, search, showHistory: true }) %>

@@ -8,6 +8,8 @@ const Utilisateur = require('../model/utilisateur');
 const Organisation = require('../model/organisation');
 const HistoriqueDemandes = require('../model/historiquedemandes'); // Importer le modèle HistoriqueDemandes
 const FichePoste = require('../model/ficheposte');
+const OffreEmploi = require("../model/offreemploi");
+
 const { validateNewOrganisation } = require('../middleware/validationUtils');
 const {
     handleNewOrganisationRequest,
@@ -219,11 +221,6 @@ router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req,
             throw new Error("Détails de l'utilisateur non trouvés.");
         }
 
-        await Utilisateur.updateTypeCompte(userId, 'candidat');
-
-        if (user.IdOrganisation) {
-            await Utilisateur.updateTypeCompteWithOrganisation(userId, 'candidat', null);
-        }
         // Mise à jour de la session si l'utilisateur est connecté
         if (userId === req.session.userEmail) {
             req.session.userType = 'candidat';
@@ -231,14 +228,15 @@ router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req,
 
         logger.info("Type de compte mis à jour en 'candidat' et organisation dissociée.");
 
+        // Supprimer l'entrée en attente de l'historique
+
         const organisation = await Organisation.read(user.IdOrganisation);
+        await HistoriqueDemandes.updateAction(organisation.NumeroSiren, userId, "refusée", req.session.userEmail);
         if (organisation && organisation.StatutOrganisation === 'en attente') {
-            await Organisation.delete(user.IdOrganisation);
+            await Organisation.archiveOrganisationAndAssociations(user.IdOrganisation);
             logger.info("Organisation supprimée.");
         }
 
-        // Supprimer l'entrée en attente de l'historique
-        await HistoriqueDemandes.deletePendingRequest(userId);
 
         req.session.message = "Demande de changement de type de compte annulée avec succès.";
         req.session.messageType = 'notification';
@@ -340,15 +338,13 @@ router.post('/reject_request', isLoggedIn, isAdmin, async (req, res, next) => {
             throw new Error("Détails de l'utilisateur non trouvés.");
         }
 
-        await Utilisateur.updateTypeCompteWithOrganisation(email, 'candidat', null);
-
-        const organisation = await Organisation.read(userDetails.IdOrganisation);
+        const organisation = await Organisation.read(user.IdOrganisation);
+        await HistoriqueDemandes.updateAction(organisation.NumeroSiren, userId, "refusée", req.session.userEmail);
         if (organisation && organisation.StatutOrganisation === 'en attente') {
-            await Organisation.delete(userDetails.IdOrganisation);
-            logger.info("Organisation en attente supprimée.");
+            await Organisation.archiveOrganisationAndAssociations(user.IdOrganisation);
+            logger.info("Organisation supprimée.");
         }
 
-        await HistoriqueDemandes.updateAction(userDetails.IdOrganisation, email, 'refusée', req.session.userEmail);
         req.session.message = "Demande rejetée et type de compte mis à jour en 'candidat'.";
         req.session.messageType = 'notification';
         res.redirect(`/organizations/manage_requests?search=${encodeURIComponent(search)}&page=${page}`);
@@ -390,7 +386,6 @@ router.get('/list_organisations', isLoggedIn, isAdmin, readMessage, async (req, 
 });
 
 
-// Route pour supprimer une organisation
 // Route pour supprimer une organisation
 router.post('/delete_organisation', isLoggedIn, isAdmin, async (req, res, next) => {
     const { numeroSiren } = req.body;

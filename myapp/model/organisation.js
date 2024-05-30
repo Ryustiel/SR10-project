@@ -1,4 +1,7 @@
 const pool = require('./db');
+const Utilisateur = require('./utilisateur');
+const FichePoste = require('./ficheposte');
+const OffreEmploi = require('./offreemploi');
 
 const Organisation = {
     async create({ numeroSiren, nom, type, adresseAdministrative, statutOrganisation }) {
@@ -75,7 +78,26 @@ const Organisation = {
         const [[{ totalOrganisations }]] = await pool.query(countQuery, [`%${search}%`]);
 
         return { organisations, totalOrganisations };
-    }
+    },
+    async archiveOrganisationAndAssociations(numeroSiren) {
+        // Récupérer tous les recruteurs de l'organisation et les repasser en candidats
+        const utilisateurs = await Utilisateur.readAllByOrganisation(numeroSiren);
+        for (const utilisateur of utilisateurs) {
+            await Utilisateur.updateTypeCompteWithOrganisation(utilisateur.Email, 'candidat', null);
+        }
+
+        // Supprimer toutes les fiches de poste et les offres d'emploi associées
+        const fichesPoste = await FichePoste.listFichesForOrganization(numeroSiren);
+        for (const fiche of fichesPoste) {
+            await OffreEmploi.deleteByFiche(fiche.IdFiche);
+            await FichePoste.delete(fiche.IdFiche);
+        }
+
+        // Mettre à jour le statut de l'organisation à "refusée"
+        const query = `UPDATE Organisation SET StatutOrganisation = 'refusée' WHERE NumeroSiren = ?;`;
+        const [result] = await pool.query(query, [numeroSiren]);
+        return result.affectedRows > 0; // Retourne true si une ligne a été mise à jour
+    },
 };
 
 module.exports = Organisation;
