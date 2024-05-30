@@ -84,11 +84,6 @@ const Candidature = {
         return results;
     },
 
-    async updateCandidateEmail(oldEmail, newEmail) {
-        const query = `UPDATE AssociationFichiers SET IdCandidat = ? WHERE IdCandidat = ?;`;
-        await pool.query(query, [newEmail, oldEmail]);
-    },
-
     async deleteByOffre(idOffre) {
         // Supprimer les fichiers associés
         await AssociationFichiers.deleteFilesByOffre(idOffre);
@@ -97,6 +92,7 @@ const Candidature = {
         const query = `DELETE FROM Candidature WHERE IdOffre = ?`;
         await pool.query(query, [idOffre]);
     },
+
     async getApplicationsForOrganisation(idOrganisation) {
         const query = `
             SELECT O.IdOffre, C.IdCandidat, U.Nom, U.Prenom, F.Intitule, C.DateCandidature

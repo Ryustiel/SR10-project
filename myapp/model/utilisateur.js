@@ -151,16 +151,6 @@ const Utilisateur = {
         return this.read(email);
     },
 
-    async getRecruiterRequests() {
-        const query = `
-            SELECT *
-            FROM Utilisateur
-            WHERE TypeCompte = 'recruteur en attente';
-        `;
-        const [rows] = await pool.query(query);
-        return rows;
-    },
-
     async readAllWithPagination(search, limit, offset) {
         const query = `
             SELECT * FROM Utilisateur
@@ -177,6 +167,7 @@ const Utilisateur = {
 
         return { users, totalUsers };
     },
+
     async getRecruiterRequestsWithPagination(search, limit, offset) {
         const query = `
             SELECT U.*, O.Nom AS OrganisationNom

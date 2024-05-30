@@ -105,11 +105,6 @@ const AssociationFichiers = {
                        FROM AssociationFichiers;`;
         const [results] = await pool.query(query);
         return results;
-    },
-
-    async updateCandidateEmail(oldEmail, newEmail) {
-        const query = `UPDATE AssociationFichiers SET IdCandidat = ? WHERE IdCandidat = ?;`;
-        await pool.query(query, [newEmail, oldEmail]);
     }
 };
 

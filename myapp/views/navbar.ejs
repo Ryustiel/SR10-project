@@ -12,7 +12,7 @@
                 <% if (userRole) { %>
                     <% if (userRole === 'candidat' || userRole === 'recruteur en attente' || userRole === 'recruteur' || userRole === 'administrateur') { %>
                         <li class="nav-item">
-                            <a class="nav-link <%= isActive('/dashboard') ? 'active' : '' %>" href="/dashboard">Dashboard</a>
+                            <a class="nav-link <%= isActive('dashboard') ? 'active' : '' %>" href="/dashboard">Dashboard</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link <%= isActive('/users/profile') ? 'active' : '' %>"
