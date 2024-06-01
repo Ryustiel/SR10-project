@@ -4,43 +4,13 @@
     <%- include('../head.ejs') %>
     <title>Liste des Organisations</title>
 </head>
-<body>
+<body class="tw-bg-gray-100 tw-font-sans tw-leading-normal tw-tracking-normal">
 <%- include('../navbar.ejs') %>
-<%- include('../message.ejs') %>
-<div class="container my-5">
-    <div class="row">
-        <div class="col-md-10 offset-md-1">
-            <h1 class="mb-4">Liste des Organisations</h1>
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th>Numéro Siren</th>
-                    <th>Nom</th>
-                    <th>Type</th>
-                    <th>Adresse Administrative</th>
-                    <th>Statut</th>
-                    <th>Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                <% organisations.forEach(function(organisation) { %>
-                    <tr>
-                        <td><%= organisation.NumeroSiren %></td>
-                        <td><%= organisation.Nom %></td>
-                        <td><%= organisation.Type %></td>
-                        <td><%= organisation.AdresseAdministrative %></td>
-                        <td><%= organisation.StatutOrganisation %></td>
-                        <td>
-                            <form action="/organizations/delete_organisation" method="post" class="d-inline">
-                                <input type="hidden" name="numeroSiren" value="<%= organisation.NumeroSiren %>">
-                                <button type="submit" class="btn btn-danger mb-2">Supprimer</button>
-                            </form>
-                        </td>
-                    </tr>
-                <% }); %>
-                </tbody>
-            </table>
-        </div>
+<div class="tw-container tw-mx-auto tw-my-8 tw-px-4">
+    <%- include('../message.ejs') %>
+    <div class="tw-mb-8">
+        <h1 class="tw-mb-4 tw-text-4xl tw-font-bold tw-text-gray-800">Liste des Organisations</h1>
+        <%- include('../listings/organisations_list.ejs', { search, currentPage, totalPages, organisations }) %>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

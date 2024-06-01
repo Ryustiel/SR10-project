@@ -1,17 +1,62 @@
 <% if (message) { %>
     <div id="message-popup"
-         class="alert alert-<%= messageType === 'error' ? 'danger' : 'success' %> alert-dismissible fade show"
-         role="alert">
+         class="tw-fixed tw-top-4 tw-left-1/2 tw-transform -tw-translate-x-1/2 tw-p-4 tw-rounded-md tw-shadow-lg
+                <%= messageType === 'error' ? 'tw-bg-red-500 tw-text-white' : 'tw-bg-green-500 tw-text-white' %>
+                tw-transition-opacity tw-duration-500 tw-ease-out tw-opacity-100 animate-slide-down"
+         role="alert" style="z-index: 1000;">
         <%= message %>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button type="button"
+                class="tw-ml-4 tw-bg-transparent tw-text-2xl tw-leading-none tw-font-semibold
+                           hover:tw-text-gray-200 focus:tw-outline-none focus:tw-text-gray-300"
+                onclick="closeMessagePopup()"
+                aria-label="Close">&times;</button>
     </div>
-    <script>
-        setTimeout(() => {
-            const messagePopup = document.getElementById('message-popup');
-            if (messagePopup) {
-                messagePopup.classList.remove('show');
-                messagePopup.addEventListener('transitionend', () => messagePopup.remove());
-            }
-        }, 5000); // Adjust the timeout duration as needed
-    </script>
 <% } %>
+
+<style>
+    @keyframes slide-down {
+        from {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slide-up {
+        from {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+    }
+
+    .animate-slide-down {
+        animation: slide-down 0.5s ease-out forwards;
+    }
+
+    .animate-slide-up {
+        animation: slide-up 0.5s ease-out forwards;
+    }
+</style>
+
+<script>
+    function closeMessagePopup() {
+        const messagePopup = document.getElementById('message-popup');
+        if (messagePopup) {
+            messagePopup.classList.add('animate-slide-up');
+            setTimeout(() => {
+                messagePopup.remove();
+            }, 500); // Wait for the transition to complete
+        }
+    }
+
+    setTimeout(() => {
+        closeMessagePopup();
+    }, 5000); // Adjust the timeout duration as needed
+</script>

@@ -4,43 +4,16 @@
     <%- include('../head.ejs') %>
     <title>Ajouter une Offre</title>
 </head>
-<body>
+<body class="tw-bg-gray-100 tw-font-sans tw-leading-normal tw-tracking-normal">
 <%- include('../navbar.ejs') %>
-<div class="container mt-5">
+<div class="tw-container tw-mx-auto tw-my-8 tw-px-4 sm:tw-px-6 lg:tw-px-8">
     <%- include('../message.ejs') %>
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <h1>Ajouter une Offre</h1>
-            <!-- Button to manage job listings -->
-            <div class="d-flex justify-content-end mb-3">
-                <a href="/jobs/my_jobs" class="btn btn-secondary">Gérer mes Fiches de Poste</a>
-            </div>
-            <form action="/jobs/add_offer" method="post">
-                <div class="mb-3">
-                    <label for="dateValidité" class="form-label">Date de Validité</label>
-                    <input type="date" class="form-control" id="dateValidité" name="dateValidité" required>
-                </div>
-                <div class="mb-3">
-                    <label for="listePieces" class="form-label">Liste des Pièces</label>
-                    <input type="text" class="form-control" id="listePieces" name="listePieces" required>
-                </div>
-                <div class="mb-3">
-                    <label for="nombrePieces" class="form-label">Nombre de Pièces</label>
-                    <input type="number" class="form-control" id="nombrePieces" name="nombrePieces" required>
-                </div>
-                <div class="mb-3">
-                    <label for="idFiche" class="form-label">Fiche de Poste</label>
-                    <select class="form-select" id="idFiche" name="idFiche" required>
-                        <% fiches.forEach(fiche => { %>
-                            <option value="<%= fiche.IdFiche %>"><%= fiche.Intitule %></option>
-                        <% }) %>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Ajouter l'Offre</button>
-            </form>
+    <div class="tw-flex tw-justify-center">
+        <div class="tw-w-full sm:tw-w-3/4 lg:tw-w-1/2">
+            <h1 class="tw-mb-4 tw-text-4xl tw-font-bold tw-text-gray-800 tw-text-center">Ajouter une Offre</h1>
+            <%- include('../forms/create_offer_form.ejs') %>
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

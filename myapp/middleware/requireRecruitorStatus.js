@@ -7,10 +7,10 @@ function requireRecruitorStatus(req, res, next) {
                 req.session.returnTo = req.originalUrl || '/'; // save current page
                 res.redirect('/login');
             } else {
-                res.render('denied/permission.ejs',
-                    {
-                        reason: 'Vous ne pouvez malheureusement pas accéder à cette page'
-                    });
+                let error = new Error();
+                error.status = 500;
+                error.message = 'Vous n\'avez pas accès à cette page';
+                next(error);
             }
         }
     } catch (e) {

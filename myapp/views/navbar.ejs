@@ -1,76 +1,120 @@
-<% function isActive(route) { return activePage.startsWith(route); } %>
+<% function isActive(route) {
+    return activePage.startsWith(route);
+} %>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="#">Plateforme de Recrutement</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <% if (userRole) { %>
-                    <% if (userRole === 'candidat' || userRole === 'recruteur en attente' || userRole === 'recruteur' || userRole === 'administrateur') { %>
-                        <li class="nav-item">
-                            <a class="nav-link <%= isActive('dashboard') ? 'active' : '' %>" href="/dashboard">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <%= isActive('/users/profile') ? 'active' : '' %>"
-                               href="/users/profile">Mon Profil</a>
-                        </li>
-                    <% } %>
-                    <% if (userRole === 'candidat' || userRole === 'recruteur en attente' || userRole === 'recruteur') { %>
-                        <% if (space === 'candidat' || !space) { %>
-                            <li class="nav-item">
-                                <a class="nav-link <%= isActive('/applications/my-applications') ? 'active' : '' %>"
-                                   href="/applications/my-applications">Voir mes Candidatures</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link <%= isActive('/jobs/browse_offers') ? 'active' : '' %>"
-                                   href="/jobs/browse_offers">Postuler</a>
-                            </li>
+<nav class="tw-bg-white tw-shadow-lg tw-w-full">
+    <div class="tw-max-w-7xl tw-mx-auto tw-px-4 sm:tw-px-6 lg:tw-px-8">
+        <div class="tw-flex tw-items-center tw-justify-between tw-h-16">
+            <div class="tw-flex-shrink-0">
+                <a class="tw-text-xl tw-font-bold tw-text-gray-800" href="#">Plateforme de Recrutement</a>
+            </div>
+            <div class="tw-hidden sm:tw-flex tw-flex-1 tw-justify-center">
+                <div class="tw-flex tw-space-x-4">
+                    <% if (userRole) { %>
+                        <% if (userRole === 'candidat' || userRole === 'recruteur en attente' || userRole === 'recruteur' || userRole === 'administrateur') { %>
+                            <a href="/dashboard"
+                               class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('dashboard') ? (userRole === 'administrateur' ? 'tw-bg-orange-400 tw-text-white' : (space === 'recruteur' ? 'tw-bg-green-500 tw-text-white' : 'tw-bg-blue-500 tw-text-white')) : (userRole === 'administrateur' ? 'tw-text-gray-800 hover:tw-bg-orange-300 hover:tw-text-white' : (space === 'recruteur' ? 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' : 'tw-text-gray-800 hover:tw-bg-blue-400 hover:tw-text-white')) %>">Dashboard</a>
+                            <a href="/users/profile"
+                               class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/users/profile') ? (userRole === 'administrateur' ? 'tw-bg-orange-400 tw-text-white' : (space === 'recruteur' ? 'tw-bg-green-500 tw-text-white' : 'tw-bg-blue-500 tw-text-white')) : (userRole === 'administrateur' ? 'tw-text-gray-800 hover:tw-bg-orange-300 hover:tw-text-white' : (space === 'recruteur' ? 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' : 'tw-text-gray-800 hover:tw-bg-blue-400 hover:tw-text-white')) %>">Profil</a>
+                        <% } %>
+                        <% if (userRole === 'candidat' || userRole === 'recruteur en attente' || userRole === 'recruteur') { %>
+                            <% if (space === 'candidat' || !space) { %>
+                                <a href="/applications/my-applications"
+                                   class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/applications/my-applications') ? (space === 'recruteur' ? 'tw-bg-green-500 tw-text-white' : 'tw-bg-blue-500 tw-text-white') : 'tw-text-gray-800 hover:tw-bg-blue-400 hover:tw-text-white' %>">Candidatures</a>
+                                <a href="/jobs/browse_offers"
+                                   class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/browse_offers') ? (space === 'recruteur' ? 'tw-bg-green-500 tw-text-white' : 'tw-bg-blue-500 tw-text-white') : 'tw-text-gray-800 hover:tw-bg-blue-400 hover:tw-text-white' %>">Postuler</a>
+                            <% } %>
+                        <% } %>
+                        <% if (userRole === 'recruteur' && space === 'recruteur') { %>
+                            <a href="/jobs/add_job"
+                               class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/add_job') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Ajouter Poste</a>
+                            <a href="/jobs/add_offer"
+                               class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/add_offer') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Ajouter Offre</a>
+                            <a href="/applications/incoming-applications"
+                               class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/applications/incoming-applications') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Candidatures</a>
+                            <a href="/jobs/my_offers"
+                               class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/my_offers') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Offres</a>
+                        <% } %>
+                        <% if (userRole === 'administrateur') { %>
+                            <a href="/organizations/manage_requests"
+                               class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/organizations/manage_requests') ? 'tw-bg-orange-400 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-orange-300 hover:tw-text-white' %>">Gérer</a>
+                            <a href="/users/userslist"
+                               class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/users/userslist') ? 'tw-bg-orange-400 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-orange-300 hover:tw-text-white' %>">Utilisateurs</a>
+                            <a href="/organizations/list_organisations"
+                               class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/organizations/list_organisations') ? 'tw-bg-orange-400 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-orange-300 hover:tw-text-white' %>">Organisations</a>
                         <% } %>
                     <% } %>
-                    <% if (userRole === 'recruteur' && space === 'recruteur') { %>
-                        <li class="nav-item">
-                            <a class="nav-link <%= isActive('/jobs/add_job') ? 'active' : '' %>" href="/jobs/add_job">Ajouter un Poste</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <%= isActive('/jobs/add_offer') ? 'active' : '' %>"
-                               href="/jobs/add_offer">Ajouter une Offre</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <%= isActive('/applications/incoming-applications') ? 'active' : '' %>" href="/applications/incoming-applications">Voir les Candidatures</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <%= isActive('/jobs/my_offers') ? 'active' : '' %>" href="/jobs/my_offers">Voir les Offres de l'Organisation</a>
-                        </li>
+                </div>
+            </div>
+            <% if (userRole === 'recruteur') { %>
+                <div class="tw-flex tw-items-center">
+                    <% if (space === 'candidat') { %>
+                        <a href="/dashboard/switch-to-recruiter-space"
+                           class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out tw-whitespace-nowrap tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white">
+                            Espace Recruteur
+                        </a>
+                    <% } else { %>
+                        <a href="/dashboard/switch-to-candidate-space"
+                           class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out tw-whitespace-nowrap tw-bg-green-500 tw-text-white hover:tw-bg-green-400">
+                            Espace Candidat
+                        </a>
                     <% } %>
-                    <% if (userRole === 'administrateur') { %>
-                        <li class="nav-item">
-                            <a class="nav-link <%= isActive('/organizations/manage_requests') ? 'active' : '' %>" href="/organizations/manage_requests">Gérer les demandes</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <%= isActive('/users/userslist') ? 'active' : '' %>" href="/users/userslist">Liste des Utilisateurs</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <%= isActive('/organizations/list_organisations') ? 'active' : '' %>" href="/organizations/list_organisations">Liste des Organisations</a>
-                        </li>
+                </div>
+            <% } %>
+            <div class="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center sm:tw-hidden">
+                <button type="button"
+                        class="tw-inline-flex tw-items-center tw-justify-center tw-p-2 tw-rounded-md tw-text-gray-400 hover:tw-text-white hover:tw-bg-blue-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-white"
+                        aria-controls="mobile-menu" aria-expanded="false">
+                    <span class="tw-sr-only">Open main menu</span>
+                    <svg class="tw-block tw-h-6 tw-w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 6h16M4 12h16m-7 6h7"/>
+                    </svg>
+                    <svg class="tw-hidden tw-h-6 tw-w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Mobile menu, show/hide based on menu state. -->
+    <div class="sm:tw-hidden" id="mobile-menu">
+        <div class="tw-px-2 tw-pt-2 tw-pb-3 tw-space-y-1">
+            <% if (userRole) { %>
+                <% if (userRole === 'candidat' || userRole === 'recruteur en attente' || userRole === 'recruteur' || userRole === 'administrateur') { %>
+                    <a href="/dashboard"
+                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('dashboard') ? (space === 'recruteur' ? 'tw-bg-green-500 tw-text-white' : 'tw-bg-blue-500 tw-text-white') : (space === 'recruteur' ? 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' : 'tw-text-gray-800 hover:tw-bg-blue-400 hover:tw-text-white') %>">Dashboard</a>
+                    <a href="/users/profile"
+                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/users/profile') ? (space === 'recruteur' ? 'tw-bg-green-500 tw-text-white' : 'tw-bg-blue-500 tw-text-white') : (space === 'recruteur' ? 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' : 'tw-text-gray-800 hover:tw-bg-blue-400 hover:tw-text-white') %>">Profil</a>
+                <% } %>
+                <% if (userRole === 'candidat' || userRole === 'recruteur en attente' || userRole === 'recruteur') { %>
+                    <% if (space === 'candidat' || !space) { %>
+                        <a href="/applications/my-applications"
+                           class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/applications/my-applications') ? (space === 'recruteur' ? 'tw-bg-green-500 tw-text-white' : 'tw-bg-blue-500 tw-text-white') : 'tw-text-gray-800 hover:tw-bg-blue-400 hover:tw-text-white' %>">Candidatures</a>
+                        <a href="/jobs/browse_offers"
+                           class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/browse_offers') ? (space === 'recruteur' ? 'tw-bg-green-500 tw-text-white' : 'tw-bg-blue-500 tw-text-white') : 'tw-text-gray-800 hover:tw-bg-blue-400 hover:tw-text-white' %>">Postuler</a>
                     <% } %>
                 <% } %>
-            </ul>
-            <% if (userRole === 'recruteur') { %>
-                <ul class="navbar-nav ms-auto">
-                    <% if (space === 'candidat' || !space) { %>
-                        <li class="nav-item">
-                            <a class="nav-link btn btn-outline-primary" href="/dashboard/switch-to-recruiter-space">Espace Recruteur</a>
-                        </li>
-                    <% } else if (space === 'recruteur') { %>
-                        <li class="nav-item">
-                            <a class="nav-link btn btn-outline-secondary" href="/dashboard/switch-to-candidate-space">Espace Candidat</a>
-                        </li>
-                    <% } %>
-                </ul>
+                <% if (userRole === 'recruteur' && space === 'recruteur') { %>
+                    <a href="/jobs/add_job"
+                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/add_job') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Ajouter Poste</a>
+                    <a href="/jobs/add_offer"
+                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/add_offer') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Ajouter Offre</a>
+                    <a href="/applications/incoming-applications"
+                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/applications/incoming-applications') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Candidatures</a>
+                    <a href="/jobs/my_offers"
+                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/my_offers') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Offres</a>
+                <% } %>
+                <% if (userRole === 'administrateur') { %>
+                    <a href="/organizations/manage_requests"
+                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/organizations/manage_requests') ? 'tw-bg-orange-400 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-orange-300 hover:tw-text-white' %>">Gérer</a>
+                    <a href="/users/userslist"
+                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/users/userslist') ? 'tw-bg-orange-400 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-orange-300 hover:tw-text-white' %>">Utilisateurs</a>
+                    <a href="/organizations/list_organisations"
+                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/organizations/list_organisations') ? 'tw-bg-orange-400 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-orange-300 hover:tw-text-white' %>">Organisations</a>
+                <% } %>
             <% } %>
         </div>
     </div>

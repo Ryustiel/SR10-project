@@ -10,15 +10,15 @@ async function requireAffiliation(req, res, next) {
                 res.redirect('/login');
             }
             else if (req.session.userType !== 'recruteur') {
-                res.render('denied/permission.ejs', {
-                    reason:
-                        'Cette page n\'est accessible qu\'aux recruteurs'
-                });
+                let error = new Error();
+                error.status = 500;
+                error.message = 'Erreur interne du serveur.';
+                next(error);
             } else {
-                res.render('denied/permission.ejs', {
-                    reason:
-                        'Vous devez d\'abord vous affilier à une organisation pour accéder à cette page'
-                });
+                let error = new Error();
+                error.status = 403;
+                error.message = 'Vous n\'avez pas le droit d\'accéder à cette page.';
+                next(error);
             }
         }
     } catch (e) {

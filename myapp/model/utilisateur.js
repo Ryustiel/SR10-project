@@ -2,6 +2,7 @@ const pool = require('./db');
 const Candidature = require('./candidature');
 const logger = require('../logger');
 const bcrypt = require('bcryptjs');
+const HistoriqueDemandes = require('./historiquedemandes');
 
 const Utilisateur = {
     async create({email, motDePasse, nom, prenom, telephone, dateCreation, statutCompte, typeCompte, idOrganisation}) {
@@ -62,6 +63,7 @@ const Utilisateur = {
                 await Candidature.delete(email, candidature.IdOffre);
             }
 
+            await HistoriqueDemandes.deleteRequests(email);
             // Supprimer l'utilisateur
             const deleteUserQuery = `DELETE FROM Utilisateur WHERE Email = ?;`;
             await connection(deleteUserQuery, [email]);

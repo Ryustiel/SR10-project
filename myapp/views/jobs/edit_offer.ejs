@@ -4,17 +4,19 @@
     <%- include('../head.ejs') %>
     <title>Modifier l'Offre</title>
 </head>
-<body>
+<body class="tw-bg-gray-100 tw-font-sans tw-leading-normal tw-tracking-normal">
+
 <%- include('../navbar.ejs') %>
-<div class="container mt-5">
+
+<div class="tw-container tw-mt-5 tw-mx-auto">
     <%- include('../message.ejs') %>
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <h1>Éditer l'Offre d'Emploi</h1>
+    <div class="tw-flex tw-justify-center">
+        <div class="tw-w-full sm:tw-w-3/4 lg:tw-w-1/2">
+            <h1 class="tw-mb-4 tw-text-4xl tw-font-bold tw-text-gray-800 tw-text-center">Éditer l'Offre d'Emploi</h1>
             <%- include('../forms/edit_offer_form', { offre, fiches }) %>
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

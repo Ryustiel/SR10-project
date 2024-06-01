@@ -24,18 +24,6 @@ const HistoriqueDemandes = {
         return results;
     },
 
-    async readByOrganisation(numeroSiren) {
-        const query = `SELECT * FROM HistoriqueDemandes WHERE NumeroSiren = ?;`;
-        const [results] = await pool.query(query, [numeroSiren]);
-        return results;
-    },
-
-    async readByAdmin(administrateurEmail) {
-        const query = `SELECT * FROM HistoriqueDemandes WHERE AdministrateurEmail = ?;`;
-        const [results] = await pool.query(query, [administrateurEmail]);
-        return results;
-    },
-
     async readEnAttente() {
         const query = `SELECT * FROM HistoriqueDemandes WHERE Action = 'en attente';`;
         const [results] = await pool.query(query);
@@ -49,18 +37,6 @@ const HistoriqueDemandes = {
             WHERE NumeroSiren = ? AND UserId = ? AND Action = 'en attente';
         `;
         const values = [newAction, administrateurEmail, numeroSiren, userId];
-        const [result] = await pool.query(query, values);
-        logger.debug(`Update values: Action=${newAction}, AdministrateurEmail=${administrateurEmail}, NumeroSiren=${numeroSiren}, UserId=${userId}`);
-        logger.debug(`Update result: ${JSON.stringify(result)}`); // Ajout du log
-        return result.affectedRows > 0;
-    },
-
-    async deletePendingRequest(userId) {
-        const query = `
-            DELETE FROM HistoriqueDemandes
-            WHERE UserId = ? AND Action = 'en attente';
-        `;
-        const values = [userId];
         const [result] = await pool.query(query, values);
         return result.affectedRows > 0;
     },
@@ -92,7 +68,18 @@ const HistoriqueDemandes = {
     async deleteByOrganisation(numeroSiren) {
         const query = `DELETE FROM HistoriqueDemandes WHERE NumeroSiren = ?;`;
         await pool.query(query, [numeroSiren]);
-    }
+    },
+
+    async deleteRequests(userId) {
+        const query = `
+            DELETE FROM HistoriqueDemandes
+            WHERE UserId = ?;
+        `;
+        const values = [userId];
+        const [result] = await pool.query(query, values);
+        return result.affectedRows > 0;
+    },
+
 };
 
 module.exports = HistoriqueDemandes;

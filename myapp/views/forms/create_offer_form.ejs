@@ -1,26 +1,39 @@
-<form action="/jobs/add_offer" method="POST">
-    <div class="mb-3">
-        <label for="dateValidité" class="form-label">Date de Validité</label>
-        <input type="date" class="form-control" id="dateValidité" name="dateValidité" required>
+<form action="/jobs/add_offer" method="post" class="tw-space-y-4 tw-w-full sm:tw-max-w-lg tw-mx-auto">
+    <div>
+        <label for="dateValidité" class="tw-block tw-text-sm tw-font-semibold tw-text-gray-700 tw-mb-2">Date de Validité</label>
+        <input type="date"
+               class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500"
+               id="dateValidité" name="dateValidité" required>
     </div>
-    <div class="mb-3">
-        <label for="listePieces" class="form-label">Liste des Pièces</label>
-        <textarea class="form-control" id="listePieces" name="listePieces" rows="3" required></textarea>
+    <div>
+        <label for="listePieces" class="tw-block tw-text-sm tw-font-semibold tw-text-gray-700 tw-mb-2">Liste des Pièces</label>
+        <textarea
+                class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500"
+                id="listePieces" name="listePieces" rows="3" required></textarea>
     </div>
-    <div class="mb-3">
-        <label for="nombrePieces" class="form-label">Nombre de Pièces</label>
-        <input type="number" class="form-control" id="nombrePieces" name="nombrePieces" required>
+    <div>
+        <label for="nombrePieces" class="tw-block tw-text-sm tw-font-semibold tw-text-gray-700 tw-mb-2">Nombre de Pièces</label>
+        <input type="number"
+               class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500"
+               id="nombrePieces" name="nombrePieces" required>
     </div>
-    <div class="mb-3">
-        <label for="idFiche" class="form-label">Fiche de Poste</label>
-        <select class="form-select" id="idFiche" name="idFiche" required>
+    <div>
+        <label for="idFiche" class="tw-block tw-text-sm tw-font-semibold tw-text-gray-700 tw-mb-2">Fiche de Poste</label>
+        <select class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500"
+                id="idFiche" name="idFiche" required>
             <% for (let i = 0; i < fiches.length; i++) { %>
-                <option value="<%= fiches[i].idFiche %>">
-                    <%= fiches[i].intitule %>
+                <option value="<%= fiches[i].IdFiche %>">
+                    <%= fiches[i].Intitule %>
                 </option>
             <% } %>
         </select>
-        <button type="button" class="btn btn-secondary" onclick="window.location.href = '/jobs/my_jobs'">Gérer Mes Fiches</button>
     </div>
-    <button type="submit" class="btn btn-primary">Créer</button>
+    <button type="submit"
+            class="tw-w-full tw-bg-gradient-to-r tw-from-blue-500 tw-to-purple-600 tw-text-white tw-font-semibold tw-py-2 tw-px-4 tw-rounded-md tw-shadow-lg hover:tw-bg-gradient-to-l focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-blue-500 tw-transition tw-duration-300 tw-ease-in-out">
+        Ajouter l'Offre
+    </button>
+    <div class="tw-flex tw-justify-end tw-mt-3">
+        <a href="/jobs/my_jobs"
+           class="tw-bg-gray-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-md hover:tw-bg-gray-600">Gérer mes Fiches de Poste</a>
+    </div>
 </form>

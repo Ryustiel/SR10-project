@@ -4,82 +4,83 @@
     <%- include('../head') %>
     <title>Dashboard Administrateur</title>
 </head>
-<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+<body class="tw-bg-gray-100 tw-font-sans tw-leading-normal tw-tracking-normal">
 <%- include('../navbar', { activePage: 'dashboard' }) %>
-<div class="container mx-auto my-8 p-4">
-    <section id="overview" class="mb-8">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Aperçu</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-blue-600 text-white shadow-lg rounded-lg p-6">
-                <h3 class="text-xl">Utilisateur<%= utilisateurs.length > 1 ? 's' : '' %></h3>
-                <p class="text-4xl"><%= utilisateurs.length %></p>
+<div class="tw-container tw-mx-auto tw-my-8 tw-px-4">
+    <%- include("../message.ejs") %>
+    <section id="overview" class="tw-mb-8">
+        <h2 class="tw-text-2xl tw-font-semibold tw-text-gray-800 tw-mb-4">Aperçu</h2>
+        <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+            <div class="tw-bg-blue-600 tw-text-white tw-shadow-lg tw-rounded-lg tw-p-6">
+                <h3 class="tw-text-xl">Utilisateur<%= utilisateurs.length > 1 ? 's' : '' %></h3>
+                <p class="tw-text-4xl"><%= utilisateurs.length %></p>
             </div>
-            <div class="bg-yellow-500 text-white shadow-lg rounded-lg p-6">
-                <h3 class="text-xl">Demande<%= demandesEnAttente.filter(demande => demande.Action === 'en attente').length > 1 ? 's' : '' %> en attente</h3>
-                <p class="text-4xl"><%= demandesEnAttente.filter(demande => demande.Action === 'en attente').length %></p>
+            <div class="tw-bg-yellow-500 tw-text-white tw-shadow-lg tw-rounded-lg tw-p-6">
+                <h3 class="tw-text-xl">Demande<%= demandesEnAttente.filter(demande => demande.Action === 'en attente').length > 1 ? 's' : '' %> en attente</h3>
+                <p class="tw-text-4xl"><%= demandesEnAttente.filter(demande => demande.Action === 'en attente').length %></p>
             </div>
         </div>
     </section>
 
-    <section id="users" class="mb-8">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Utilisateurs Récents</h2>
-        <div class="overflow-x-auto bg-white shadow-lg rounded-lg">
-            <table class="min-w-full bg-white">
-                <thead class="bg-gray-200">
+    <section id="users" class="tw-mb-8">
+        <h2 class="tw-text-2xl tw-font-semibold tw-text-gray-800 tw-mb-4">Utilisateurs Récents</h2>
+        <div class="tw-overflow-x-auto tw-bg-white tw-shadow-lg tw-rounded-lg">
+            <table class="tw-min-w-full tw-bg-white">
+                <thead class="tw-bg-gray-200">
                 <tr>
-                    <th class="w-1/4 py-2">Nom</th>
-                    <th class="w-1/4 py-2">Email</th>
-                    <th class="w-1/4 py-2">Téléphone</th>
-                    <th class="w-1/4 py-2">Type de Compte</th>
-                    <th class="w-1/4 py-2">Date de Création</th>
+                    <th class="tw-w-1/5 tw-py-2">Nom</th>
+                    <th class="tw-w-1/5 tw-py-2">Email</th>
+                    <th class="tw-w-1/5 tw-py-2">Téléphone</th>
+                    <th class="tw-w-1/5 tw-py-2">Type de Compte</th>
+                    <th class="tw-w-1/5 tw-py-2">Date de Création</th>
                 </tr>
                 </thead>
                 <tbody>
                 <% utilisateurs.slice(0, 5).forEach(utilisateur => { %>
-                    <tr class="hover:bg-gray-100">
-                        <td class="py-2 px-4"><%= utilisateur.Nom %> <%= utilisateur.Prenom %></td>
-                        <td class="py-2 px-4"><%= utilisateur.Email %></td>
-                        <td class="py-2 px-4"><%= utilisateur.Telephone %></td>
-                        <td class="py-2 px-4"><%= utilisateur.TypeCompte %></td>
-                        <td class="py-2 px-4"><%= new Date(utilisateur.DateCreation).toLocaleDateString() %></td>
+                    <tr class="hover:tw-bg-gray-100">
+                        <td class="tw-py-2 tw-px-4"><%= utilisateur.Nom %> <%= utilisateur.Prenom %></td>
+                        <td class="tw-py-2 tw-px-4"><%= utilisateur.Email %></td>
+                        <td class="tw-py-2 tw-px-4"><%= utilisateur.Telephone %></td>
+                        <td class="tw-py-2 tw-px-4"><%= utilisateur.TypeCompte %></td>
+                        <td class="tw-py-2 tw-px-4"><%= new Date(utilisateur.DateCreation).toLocaleDateString() %></td>
                     </tr>
                 <% }) %>
                 </tbody>
             </table>
         </div>
-        <div class="mt-4 text-right">
-            <a href="/users/userslist" class="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg">Voir tous les utilisateurs</a>
+        <div class="tw-mt-4 tw-text-right">
+            <a href="/users/userslist" class="tw-bg-blue-600 hover:tw-bg-blue-700 tw-text-white tw-font-semibold tw-py-2 tw-px-4 tw-rounded-lg">Voir tous les utilisateurs</a>
         </div>
     </section>
 
-    <section id="requests" class="mb-8">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Demandes en Attente</h2>
-        <div class="overflow-x-auto bg-white shadow-lg rounded-lg">
-            <table class="min-w-full bg-white">
-                <thead class="bg-gray-200">
+    <section id="requests" class="tw-mb-8">
+        <h2 class="tw-text-2xl tw-font-semibold tw-text-gray-800 tw-mb-4">Demandes en Attente</h2>
+        <div class="tw-overflow-x-auto tw-bg-white tw-shadow-lg tw-rounded-lg">
+            <table class="tw-min-w-full tw-bg-white">
+                <thead class="tw-bg-gray-200">
                 <tr>
-                    <th class="w-1/5 py-2">Numéro Siren</th>
-                    <th class="w-1/5 py-2">Action</th>
-                    <th class="w-1/5 py-2">Type de Demande</th>
-                    <th class="w-1/5 py-2">Date de l'Action</th>
-                    <th class="w-1/5 py-2">Utilisateur</th>
+                    <th class="tw-w-1/5 tw-py-2">Numéro Siren</th>
+                    <th class="tw-w-1/5 tw-py-2">Action</th>
+                    <th class="tw-w-1/5 tw-py-2">Type de Demande</th>
+                    <th class="tw-w-1/5 tw-py-2">Date de l'Action</th>
+                    <th class="tw-w-1/5 tw-py-2">Utilisateur</th>
                 </tr>
                 </thead>
                 <tbody>
                 <% demandesEnAttente.slice(0, 5).forEach(demande => { %>
-                    <tr class="hover:bg-gray-100">
-                        <td class="py-2 px-4"><%= demande.NumeroSiren %></td>
-                        <td class="py-2 px-4"><%= demande.Action %></td>
-                        <td class="py-2 px-4"><%= demande.TypeDemande %></td>
-                        <td class="py-2 px-4"><%= new Date(demande.DateAction).toLocaleDateString() %></td>
-                        <td class="py-2 px-4"><%= demande.UserId %></td>
+                    <tr class="hover:tw-bg-gray-100">
+                        <td class="tw-py-2 tw-px-4"><%= demande.NumeroSiren %></td>
+                        <td class="tw-py-2 tw-px-4"><%= demande.Action %></td>
+                        <td class="tw-py-2 tw-px-4"><%= demande.TypeDemande %></td>
+                        <td class="tw-py-2 tw-px-4"><%= new Date(demande.DateAction).toLocaleDateString() %></td>
+                        <td class="tw-py-2 tw-px-4"><%= demande.UserId %></td>
                     </tr>
                 <% }) %>
                 </tbody>
             </table>
         </div>
-        <div class="mt-4 text-right">
-            <a href="/organizations/manage_requests" class="btn btn-warning bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 px-4 rounded-lg">Voir toutes les demandes</a>
+        <div class="tw-mt-4 tw-text-right">
+            <a href="/organizations/manage_requests" class="tw-bg-yellow-600 hover:tw-bg-yellow-700 tw-text-white tw-font-semibold tw-py-2 tw-px-4 tw-rounded-lg">Voir toutes les demandes</a>
         </div>
     </section>
 </div>

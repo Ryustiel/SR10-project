@@ -1,33 +1,33 @@
-<div>
-    <h3>Détails de la Candidature</h3>
+<div class="tw-px-4 tw-py-2">
+    <h3 class="tw-text-2xl tw-font-bold tw-mb-4">Détails de la Candidature</h3>
     <% if (organisations.length > 0) { %>
-        <p><strong>Organisation:</strong> <%= organisations[0].Nom %></p>
+        <p class="tw-mb-2"><strong>Organisation:</strong> <%= organisations[0].Nom %></p>
     <% } %>
-    <p><strong>Offre:</strong> <%= offre.Intitule %></p>
-    <p><strong>Date de Candidature:</strong> <%= new Date(candidature.DateCandidature).toLocaleDateString("fr-FR") %></p>
+    <p class="tw-mb-2"><strong>Offre:</strong> <%= offre.Intitule %></p>
+    <p class="tw-mb-2"><strong>Date de Candidature:</strong> <%= new Date(candidature.DateCandidature).toLocaleDateString("fr-FR") %></p>
 
-    <h3>Pièces Jointes</h3>
-    <ul id="existing-files">
+    <h3 class="tw-text-xl tw-font-bold tw-mt-4 tw-mb-2">Pièces Jointes</h3>
+    <ul id="existing-files" class="tw-list-disc tw-list-inside">
         <% fichiers.forEach(function(file) { %>
-            <li>
-                <a href="/applications/download-attachment?fichier=<%= file.Fichier %>"><%= file.NomOriginal %></a>
-                <button type="button" class="btn btn-danger btn-sm delete-file" data-file="<%= file.Fichier %>" data-offre-id="<%= offre.IdOffre %>" data-candidat-id="<%= candidature.IdCandidat %>">Supprimer</button>
+            <li class="tw-mb-2">
+                <a href="/applications/download-attachment?fichier=<%= file.Fichier %>" class="tw-text-blue-500 tw-underline"><%= file.NomOriginal %></a>
+                <button type="button" class="tw-ml-2 tw-text-white tw-bg-red-500 hover:tw-bg-red-700 tw-rounded tw-px-2 tw-py-1 delete-file" data-file="<%= file.Fichier %>" data-offre-id="<%= offre.IdOffre %>" data-candidat-id="<%= candidature.IdCandidat %>">Supprimer</button>
             </li>
         <% }); %>
     </ul>
 
-    <h3>Ajouter/Modifier des Pièces Jointes</h3>
+    <h3 class="tw-text-xl tw-font-bold tw-mt-4 tw-mb-2">Ajouter/Modifier des Pièces Jointes</h3>
     <form id="edit-application-form" action="/applications/edit-application" method="post" enctype="multipart/form-data">
         <input type="hidden" name="idCandidat" value="<%= candidature.IdCandidat %>">
         <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
         <input type="hidden" id="filesToDelete" name="filesToDelete">
-        <div class="mb-3">
-            <label for="formFileLg" class="form-label">Télécharger des fichiers</label>
-            <input class="form-control" id="formFileLg" name="files" type="file" multiple>
+        <div class="tw-mb-3">
+            <label for="formFileLg" class="tw-form-label">Télécharger des fichiers</label>
+            <input class="tw-form-control tw-w-full tw-py-2 tw-px-3 tw-border tw-border-gray-300 tw-rounded-md" id="formFileLg" name="files" type="file" multiple>
         </div>
-        <div id="fileCount" class="mb-3" data-required-files="<%= offre.NombrePieces %>">
+        <div id="fileCount" class="tw-mb-3" data-required-files="<%= offre.NombrePieces %>">
             Pièces justificatives fournies : <%= fichiers.length %>/<%= offre.NombrePieces %>
         </div>
-        <button id="submitButton" type="submit" class="btn btn-secondary" disabled>Mettre à jour</button>
+        <button id="submitButton" type="submit" class="tw-bg-gray-500 tw-text-white tw-py-2 tw-px-4 tw-rounded" disabled>Mettre à jour</button>
     </form>
 </div>

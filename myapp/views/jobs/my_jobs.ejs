@@ -3,33 +3,20 @@
 <head>
     <%- include('../head.ejs') %>
     <title>Fiches de Poste</title>
-    <style>
-        .btn-group > .btn:first-of-type {
-            border-top-left-radius: .25rem;
-            border-bottom-left-radius: .25rem;
-        }
-        .btn-group > .btn:last-of-type {
-            border-top-right-radius: .25rem;
-            border-bottom-right-radius: .25rem;
-        }
-        .btn {
-            border-radius: .25rem !important;
-        }
-    </style>
 </head>
-<body>
+<body class="tw-bg-gray-100 tw-font-sans tw-leading-normal tw-tracking-normal">
 
 <%- include('../navbar.ejs') %>
 
-<div class="container mt-5">
+<div class="tw-container tw-mt-5 tw-mx-auto">
     <%- include('../message.ejs') %> <!-- Inclusion des messages -->
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <h1>Fiches de Poste de Mon Organisation</h1>
+    <div class="tw-flex tw-justify-center">
+        <div class="tw-w-full sm:tw-w-3/4 lg:tw-w-1/2">
+            <h1 class="tw-mb-4 tw-text-4xl tw-font-bold tw-text-gray-800 tw-text-center">Fiches de Poste de Mon Organisation</h1>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
+    <div class="tw-flex tw-justify-center">
+        <div class="tw-w-full sm:tw-w-3/4 lg:tw-w-1/2">
             <%- include('../listings/my_jobs.ejs') %>
         </div>
     </div>
@@ -79,6 +66,14 @@
         }
     });
 </script>
+
+<!-- Inclusion du modal en utilisant le fichier modal.ejs -->
+<%- include('../modal.ejs', {
+modalId: 'deleteModal',
+modalLabelId: 'deleteModalLabel',
+modalTitle: 'Confirmer la Suppression',
+modalBody: 'confirmation_body.ejs',
+}) %>
 
 </body>
 </html>

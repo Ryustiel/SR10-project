@@ -1,43 +1,45 @@
-<%- include('../search_pagination', { search, currentPage, totalPages, showHistory: true }) %>
-<table class="table table-bordered">
-    <thead>
-    <tr>
-        <th>Nom</th>
-        <th>Prénom</th>
-        <th>Email</th>
-        <th>Organisation</th>
-        <th>Statut de l'Organisation</th>
-        <th>Action</th>
-        <th>Date de l'Action</th>
-    </tr>
-    </thead>
-    <tbody>
-    <% requests.forEach(function(request) { %>
+<%- include('../search_pagination.ejs', { search, currentPage, totalPages, showHistory: true }) %>
+<div class="tw-overflow-x-auto tw-bg-white tw-shadow-lg tw-rounded-lg">
+    <table class="tw-min-w-full tw-bg-white tw-mb-4">
+        <thead class="tw-bg-gray-200">
         <tr>
-            <td><%= request.UserNom %></td>
-            <td><%= request.UserPrenom %></td>
-            <td><%= request.UserId %></td>
-            <td><%= request.OrganisationNom %> (<%= request.NumeroSiren %>)</td>
-            <td>
-                <% if (request.Action === 'en attente') { %>
-                    <%= request.TypeDemande.includes('nouvelle') ? 'Nouvelle organisation en attente' : 'Organisation existante' %>
-                <% } else if (request.Action === 'approuvée') { %>
-                    <%= request.TypeDemande.includes('nouvelle') ? 'Nouvelle organisation approuvée' : 'Organisation existante' %>
-                <% } else if (request.Action === 'refusée') { %>
-                    <%= request.TypeDemande.includes('nouvelle') ? 'Nouvelle organisation refusée' : 'Organisation existante' %>
-                <% } %>
-            </td>
-            <td>
-                <% if (request.Action === 'en attente') { %>
-                    <%= request.TypeDemande.includes('nouvelle') ? 'Demande de rejoindre la nouvelle organisation en attente' : 'Demande de rejoindre l\'organisation existante en attente' %>
-                <% } else { %>
-                    <%= request.TypeDemande.includes('nouvelle') ? 'Demande de rejoindre la nouvelle organisation ' : 'Demande de rejoindre l\'organisation existante ' %>
-                    <%= request.Action %> par <%= request.AdministrateurEmail %>
-                <% } %>
-            </td>
-            <td><%= new Date(request.DateAction).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Nom</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Prénom</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Email</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Organisation</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Statut de l'Organisation</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Action</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Date de l'Action</th>
         </tr>
-    <% }); %>
-    </tbody>
-</table>
-<%- include('../pagination', { currentPage, totalPages, search, showHistory: true }) %>
+        </thead>
+        <tbody>
+        <% requests.forEach(function(request) { %>
+            <tr class="hover:tw-bg-gray-100">
+                <td class="tw-py-2 tw-px-4"><%= request.UserNom %></td>
+                <td class="tw-py-2 tw-px-4"><%= request.UserPrenom %></td>
+                <td class="tw-py-2 tw-px-4"><%= request.UserId %></td>
+                <td class="tw-py-2 tw-px-4"><%= request.OrganisationNom %> (<%= request.NumeroSiren %>)</td>
+                <td class="tw-py-2 tw-px-4">
+                    <% if (request.Action === 'en attente') { %>
+                        <%= request.TypeDemande.includes('nouvelle') ? 'Nouvelle organisation en attente' : 'Organisation existante' %>
+                    <% } else if (request.Action === 'approuvée') { %>
+                        <%= request.TypeDemande.includes('nouvelle') ? 'Nouvelle organisation approuvée' : 'Organisation existante' %>
+                    <% } else if (request.Action === 'refusée') { %>
+                        <%= request.TypeDemande.includes('nouvelle') ? 'Nouvelle organisation refusée' : 'Organisation existante' %>
+                    <% } %>
+                </td>
+                <td class="tw-py-2 tw-px-4">
+                    <% if (request.Action === 'en attente') { %>
+                        <%= request.TypeDemande.includes('nouvelle') ? 'Demande de rejoindre la nouvelle organisation en attente' : 'Demande de rejoindre l\'organisation existante en attente' %>
+                    <% } else { %>
+                        <%= request.TypeDemande.includes('nouvelle') ? 'Demande de rejoindre la nouvelle organisation ' : 'Demande de rejoindre l\'organisation existante ' %>
+                        <%= request.Action %> par <%= request.AdministrateurEmail %>
+                    <% } %>
+                </td>
+                <td class="tw-py-2 tw-px-4"><%= new Date(request.DateAction).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
+            </tr>
+        <% }); %>
+        </tbody>
+    </table>
+</div>
+<%- include('../pagination.ejs', { currentPage, totalPages, search, showHistory: true }) %>

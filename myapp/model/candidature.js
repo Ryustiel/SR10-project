@@ -61,13 +61,14 @@ const Candidature = {
 
     async getApplicationsRecruteur(idRecruteur) {
         const query = `
-            SELECT O.IdOffre, IdCandidat, Nom, Prenom, Intitule, DateCandidature
-            FROM Candidature AS C
-            JOIN OffreEmploi AS O ON C.IdOffre = O.IdOffre
-            JOIN Utilisateur AS U ON C.IdCandidat = U.email
-            JOIN FichePoste AS F ON F.IdFiche = O.IdFiche
-            WHERE O.IdRecruteur = ?;
-        `;
+        SELECT O.IdOffre, IdCandidat, Nom, Prenom, Intitule, DateCandidature
+        FROM Candidature AS C
+        JOIN OffreEmploi AS O ON C.IdOffre = O.IdOffre
+        JOIN Utilisateur AS U ON C.IdCandidat = U.email
+        JOIN FichePoste AS F ON F.IdFiche = O.IdFiche
+        WHERE O.IdRecruteur = ?
+        ORDER BY DateCandidature DESC;
+    `;
         const [results] = await pool.query(query, [idRecruteur]);
         return results;
     },
@@ -91,6 +92,15 @@ const Candidature = {
         // Supprimer les candidatures
         const query = `DELETE FROM Candidature WHERE IdOffre = ?`;
         await pool.query(query, [idOffre]);
+    },
+
+    async deleteByCandidat(idCandidat) {
+        // Supprimer les fichiers associés
+        await AssociationFichiers.deleteFilesByCandidat(idCandidat);
+
+        // Supprimer les candidatures
+        const query = `DELETE FROM Candidature WHERE IdCandidat = ?`;
+        await pool.query(query, [idCandidat]);
     },
 
     async getApplicationsForOrganisation(idOrganisation) {

@@ -1,42 +1,57 @@
-<form action="/register" method="POST">
-    <div class="mb-3">
-        <label for="firstname" class="form-label">Prénom</label>
-        <input type="text" id="firstname" name="firstname" required class="form-control"
+<form action="/register" method="POST" class="tw-space-y-6 tw-max-w-lg tw-mx-auto">
+    <div>
+        <label for="firstname" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">Prénom</label>
+        <input type="text" id="firstname" name="firstname" required
+               class="tw-mt-1 tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-shadow-sm focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-blue-500"
                value="<%= data.firstname || '' %>">
     </div>
-    <div class="mb-3">
-        <label for="lastname" class="form-label">Nom</label>
-        <input type="text" id="lastname" name="lastname" required class="form-control"
+    <div>
+        <label for="lastname" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">Nom</label>
+        <input type="text" id="lastname" name="lastname" required
+               class="tw-mt-1 tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-shadow-sm focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-blue-500"
                value="<%= data.lastname || '' %>">
     </div>
-    <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" id="email" name="email" required class="form-control" value="<%= data.email || '' %>"
-               pattern="[^@ \t\r\n]+@[^@ \t\r\n]+.[^@ \t\r\n]+">
+    <div>
+        <label for="email" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">Email</label>
+        <input type="email" id="email" name="email" required
+               class="tw-mt-1 tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-shadow-sm focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-blue-500"
+               value="<%= data.email || '' %>"
+               pattern="[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+">
     </div>
-    <div class="mb-3">
-        <label for="confirm-email" class="form-label">Confirmez l'email</label>
-        <input type="email" id="confirm-email" name="confirmEmail" required class="form-control"
-               value="<%= data.confirmEmail || '' %>" pattern="[^@ \t\r\n]+@[^@ \t\r\n]+.[^@ \t\r\n]+">
+    <div>
+        <label for="confirm-email" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">Confirmez l'email</label>
+        <input type="email" id="confirm-email" name="confirmEmail" required
+               class="tw-mt-1 tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-shadow-sm focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-blue-500"
+               value="<%= data.confirmEmail || '' %>"
+               pattern="[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+">
     </div>
-    <div class="mb-3">
-        <label for="phone" class="form-label">Numéro de téléphone</label>
-        <input type="tel" id="phone" name="phone" required class="form-control" value="<%= data.phone || '' %>"
-               pattern="[0-9]{10}">
-    </div>
-    <div class="mb-3">
-        <label for="password" class="form-label">Mot de passe</label>
-        <input type="password" id="password" name="password" required class="form-control"
-               pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}">
-        <div class="form-text">
-            Le mot de passe doit contenir au moins 12 caractères, avec au moins une majuscule, une minuscule, un chiffre
-            et un caractère spécial.
+    <div>
+        <label for="phone" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">Numéro de téléphone</label>
+        <input type="tel" id="phone" name="phone" required
+               class="tw-mt-1 tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-shadow-sm focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-blue-500"
+               value="<%= data.phone || '' %>"
+               pattern="^0[67][0-9]{8}$">
+        <div class="tw-text-gray-500 tw-text-sm tw-mt-1">
+            Veuillez entrer un numéro de téléphone mobile français valide (10 chiffres commençant par 06 ou 07).
         </div>
     </div>
-    <div class="mb-3">
-        <label for="confirm-password" class="form-label">Confirmer le mot de passe</label>
-        <input type="password" id="confirm-password" name="confirmPassword" required class="form-control"
+    <div>
+        <label for="password" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">Mot de passe</label>
+        <input type="password" id="password" name="password" required
+               class="tw-mt-1 tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-shadow-sm focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-blue-500"
+               pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}">
+        <div class="tw-text-gray-500 tw-text-sm tw-mt-1">
+            Le mot de passe doit contenir au moins 12 caractères, avec au moins une majuscule, une minuscule, un chiffre et un caractère spécial.
+        </div>
+    </div>
+    <div>
+        <label for="confirm-password" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">Confirmer le mot de passe</label>
+        <input type="password" id="confirm-password" name="confirmPassword" required
+               class="tw-mt-1 tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-shadow-sm focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-blue-500"
                pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}">
     </div>
-    <button type="submit" class="btn btn-primary">S'inscrire</button>
+    <button type="submit"
+            class="tw-w-full tw-bg-gradient-to-r tw-from-purple-400 tw-via-pink-500 tw-to-red-500 hover:tw-from-purple-500 hover:tw-via-pink-600 hover:tw-to-red-600 tw-text-white tw-font-bold tw-py-2 tw-px-4 tw-rounded-full tw-transition tw-duration-300 tw-ease-in-out tw-shadow-lg hover:tw-shadow-2xl tw-transform hover:tw-scale-105">
+        S'inscrire
+    </button>
 </form>

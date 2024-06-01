@@ -1,21 +1,23 @@
 <%- include('../search_pagination.ejs', { search, currentPage, totalPages }) %>
 
 <% if (fiches.length === 0) { %>
-    <p>Vous n'avez pas encore de fiche de poste.</p>
-    <p>Vous pouvez en créer une <a href="/jobs/add_job">ici</a>.</p>
+    <div class="tw-bg-white tw-p-4 tw-rounded-lg tw-shadow-md tw-mb-6">
+        <p class="tw-text-gray-700">Vous n'avez pas encore de fiche de poste.</p>
+        <p class="tw-text-blue-500"><a href="/jobs/add_job" class="tw-underline hover:tw-text-blue-700">Créer une fiche de poste ici</a>.</p>
+    </div>
 <% } %>
 
 <% fiches.forEach((fiche) => { %>
-    <div class="card mb-3">
-        <div class="card-body">
-            <h5 class="card-title"><%= fiche.Intitule %></h5>
-            <div class="btn-group" role="group">
+    <div class="tw-bg-white tw-p-4 tw-rounded-lg tw-shadow-md tw-mb-6">
+        <h5 class="tw-text-xl tw-font-bold tw-text-gray-800"><%= fiche.Intitule %></h5>
+        <div class="tw-flex tw-justify-between tw-items-center tw-mt-4">
+            <div class="tw-flex tw-space-x-4">
                 <form method="get" action="/jobs/edit_job">
                     <input type="hidden" name="idFiche" value="<%= fiche.IdFiche %>">
-                    <button type="submit" class="btn btn-primary">Editer</button>
+                    <button type="submit" class="tw-bg-blue-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-md hover:tw-bg-blue-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-blue-500">Éditer</button>
                 </form>
-                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#detailsModal<%= fiche.IdFiche %>">Détails</button>
-                <button type="button" class="btn btn-danger delete-button" data-id="<%= fiche.IdFiche %>">Supprimer</button>
+                <button type="button" class="tw-bg-gray-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-md hover:tw-bg-gray-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-gray-500" data-bs-toggle="modal" data-bs-target="#detailsModal<%= fiche.IdFiche %>">Détails</button>
+                <button type="button" class="tw-bg-red-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-md hover:tw-bg-red-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-red-500 delete-button" data-id="<%= fiche.IdFiche %>">Supprimer</button>
             </div>
         </div>
     </div>

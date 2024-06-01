@@ -1,19 +1,19 @@
-<div class="modal-body">
-    <p><strong>Description:</strong> <%= offre.Description %></p>
-    <p><strong>Statut du poste:</strong> <%= offre.StatutPoste %></p>
-    <p><strong>Responsable hiérarchique:</strong> <%= offre.ResponsableHierarchique %></p>
-    <p><strong>Type de métier:</strong> <%= offre.TypeMetier %></p>
-    <p><strong>Lieu de mission:</strong> <%= offre.LieuMission %></p>
-    <p><strong>Rythme:</strong> <%= offre.Rythme %></p>
-    <p><strong>Salaire:</strong> <%= offre.Salaire %> €</p>
-    <p><strong>Valide jusqu'à:</strong> <%= new Date(offre.DateValidite).toLocaleDateString("fr-FR") %></p>
-    <p><strong>Organisation:</strong> <%= offre.organisationNom %></p>
+<div class="tw-px-4 tw-py-2">
+    <p class="tw-mb-2"><strong>Description:</strong> <%= offre.Description %></p>
+    <p class="tw-mb-2"><strong>Statut du poste:</strong> <%= offre.StatutPoste %></p>
+    <p class="tw-mb-2"><strong>Responsable hiérarchique:</strong> <%= offre.ResponsableHierarchique %></p>
+    <p class="tw-mb-2"><strong>Type de métier:</strong> <%= offre.TypeMetier %></p>
+    <p class="tw-mb-2"><strong>Lieu de mission:</strong> <%= offre.LieuMission %></p>
+    <p class="tw-mb-2"><strong>Rythme:</strong> <%= offre.Rythme %></p>
+    <p class="tw-mb-2"><strong>Salaire:</strong> <%= offre.Salaire %> €</p>
+    <p class="tw-mb-2"><strong>Valide jusqu'à:</strong> <%= new Date(offre.DateValidite).toLocaleDateString("fr-FR") %></p>
+    <p class="tw-mb-2"><strong>Organisation:</strong> <%= offre.organisationNom %></p>
 
     <% if (isCandidate) { %>
-        <h3>Vous avez déjà postulé à cette offre</h3>
+        <h3 class="tw-text-xl tw-font-bold tw-mt-4">Vous avez déjà postulé à cette offre</h3>
     <% } else { %>
-        <h3>Postuler à cette Offre</h3>
-        <p>Les pièces suivantes sont demandées :<br><%= offre.ListePieces %></p>
+        <h3 class="tw-text-xl tw-font-bold tw-mt-4">Postuler à cette Offre</h3>
+        <p class="tw-mt-2">Les pièces suivantes sont demandées :<br><%= offre.ListePieces %></p>
         <%- include('../forms/apply_form.ejs', { idOffre: offre.IdOffre, offre: offre }) %>
     <% } %>
 </div>

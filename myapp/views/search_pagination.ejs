@@ -1,7 +1,7 @@
-<form action="<%= activePage %>" method="get" class="mb-4">
-    <div class="input-group">
+<form action="<%= activePage %>" method="get" class="tw-mb-4">
+    <div class="tw-flex tw-border tw-rounded-md">
         <input type="hidden" name="showHistory" value="<%= typeof showHistory !== 'undefined' ? showHistory : 'false' %>">
-        <input type="text" name="search" class="form-control" placeholder="<%= placeholder %>" value="<%= search %>">
-        <button type="submit" class="btn btn-primary">Rechercher</button>
+        <input type="text" name="search" class="tw-flex-grow tw-px-4 tw-py-2 tw-border-0 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500" placeholder="<%= placeholder %>" value="<%= search %>">
+        <button type="submit" class="tw-bg-blue-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-r-md hover:tw-bg-blue-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500">Rechercher</button>
     </div>
 </form>

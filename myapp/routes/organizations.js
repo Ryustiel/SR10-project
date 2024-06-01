@@ -9,6 +9,7 @@ const Organisation = require('../model/organisation');
 const HistoriqueDemandes = require('../model/historiquedemandes'); // Importer le modèle HistoriqueDemandes
 const FichePoste = require('../model/ficheposte');
 const OffreEmploi = require("../model/offreemploi");
+const Candidature = require('../model/candidature');
 
 const { validateNewOrganisation } = require('../middleware/validationUtils');
 const {
@@ -231,6 +232,7 @@ router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req,
         // Supprimer l'entrée en attente de l'historique
 
         const organisation = await Organisation.read(user.IdOrganisation);
+        await Utilisateur.updateTypeCompte(userId, 'candidat');
         await HistoriqueDemandes.updateAction(organisation.NumeroSiren, userId, "refusée", req.session.userEmail);
         if (organisation && organisation.StatutOrganisation === 'en attente') {
             await Organisation.archiveOrganisationAndAssociations(user.IdOrganisation);
@@ -314,6 +316,19 @@ router.post('/accept_request', isLoggedIn, isAdmin, async (req, res, next) => {
         if (organisation && userDetails.IdOrganisation === organisationNumber && organisation.StatutOrganisation === 'en attente') {
             await Organisation.updateStatus(organisationNumber, 'approuvée');
             logger.info("Statut de l'organisation mis à jour en 'approuvée'.");
+        }
+
+        // Récupérer toutes les candidatures du candidat
+        const candidatures = await Candidature.getApplicationsCandidat(email);
+
+        // Filtrer les candidatures qui appartiennent à l'organisation
+        for (const candidature of candidatures) {
+            const offre = await OffreEmploi.read(candidature.IdOffre);
+            const fiche = await FichePoste.read(offre.IdFiche);
+            if (fiche.IdOrganisation === organisationNumber) {
+                // Supprimer la candidature
+                await Candidature.delete(email, candidature.IdOffre);
+            }
         }
 
         await Utilisateur.updateTypeCompte(email, 'recruteur');
@@ -408,6 +423,8 @@ router.post('/delete_organisation', isLoggedIn, isAdmin, async (req, res, next) 
 
         // Supprimer l'organisation
         await Organisation.delete(numeroSiren);
+
+        logger.info(`Organisation ${numeroSiren} supprimée avec succès.`);
 
         req.session.message = "Organisation supprimée avec succès.";
         req.session.messageType = 'notification';

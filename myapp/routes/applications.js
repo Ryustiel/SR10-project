@@ -49,7 +49,7 @@ router.post('/apply', isLoggedIn, upload.array('files'), [
 
         // Check if files exist
         if (!files || files.length === 0) {
-            req.session.message = 'No files uploaded';
+            req.session.message = 'Aucun fichier reçu';
             req.session.messageType = 'error';
             return res.redirect('/jobs/browse_offers');
         }
@@ -63,6 +63,7 @@ router.post('/apply', isLoggedIn, upload.array('files'), [
 
         // NOTIFY
         const nom = await OffreEmploi.getNom(idOffre);
+        logger.info(`Nouvelle candidature de ${idCandidat} pour l'offre ${nom}`);
         req.session.message = `Vous avez postulé à ${nom}`;
         req.session.messageType = 'notification';
         res.redirect('/jobs/browse_offers');
@@ -125,8 +126,8 @@ router.get('/download-attachment', isLoggedIn, async function (req, res, next) {
         const result = await AssociationFichier.readFichier(fichier);
         if (!result) {
             let error = new Error();
-            error.message = "Vous n'êtes pas autorisé à accéder à cette page.";
-            error.status = 403;
+            error.message = "Le fichier demandé n'existe pas ou est corrompu.";
+            error.status = 404;
             next(error);
         } else {
             logger.info(`Téléchargement de la pièce jointe : ${fichier}`);
@@ -384,7 +385,7 @@ router.post('/edit-application', isLoggedIn, upload.array('files'), [
                 await AssociationFichier.create(idCandidat, idOffre, file.filename, file.originalname);
             }
         }
-
+        logger.info(`Candidature ${idCandidat} pour l'offre ${idOffre} mise à jour avec succès`);
         req.session.message = 'Candidature mise à jour avec succès';
         req.session.messageType = 'notification';
         return res.redirect('/applications/my-applications');

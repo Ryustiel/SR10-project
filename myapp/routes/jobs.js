@@ -34,7 +34,6 @@ router.get('/browse_offers', isLoggedIn, readMessage, async function (req, res, 
         } = await OffreEmploi.browseOffers(search, sort, typeMetier, minSalaire, maxSalaire, limit, offset, excludeOrganisationId, userRole);
         const totalPages = Math.ceil(totalOffres / limit);
         const typesMetier = await OffreEmploi.getTypesMetier();
-
         logger.info("Offres d'emploi récupérées avec succès.");
         res.render('jobs/browse_offers', {
             offres,
@@ -430,7 +429,7 @@ router.post('/edit_offer', requireAffiliation, [
         };
 
         await OffreEmploi.update(idOffre, fields);
-
+        logger.info(`L'offre d'emploi a été mise à jour avec succès par ${req.session.userEmail}.`);
         req.session.message = "L'offre d'emploi a été mise à jour avec succès.";
         req.session.messageType = 'notification';
         res.redirect('/jobs/my_offers');
@@ -473,7 +472,6 @@ router.post('/edit_job', requireAffiliation, [
     body('rythme').notEmpty().withMessage('Rythme requis'),
     body('salaire').isFloat({ min: 0 }).withMessage('Salaire doit être un nombre positif'),
     body('description').notEmpty().withMessage('Description requise'),
-    body('idOrganisation').notEmpty().withMessage('ID de l\'organisation requis')
 ], async function (req, res, next) {
     const errors = validationResult(req);
     const { idFiche } = req.body;
@@ -494,8 +492,10 @@ router.post('/edit_job', requireAffiliation, [
             rythme,
             salaire,
             description,
-            idOrganisation
         } = req.body;
+
+        let fiche = await FichePoste.read(idFiche);
+        let idOrganisation = parseInt(fiche.IdOrganisation);
 
         const fields = {
             intitule,
@@ -510,7 +510,7 @@ router.post('/edit_job', requireAffiliation, [
         };
 
         await FichePoste.update(idFiche, fields);
-
+        logger.info(`Fiche de poste mise à jour: ${intitule}`);
         req.session.message = "La fiche de poste a été mise à jour avec succès.";
         req.session.messageType = 'notification';
         res.redirect('/jobs/my_jobs');

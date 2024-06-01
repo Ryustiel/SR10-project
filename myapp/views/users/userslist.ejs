@@ -4,15 +4,13 @@
     <%- include('../head.ejs') %>
     <title>Liste des Utilisateurs</title>
 </head>
-<body>
+<body class="tw-bg-gray-100 tw-font-sans tw-leading-normal tw-tracking-normal">
 <%- include('../navbar.ejs') %>
-<%- include('../message.ejs') %>
-<div class="container my-5">
-    <div class="row">
-        <div class="col-md-10 offset-md-1">
-            <h1 class="mb-4">Liste des Utilisateurs</h1>
-            <%- include('../listings/userslist.ejs', { search, currentPage, totalPages, users }) %>
-        </div>
+<div class="tw-container tw-mx-auto tw-my-8 tw-px-4">
+    <%- include('../message.ejs') %>
+    <div class="tw-mb-8">
+        <h1 class="tw-mb-4 tw-text-4xl tw-font-bold tw-text-gray-800">Liste des Utilisateurs</h1>
+        <%- include('../listings/userslist.ejs', { search, currentPage, totalPages, users }) %>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

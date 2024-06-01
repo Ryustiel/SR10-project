@@ -1,19 +1,19 @@
 <% if (candidatures.length === 0) { %>
-    <p>Vous n'avez candidaté à aucune offre.</p>
+    <div class="tw-bg-white tw-p-4 tw-rounded-lg tw-shadow-md tw-mb-6">
+        <p class="tw-text-gray-700">Vous n'avez candidaté à aucune offre.</p>
+    </div>
 <% } else { %>
     <% candidatures.forEach((candidature) => { %>
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title"><%= candidature.Intitule %></h5>
-                <p class="card-text">le <%= new Date(candidature.DateCandidature).toLocaleDateString("fr-FR") %></p>
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-info view-details" data-candidat-id="<%= candidature.IdCandidat %>" data-offre-id="<%= candidature.IdOffre %>" data-bs-toggle="modal" data-bs-target="#applicationDetailsModal">Voir les détails</button>
-                    <form method="POST" action="/applications/cancel-application">
-                        <input type="hidden" name="idCandidat" value="self">
-                        <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
-                        <button type="submit" class="btn btn-danger">Annuler</button>
-                    </form>
-                </div>
+        <div class="tw-bg-white tw-p-4 tw-rounded-lg tw-shadow-md tw-mb-6">
+            <h5 class="tw-text-xl tw-font-bold tw-text-gray-800"><%= candidature.Intitule %></h5>
+            <p class="tw-text-gray-600">le <%= new Date(candidature.DateCandidature).toLocaleDateString("fr-FR") %></p>
+            <div class="tw-flex tw-space-x-4 tw-mt-4">
+                <button type="button" class="tw-bg-blue-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-md hover:tw-bg-blue-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-blue-500 view-details" data-candidat-id="<%= candidature.IdCandidat %>" data-offre-id="<%= candidature.IdOffre %>" data-bs-toggle="modal" data-bs-target="#applicationDetailsModal">Voir les détails</button>
+                <form method="POST" action="/applications/cancel-application">
+                    <input type="hidden" name="idCandidat" value="self">
+                    <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
+                    <button type="submit" class="tw-bg-red-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-md hover:tw-bg-red-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-red-500">Annuler</button>
+                </form>
             </div>
         </div>
     <% }) %>

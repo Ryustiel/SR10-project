@@ -8,13 +8,17 @@ const defaultCandidature = typeof candidature !== 'undefined' ? candidature : {}
 const defaultFichiers = typeof fichiers !== 'undefined' ? fichiers : [];
 %>
 <div class="modal fade" id="<%= modalId %>" tabindex="-1" aria-labelledby="<%= modalLabelId %>" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="<%= modalLabelId %>"><%= modalTitle %></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog tw-w-auto tw-mx-auto">
+        <div class="modal-content tw-bg-white tw-rounded-lg tw-shadow-lg">
+            <div class="modal-header tw-bg-gray-100 tw-border-b tw-border-gray-200 tw-p-4 tw-rounded-t-lg tw-flex tw-items-center tw-justify-between">
+                <h5 class="modal-title tw-text-lg tw-font-semibold" id="<%= modalLabelId %>"><%= modalTitle %></h5>
+                <button type="button" class="tw-text-gray-400 hover:tw-text-gray-600 focus:tw-outline-none" data-bs-dismiss="modal" aria-label="Close">
+                    <svg class="tw-w-6 tw-h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body tw-p-4">
                 <%- include(modalBody, { organisations: defaultOrganisations, user: defaultUser, offre: defaultOffre, isCandidate: defaultIsCandidate, fiche: defaultFiche, candidature: defaultCandidature, fichiers: defaultFichiers }) %>
             </div>
         </div>

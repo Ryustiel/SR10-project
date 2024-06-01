@@ -1,15 +1,15 @@
-<form id="applicationForm" enctype="multipart/form-data" action="/applications/apply" method="POST">
+<form id="applicationForm" enctype="multipart/form-data" action="/applications/apply" method="POST" class="tw-mt-4">
     <input type="hidden" name="idOffre" value="<%= idOffre %>"/>
 
     <% if (offre.NombrePieces > 0) { %>
-        <div class="mb-3">
-            <label for="formFileLg" class="form-label">Télécharger des Pièces Justificatives</label>
-            <input class="form-control form-control-lg" id="formFileLg" name="files" type="file" multiple/>
+        <div class="tw-mb-4">
+            <label for="formFileLg" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">Télécharger des Pièces Justificatives</label>
+            <input class="tw-mt-1 tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-shadow-sm focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-blue-500" id="formFileLg" name="files" type="file" multiple/>
         </div>
-        <div id="fileCount" class="mb-3">Pièces justificatives fournies : 0 / <%= offre.NombrePieces %></div>
-        <button id="submitButton" type="submit" class="btn btn-secondary" disabled>Postuler</button>
+        <div id="fileCount" class="tw-mb-4 tw-text-sm tw-text-gray-700" data-required-files="<%= offre.NombrePieces %>">Pièces justificatives fournies : 0 / <%= offre.NombrePieces %></div>
+        <button id="submitButton" type="submit" class="tw-bg-gray-500 tw-text-white tw-font-bold tw-py-2 tw-px-4 tw-rounded-lg tw-transition tw-duration-300" disabled>Postuler</button>
     <% } else { %>
-        <button type="submit" class="btn btn-success">Postuler</button>
+        <button type="submit" class="tw-bg-green-600 hover:tw-bg-green-700 tw-text-white tw-font-bold tw-py-2 tw-px-4 tw-rounded-lg tw-transition tw-duration-300 tw-transform hover:tw-scale-105">Postuler</button>
     <% } %>
 </form>
 
@@ -20,20 +20,21 @@
                 const fileInput = modal.querySelector('#formFileLg');
                 const fileCountDisplay = modal.querySelector('#fileCount');
                 const submitButton = modal.querySelector('#submitButton');
+                const requiredFiles = parseInt(fileCountDisplay.getAttribute('data-required-files'));
 
                 if (fileInput) {
                     fileInput.addEventListener('change', () => {
                         const files = fileInput.files;
                         const fileCount = files.length;
-                        fileCountDisplay.textContent = `Pièces justificatives fournies : ${fileCount} / <%= offre.NombrePieces %>`;
+                        fileCountDisplay.textContent = `Pièces justificatives fournies : ${fileCount} / ${requiredFiles}`;
 
-                        if (fileCount === <%= offre.NombrePieces %>) {
-                            submitButton.classList.remove('btn-secondary');
-                            submitButton.classList.add('btn-success');
+                        if (fileCount === requiredFiles) {
+                            submitButton.classList.remove('tw-bg-gray-500', 'tw-transform');
+                            submitButton.classList.add('tw-bg-green-600', 'hover:tw-bg-green-700', 'tw-transform', 'hover:tw-scale-105');
                             submitButton.disabled = false;
                         } else {
-                            submitButton.classList.remove('btn-success');
-                            submitButton.classList.add('btn-secondary');
+                            submitButton.classList.remove('tw-bg-green-600', 'hover:tw-bg-green-700', 'hover:tw-scale-105');
+                            submitButton.classList.add('tw-bg-gray-500');
                             submitButton.disabled = true;
                         }
                     });
@@ -42,3 +43,35 @@
         });
     });
 </script>
+
+<style>
+    @keyframes slide-down {
+        from {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slide-up {
+        from {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+    }
+
+    .animate-slide-down {
+        animation: slide-down 0.5s ease-out forwards;
+    }
+
+    .animate-slide-up {
+        animation: slide-up 0.5s ease-out forwards;
+    }
+</style>

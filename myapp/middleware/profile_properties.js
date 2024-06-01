@@ -38,15 +38,22 @@ async function canViewProfile(req, res, next) {
             if (canView) {
                 return next();
             } else {
-                return res.status(403).render('error', {message: 'Accès refusé.'});
+                let error = new Error();
+                error.message = "Vous n'êtes pas autorisé à accéder à cette page.";
+                error.status = 403;
             }
         }
 
         // Default access denied response
-        return res.status(403).render('error', {message: 'Accès refusé.'});
+        let error = new Error();
+        error.message = "Vous n'êtes pas autorisé à accéder à cette page.";
+        error.status = 403;
+        next(error);
     } catch (error) {
         logger.error(`Error in profile_properties: ${error}`);
-        return res.status(500).render('error', {message: 'Erreur interne du serveur.'});
+        error.status = 500;
+        error.message = "Une erreur est survenue lors de la récupération de vos informations.";
+        next(error);
     }
 }
 
@@ -86,10 +93,15 @@ async function canEditProfile(req, res, next) {
         }
 
         // Default access denied response
-        return res.status(403).render('error', {message: 'Accès refusé.'});
+        let error = new Error();
+        error.message = "Vous n'êtes pas autorisé à accéder à cette page.";
+        error.status = 403;
+        next(error);
     } catch (error) {
         logger.error(`Error in canEditProfile: ${error}`);
-        return res.status(500).render('error', {message: 'Erreur interne du serveur.'});
+        error.status = 500;
+        error.message = "Une erreur s'est produite lors de la vérification des autorisations. Veuillez réessayer plus tard.";
+        next(error);
     }
 }
 

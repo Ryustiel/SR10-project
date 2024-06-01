@@ -1,22 +1,20 @@
 <% if (fichiers.length === 0) { %>
-    <p>
-        Aucune Pièce jointe n'est disponible pour cette candidature.
-    </p>
+    <div class="tw-px-4 tw-py-2 tw-text-center tw-text-gray-700 tw-font-medium">
+        Aucune pièce jointe n'est disponible pour cette candidature.
+    </div>
 <% } %>
 
 <% fichiers.forEach((fichier) => { %>
-
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title"> <%= fichier.NomOriginal %> </h5> <!-- Modification ici -->
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-primary" onclick="openDownloadTab('<%= fichier.Fichier %>')">
+    <div class="tw-bg-white tw-shadow-md tw-rounded-lg tw-overflow-hidden tw-mb-4">
+        <div class="tw-px-4 tw-py-4">
+            <h5 class="tw-text-xl tw-font-semibold tw-text-gray-800"><%= fichier.NomOriginal %></h5>
+            <div class="tw-mt-4 tw-flex tw-justify-end">
+                <button type="button" class="tw-bg-blue-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-md hover:tw-bg-blue-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-blue-500" onclick="openDownloadTab('<%= fichier.Fichier %>')">
                     Télécharger
                 </button>
             </div>
         </div>
     </div>
-
 <% }) %>
 
 <script>

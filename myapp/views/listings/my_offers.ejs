@@ -1,39 +1,39 @@
 <%- include('../search_pagination.ejs', { search, currentPage, totalPages }) %>
 
 <% if (offers.length === 0) { %>
-    <p>Vous n'avez pas encore d'offres d'emploi.</p>
-    <p>Vous pouvez en créer une <a href="/jobs/add_offer">ici</a>.</p>
+    <div class="tw-bg-white tw-p-4 tw-rounded-lg tw-shadow-md tw-mb-6">
+        <p class="tw-text-gray-700">Vous n'avez pas encore d'offres d'emploi.</p>
+        <p class="tw-text-blue-500"><a href="/jobs/add_offer" class="tw-underline hover:tw-text-blue-700">Créer une offre ici</a>.</p>
+    </div>
 <% } %>
 
 <% offers.forEach((offer) => { %>
-    <div class="card mb-3">
-        <div class="card-body">
-            <h5 class="card-title"><%= offer.Intitule %></h5>
-            <p class="card-text">Date de validité: <%= new Date(offer.DateValidite).toLocaleDateString("fr-FR") %></p>
-            <div class="btn-group" role="group">
-                <% if (offer.Etat === 'publié') { %>
-                    <form method="post" action="/jobs/my_offers">
-                        <input type="hidden" name="idOffre" value="<%= offer.IdOffre %>">
-                        <input type="hidden" name="action" value="2">
-                        <button type="submit" class="btn btn-secondary">Désactiver</button>
-                    </form>
-                <% } else { %>
-                    <form method="post" action="/jobs/my_offers">
-                        <input type="hidden" name="idOffre" value="<%= offer.IdOffre %>">
-                        <input type="hidden" name="action" value="1">
-                        <button type="submit" class="btn btn-success">Activer</button>
-                    </form>
-                <% } %>
-                <form method="get" action="/jobs/edit_offer">
-                    <input type="hidden" name="idOffre" value="<%= offer.IdOffre %>">
-                    <button type="submit" class="btn btn-primary">Editer</button>
-                </form>
+    <div class="tw-bg-white tw-p-4 tw-rounded-lg tw-shadow-md tw-mb-6">
+        <h5 class="tw-text-xl tw-font-bold tw-text-gray-800"><%= offer.Intitule %></h5>
+        <p class="tw-text-gray-600">Date de validité: <%= new Date(offer.DateValidite).toLocaleDateString("fr-FR") %></p>
+        <div class="tw-flex tw-space-x-4 tw-mt-4">
+            <% if (offer.Etat === 'publié') { %>
                 <form method="post" action="/jobs/my_offers">
                     <input type="hidden" name="idOffre" value="<%= offer.IdOffre %>">
-                    <input type="hidden" name="action" value="3">
-                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                    <input type="hidden" name="action" value="2">
+                    <button type="submit" class="tw-bg-gray-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-md hover:tw-bg-gray-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-gray-500">Désactiver</button>
                 </form>
-            </div>
+            <% } else { %>
+                <form method="post" action="/jobs/my_offers">
+                    <input type="hidden" name="idOffre" value="<%= offer.IdOffre %>">
+                    <input type="hidden" name="action" value="1">
+                    <button type="submit" class="tw-bg-green-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-md hover:tw-bg-green-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-green-500">Activer</button>
+                </form>
+            <% } %>
+            <form method="get" action="/jobs/edit_offer">
+                <input type="hidden" name="idOffre" value="<%= offer.IdOffre %>">
+                <button type="submit" class="tw-bg-blue-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-md hover:tw-bg-blue-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-blue-500">Éditer</button>
+            </form>
+            <form method="post" action="/jobs/my_offers">
+                <input type="hidden" name="idOffre" value="<%= offer.IdOffre %>">
+                <input type="hidden" name="action" value="3">
+                <button type="submit" class="tw-bg-red-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-md hover:tw-bg-red-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-red-500">Supprimer</button>
+            </form>
         </div>
     </div>
 <% }); %>

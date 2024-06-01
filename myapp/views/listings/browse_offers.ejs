@@ -1,42 +1,49 @@
-<form action="/jobs/browse_offers" method="get" class="mb-4">
+<form action="/jobs/browse_offers" method="get" class="tw-mb-4">
     <!-- Formulaire de recherche et de filtrage -->
-    <div class="input-group mb-3">
-        <label class="input-group-text" for="sort">Trier par</label>
-        <select name="sort" class="form-select">
-            <option value="date" <%= sort === 'date' ? 'selected' : '' %>>Date</option>
-            <option value="lieu" <%= sort === 'lieu' ? 'selected' : '' %>>Lieu</option>
-            <option value="salaire" <%= sort === 'salaire' ? 'selected' : '' %>>Salaire</option>
-        </select>
-        <label class="input-group-text" for="typeMetier">Type de métier</label>
-        <select name="typeMetier" class="form-select">
-            <option value="">Tous les types de métier</option>
-            <% typesMetier.forEach(function(type) { %>
-                <option value="<%= type %>" <%= selectedTypeMetier === type ? 'selected' : '' %>><%= type %></option>
-            <% }); %>
-        </select>
-    </div>
-    <div class="input-group mb-3">
-        <label class="input-group-text" for="minSalaire">Salaire min</label>
-        <input type="number" name="minSalaire" class="form-control" placeholder="Salaire min" value="<%= minSalaire %>">
-        <label class="input-group-text" for="maxSalaire">Salaire max</label>
-        <input type="number" name="maxSalaire" class="form-control" placeholder="Salaire max" value="<%= maxSalaire %>">
-        <button type="submit" class="btn btn-secondary">Filtrer</button>
+    <div class="tw-flex tw-flex-wrap tw-mb-4">
+        <div class="tw-w-full sm:tw-w-1/2 lg:tw-w-1/4 tw-px-2 tw-mb-4">
+            <label class="tw-block tw-font-medium tw-mb-1" for="sort">Trier par</label>
+            <select name="sort" class="tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500">
+                <option value="date" <%= sort === 'date' ? 'selected' : '' %>>Date</option>
+                <option value="lieu" <%= sort === 'lieu' ? 'selected' : '' %>>Lieu</option>
+                <option value="salaire" <%= sort === 'salaire' ? 'selected' : '' %>>Salaire</option>
+            </select>
+        </div>
+        <div class="tw-w-full sm:tw-w-1/2 lg:tw-w-1/4 tw-px-2 tw-mb-4">
+            <label class="tw-block tw-font-medium tw-mb-1" for="typeMetier">Type de métier</label>
+            <select name="typeMetier" class="tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500">
+                <option value="">Tous les types de métier</option>
+                <% typesMetier.forEach(function(type) { %>
+                    <option value="<%= type %>" <%= selectedTypeMetier === type ? 'selected' : '' %>><%= type %></option>
+                <% }); %>
+            </select>
+        </div>
+        <div class="tw-w-full sm:tw-w-1/2 lg:tw-w-1/4 tw-px-2 tw-mb-4">
+            <label class="tw-block tw-font-medium tw-mb-1" for="minSalaire">Salaire min</label>
+            <input type="number" name="minSalaire" class="tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500" placeholder="Salaire min" value="<%= minSalaire %>">
+        </div>
+        <div class="tw-w-full sm:tw-w-1/2 lg:tw-w-1/4 tw-px-2 tw-mb-4">
+            <label class="tw-block tw-font-medium tw-mb-1" for="maxSalaire">Salaire max</label>
+            <input type="number" name="maxSalaire" class="tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500" placeholder="Salaire max" value="<%= maxSalaire %>">
+        </div>
+        <div class="tw-w-full lg:tw-w-1/4 tw-px-2 tw-mb-4 tw-flex tw-items-end">
+            <button type="submit" class="tw-w-full tw-bg-gradient-to-r tw-from-blue-500 tw-to-indigo-600 tw-text-white tw-px-4 tw-py-2 tw-rounded-md tw-shadow-lg hover:tw-bg-gradient-to-l focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500">Filtrer</button>
+        </div>
     </div>
 </form>
+
 <% if (offres.length === 0) { %>
-    <div class="card">
-        <div class="card-body">
-            <p>Aucune Offre d'emploi n'est disponible</p>
-        </div>
+    <div class="tw-bg-white tw-shadow-md tw-rounded-md tw-p-4 tw-mb-4">
+        <p>Aucune Offre d'emploi n'est disponible</p>
     </div>
 <% } else { %>
     <% offres.forEach((offre) => { %>
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title"><%= offre.Intitule %></h5>
-                <p class="card-text">Date de validité: <%= new Date(offre.DateValidite).toLocaleDateString("fr-FR") %></p>
+        <div class="tw-bg-white tw-shadow-md tw-rounded-md tw-mb-4">
+            <div class="tw-p-4">
+                <h5 class="tw-text-xl tw-font-bold tw-mb-2"><%= offre.Intitule %></h5>
+                <p class="tw-text-gray-600 tw-mb-4">Date de validité: <%= new Date(offre.DateValidite).toLocaleDateString("fr-FR") %></p>
                 <input type="hidden" name="idOffre" value="<%= offre.IdOffre %>">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal<%= offre.IdOffre %>">Voir les Détails</button>
+                <button type="button" class="tw-bg-blue-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-md hover:tw-bg-blue-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500" data-bs-toggle="modal" data-bs-target="#modal<%= offre.IdOffre %>">Voir les Détails</button>
             </div>
         </div>
         <%- include('../modal', {
@@ -52,3 +59,28 @@
     <% }); %>
     <%- include('../pagination', { currentPage, totalPages, search, sort, selectedTypeMetier, minSalaire, maxSalaire }) %>
 <% } %>
+
+<script>
+    document.querySelectorAll('[data-bs-toggle="modal"]').forEach(button => {
+        button.addEventListener('click', async function () {
+            const modalId = this.getAttribute('data-bs-target').substring(1);
+            const modal = document.getElementById(modalId);
+            const idOffre = this.previousElementSibling.value;
+
+            try {
+                const response = await fetch('/jobs/view_offer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ idOffre })
+                });
+
+                const data = await response.text();
+                modal.querySelector('.modal-body').innerHTML = data;
+            } catch (error) {
+                console.error("Erreur lors de la récupération des détails de l'offre:", error);
+            }
+        });
+    });
+</script>

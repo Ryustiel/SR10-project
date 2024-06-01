@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities{
+    *::-webkit-scrollbar {
+        width: 8px; /* Width of the scrollbar */
+        height: 8px; /* Height for horizontal scrollbar */
+    }
+
+    *::-webkit-scrollbar-track {
+        background: transparent; /* Transparent track */
+    }
+
+    *::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.5); /* Semi-transparent thumb */
+        border-radius: 10px; /* Rounded corners */
+    }
+
+    *::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.7); /* Darker on hover */
+    }
+
+    /* Custom scrollbar for Firefox */
+    * {
+        scrollbar-width: thin; /* Make scrollbar thin */
+        scrollbar-color: rgba(0, 0, 0, 0.5) transparent; /* Semi-transparent thumb with transparent track */
+    }
+
+    /* Ensure consistent text rendering */
+    html, body {
+        overflow: auto; /* Standard overflow property */
+    }
+
+    body {
+        position: relative;
+        padding-right: 8px; /* Space for scrollbar */
+    }
+
+    body.scrolling {
+        --scrollbar-color: rgba(0, 0, 0, 0.5);
+    }
+
+
+}

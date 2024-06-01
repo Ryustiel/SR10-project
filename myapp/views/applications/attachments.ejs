@@ -4,22 +4,23 @@
     <%- include('../head.ejs') %>
     <title>Voir les Pièces Jointes</title>
 </head>
-<body>
+<body class="tw-bg-gray-100 tw-font-sans tw-leading-normal tw-tracking-normal">
 
 <%- include('../navbar.ejs') %>
 
-<div class="container mt-5">
-    <div class = "row">
-        <div class="col-md-6 offset-md-3">
-            <h1>Pièces Jointes de <%= nom_candidat %> pour <%= nom_offre %></h1>
+<div class="tw-container tw-mt-5 tw-mx-auto">
+    <div class="tw-flex tw-justify-center">
+        <div class="tw-w-full sm:tw-w-3/4 lg:tw-w-1/2">
+            <h1 class="tw-mb-4 tw-text-4xl tw-font-bold tw-text-gray-800 tw-text-center">Pièces Jointes de <%= nom_candidat %> pour <%= nom_offre %></h1>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
+    <div class="tw-flex tw-justify-center">
+        <div class="tw-w-full sm:tw-w-3/4 lg:tw-w-1/2">
             <%- include('../listings/attachments.ejs') %>
         </div>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

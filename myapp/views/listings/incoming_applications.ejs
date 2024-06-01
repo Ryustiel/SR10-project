@@ -1,32 +1,40 @@
 <% if (candidatures.length === 0) { %>
-    <p>
+    <div class="tw-px-4 tw-py-2 tw-text-center tw-text-gray-700 tw-font-medium">
         Aucune candidature n'a été envoyée pour le moment.
-    </p>
+    </div>
 <% } else { %>
     <% candidatures.forEach((candidature) => { %>
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title"><%= candidature.Prenom %> <%= candidature.Nom %> pour <%= candidature.Intitule %> </h5>
-                <p class="card-text"> le <%= new Date(candidature.DateCandidature).toLocaleDateString("fr-FR") %> </p>
-                <div class="btn-group" role="group">
-                    <form method="POST" action="/users/profile">
+        <div class="tw-bg-white tw-shadow-md tw-rounded-lg tw-overflow-hidden tw-mb-4">
+            <div class="tw-px-4 tw-py-4">
+                <h5 class="tw-text-xl tw-font-semibold tw-text-gray-800"><%= candidature.Prenom %> <%= candidature.Nom %> pour <%= candidature.Intitule %></h5>
+                <p class="tw-text-gray-600">le <%= new Date(candidature.DateCandidature).toLocaleDateString("fr-FR") %></p>
+                <div class="tw-mt-4 tw-flex tw-flex-wrap tw-space-x-2">
+                    <form method="POST" action="/users/profile" class="tw-mb-2">
                         <input type="hidden" name="userId" value="<%= candidature.IdCandidat %>">
-                        <button type="submit" class="btn btn-primary">Voir le Profil</button>
+                        <button type="submit" class="tw-bg-blue-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-md hover:tw-bg-blue-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-blue-500">
+                            Voir le Profil
+                        </button>
                     </form>
-                    <form method="POST" action="/applications/attachments">
+                    <form method="POST" action="/applications/attachments" class="tw-mb-2">
                         <input type="hidden" name="idCandidat" value="<%= candidature.IdCandidat %>">
                         <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
-                        <button type="submit" class="btn btn-success">Consulter les Pièces</button>
+                        <button type="submit" class="tw-bg-green-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-md hover:tw-bg-green-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-green-500">
+                            Consulter les Pièces
+                        </button>
                     </form>
-                    <form method="POST" action="/applications/cancel-application">
+                    <form method="POST" action="/applications/cancel-application" class="tw-mb-2">
                         <input type="hidden" name="idCandidat" value="<%= candidature.IdCandidat %>">
                         <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
-                        <button type="submit" class="btn btn-danger">Refuser</button>
+                        <button type="submit" class="tw-bg-red-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-md hover:tw-bg-red-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-red-500">
+                            Refuser
+                        </button>
                     </form>
-                    <form method="POST" action="/applications/download-candidate-folder">
+                    <form method="POST" action="/applications/download-candidate-folder" class="tw-mb-2">
                         <input type="hidden" name="idCandidat" value="<%= candidature.IdCandidat %>">
                         <input type="hidden" name="idOffre" value="<%= candidature.IdOffre %>">
-                        <button type="submit" class="btn btn-info">Télécharger le Dossier</button>
+                        <button type="submit" class="tw-bg-yellow-500 tw-text-white tw-px-4 tw-py-2 tw-rounded-md hover:tw-bg-yellow-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-yellow-500">
+                            Télécharger le Dossier
+                        </button>
                     </form>
                 </div>
             </div>

@@ -75,7 +75,6 @@ const FichePoste = {
             await OffreEmploi.deleteByFiche(idFiche);
             await pool.query(`DELETE FROM FichePoste WHERE IdFiche = ?`, [idFiche]);
             await pool.query('COMMIT');
-            logger.info(`Suppression de la fiche ${idFiche} réussie.`);
         } catch (error) {
             await pool.query('ROLLBACK');
             logger.error(`Erreur lors de la suppression de la fiche ${idFiche}: ${error.message}`);

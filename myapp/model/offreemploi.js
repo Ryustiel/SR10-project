@@ -81,14 +81,16 @@ const OffreEmploi = {
 
     async listRecruitorsOffers(idRecruteur) {
         const query = `
-            SELECT IdOffre, Intitule, DateValidite, Etat FROM OffreEmploi AS O
-            JOIN FichePoste AS F
-            ON O.IdFiche = F.IdFiche
-            WHERE IdRecruteur = ?;
-        `;
+        SELECT IdOffre, Intitule, DateValidite, Etat 
+        FROM OffreEmploi AS O
+        JOIN FichePoste AS F ON O.IdFiche = F.IdFiche
+        WHERE IdRecruteur = ?
+        ORDER BY DateValidite ASC;
+    `;
         const [results] = await pool.query(query, [idRecruteur]);
         return results;
     },
+
 
     async candidateViewOffer(idOffre) {
         const query = `
@@ -270,14 +272,14 @@ const OffreEmploi = {
     },
     async getLatestOffers(idCandidat, excludeOrganisationId = null) {
         let query = `
-            SELECT F.Intitule, F.LieuMission, F.Salaire, O.DateValidite
-            FROM OffreEmploi O
-            JOIN FichePoste F ON O.IdFiche = F.IdFiche
-            WHERE O.Etat = 'publié'
-              AND O.IdOffre NOT IN (
-                SELECT C.IdOffre FROM Candidature C WHERE C.IdCandidat = ?
-            )
-        `;
+    SELECT F.Intitule, F.LieuMission, F.Salaire, O.DateValidite
+    FROM OffreEmploi O
+    JOIN FichePoste F ON O.IdFiche = F.IdFiche
+    LEFT JOIN Candidature C ON O.IdOffre = C.IdOffre AND C.IdCandidat = ?
+    WHERE O.Etat = 'publié'
+      AND O.DateValidite >= CURDATE()
+      AND C.IdOffre IS NULL
+    `;
         let values = [idCandidat];
 
         if (excludeOrganisationId) {
@@ -285,7 +287,7 @@ const OffreEmploi = {
             values.push(excludeOrganisationId);
         }
 
-        query += ` ORDER BY O.DateValidite DESC LIMIT 3`;
+        query += ` ORDER BY O.DateValidite DESC`;
 
         const [results] = await pool.query(query, values);
         return results;

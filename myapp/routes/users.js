@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userModel = require('../model/utilisateur');
+const candidatureModel = require('../model/candidature');
 const isLoggedIn = require("../middleware/isLoggedIn");
 const isAdmin = require("../middleware/isAdmin");
 const {canViewProfile, canEditProfile} = require("../middleware/profile_properties");
@@ -82,6 +83,7 @@ router.post('/update-email', isLoggedIn, canEditProfile, [
         }
         req.session.message = "Email mis à jour avec succès.";
         req.session.messageType = 'notification';
+        logger.info(`L\'adresse e-mail de l'utilisateur ${userId} a été mise à jour avec succès.`);
         res.send(`
             <form id="redirectForm" method="post" action="/users/profile">
                 <input type="hidden" name="userId" value="${newEmail}">
@@ -114,6 +116,7 @@ router.post('/update-telephone', isLoggedIn, canEditProfile, [
         await userModel.update(userId, {Telephone: newTelephone});
         req.session.message = "Téléphone mis à jour avec succès.";
         req.session.messageType = 'notification';
+        logger.info(`Téléphone de l'utilisateur ${userId} mis à jour.`);
         res.send(`
             <form id="redirectForm" method="post" action="/users/profile">
                 <input type="hidden" name="userId" value="${userId}">
@@ -138,6 +141,7 @@ router.post('/reset-password', isLoggedIn, isAdmin, async (req, res,next) => {
         await userModel.update(userId, {MotDePasse: hashedPassword});
         req.session.message = "Mot de passe réinitialisé avec succès.";
         req.session.messageType = 'notification';
+        logger.info(`Le mot de passe de l'utilisateur ${userId} a été réinitialisé avec succès.`);
         res.send(`
             <form id="redirectForm" method="post" action="/users/profile">
                 <input type="hidden" name="userId" value="${userId}">
@@ -181,6 +185,7 @@ router.post('/update-password', isLoggedIn, [
         await userModel.update(userId, {MotDePasse: hashedPassword});
         req.session.message = "Mot de passe mis à jour avec succès.";
         req.session.messageType = 'notification';
+        logger.info(`Mot de passe de l'utilisateur ${user.IdUtilisateur} mis à jour avec succès.`);
         res.redirect(`/users/profile`);
     } catch (error) {
         logger.error(`Erreur lors de la mise à jour du mot de passe: ${error}`);
@@ -199,7 +204,12 @@ router.post('/delete', isLoggedIn, isAdmin, async (req, res, next) => {
         await userModel.delete(userId);
         req.session.message = "Utilisateur supprimé avec succès.";
         req.session.messageType = 'notification';
-        res.redirect(`/users/userslist?search=${encodeURIComponent(search)}&page=${page}`);
+        logger.info(`Utilisateur supprimé avec succès: ${userId}`);
+        if (req.session.userEmail === userId) {
+            res.redirect('/logout');
+        } else {
+            res.redirect(`/users/userslist?search=${encodeURIComponent(search)}&page=${page}`);
+        }
     } catch (error) {
         logger.error(`Erreur lors de la suppression de l'utilisateur: ${error}`);
         error.status = 500;
@@ -215,8 +225,10 @@ router.post('/make-admin', isLoggedIn, isAdmin, async (req, res, next) => {
     const page = req.body.page || 1;
     try {
         await userModel.update(userId, {TypeCompte: 'administrateur'});
+        await candidatureModel.deleteByCandidat(userId);
         req.session.message = "Utilisateur promu en administrateur avec succès.";
         req.session.messageType = 'notification';
+        logger.info(`Utilisateur promu en administrateur avec succès. Utilisateur : ${userId}.`);
         res.redirect(`/users/userslist?search=${encodeURIComponent(search)}&page=${page}`);
     } catch (error) {
         logger.error(`Erreur lors de la promotion de l'utilisateur. ${error}`);

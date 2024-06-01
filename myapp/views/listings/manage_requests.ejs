@@ -1,46 +1,50 @@
 <%- include('../search_pagination.ejs', { search, currentPage, totalPages, showHistory: false }) %>
-<table class="table table-bordered">
-    <thead>
-    <tr>
-        <th>Nom</th>
-        <th>Prénom</th>
-        <th>Email</th>
-        <th>Organisation</th>
-        <th>Statut de l'Organisation</th>
-        <th>Action</th>
-    </tr>
-    </thead>
-    <tbody>
-    <% requests.forEach(function(request) { %>
+<div class="tw-overflow-x-auto tw-bg-white tw-shadow-lg tw-rounded-lg">
+    <table class="tw-min-w-full tw-bg-white tw-mb-4">
+        <thead class="tw-bg-gray-200">
         <tr>
-            <td><%= request.Nom %></td>
-            <td><%= request.Prenom %></td>
-            <td><%= request.Email %></td>
-            <td><%= request.OrganisationNom %> (<%= request.IdOrganisation %>)</td>
-            <td>
-                <% if (request.StatutOrganisation === 'en attente') { %>
-                    Nouvelle organisation en attente
-                <% } else { %>
-                    Organisation existante
-                <% } %>
-            </td>
-            <td>
-                <form action="/organizations/accept_request" method="post" class="d-inline">
-                    <input type="hidden" name="email" value="<%= request.Email %>">
-                    <input type="hidden" name="organisationNumber" value="<%= request.IdOrganisation %>">
-                    <input type="hidden" name="search" value="<%= search %>">
-                    <input type="hidden" name="page" value="<%= currentPage %>">
-                    <button type="submit" class="btn btn-success">Accepter</button>
-                </form>
-                <form action="/organizations/reject_request" method="post" class="d-inline">
-                    <input type="hidden" name="email" value="<%= request.Email %>">
-                    <input type="hidden" name="search" value="<%= search %>">
-                    <input type="hidden" name="page" value="<%= currentPage %>">
-                    <button type="submit" class="btn btn-danger">Refuser</button>
-                </form>
-            </td>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Nom</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Prénom</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Email</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Organisation</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Statut de l'Organisation</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Action</th>
         </tr>
-    <% }); %>
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+        <% requests.forEach(function(request) { %>
+            <tr class="hover:tw-bg-gray-100">
+                <td class="tw-py-2 tw-px-4"><%= request.Nom %></td>
+                <td class="tw-py-2 tw-px-4"><%= request.Prenom %></td>
+                <td class="tw-py-2 tw-px-4"><%= request.Email %></td>
+                <td class="tw-py-2 tw-px-4"><%= request.OrganisationNom %> (<%= request.IdOrganisation %>)</td>
+                <td class="tw-py-2 tw-px-4">
+                    <% if (request.StatutOrganisation === 'en attente') { %>
+                        Nouvelle organisation en attente
+                    <% } else { %>
+                        Organisation existante
+                    <% } %>
+                </td>
+                <td class="tw-py-2 tw-px-4">
+                    <div class="tw-flex tw-space-x-2">
+                        <form action="/organizations/accept_request" method="post">
+                            <input type="hidden" name="email" value="<%= request.Email %>">
+                            <input type="hidden" name="organisationNumber" value="<%= request.IdOrganisation %>">
+                            <input type="hidden" name="search" value="<%= search %>">
+                            <input type="hidden" name="page" value="<%= currentPage %>">
+                            <button type="submit" class="tw-bg-green-500 hover:tw-bg-green-700 tw-text-white tw-px-4 tw-py-2 tw-rounded-md">Accepter</button>
+                        </form>
+                        <form action="/organizations/reject_request" method="post">
+                            <input type="hidden" name="email" value="<%= request.Email %>">
+                            <input type="hidden" name="search" value="<%= search %>">
+                            <input type="hidden" name="page" value="<%= currentPage %>">
+                            <button type="submit" class="tw-bg-red-500 hover:tw-bg-red-700 tw-text-white tw-px-4 tw-py-2 tw-rounded-md">Refuser</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        <% }); %>
+        </tbody>
+    </table>
+</div>
 <%- include('../pagination.ejs', { currentPage, totalPages, search, showHistory: false }) %>

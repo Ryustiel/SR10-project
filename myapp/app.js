@@ -7,6 +7,9 @@ const sessionMiddleware = require('./middleware/session');
 // Création de l'application Express
 const app = express();
 
+// Serveur de fichiers statiques
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Affichage de l'accès aux pages dans le logging
 app.use((req, res, next) => {
     logger.info(`Requête reçue: ${req.method} ${req.url} de ${req.ip}`);
@@ -26,8 +29,6 @@ app.use(sessions({
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
-// Serveur de fichiers statiques
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Vue engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -79,7 +80,6 @@ app.use(function (req, res, next) {
 app.use(function (err, req, res, next) {
     // Log de l'erreur
     logger.error(`Erreur : ${err.status || 500} - ${err.message}, Stack: ${err.stack}`);
-
     // Réponse de l'erreur
     res.status(err.status || 500).render('error', {
         message: err.message || "Une erreur est survenue sur le serveur.",

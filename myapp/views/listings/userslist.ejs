@@ -1,49 +1,53 @@
 <%- include('../search_pagination.ejs', { search, currentPage, totalPages }) %>
-<table class="table table-bordered">
-    <thead>
-    <tr>
-        <th>Nom</th>
-        <th>Prénom</th>
-        <th>Email</th>
-        <th>Téléphone</th>
-        <th>Date de Création</th>
-        <th>Statut du Compte</th>
-        <th>Type de Compte</th>
-        <th>Action</th>
-    </tr>
-    </thead>
-    <tbody>
-    <% users.forEach(function(user) { %>
+<div class="tw-overflow-x-auto tw-bg-white tw-shadow-lg tw-rounded-lg">
+    <table class="tw-min-w-full tw-bg-white tw-mb-4">
+        <thead class="tw-bg-gray-200">
         <tr>
-            <td><%= user.Nom %></td>
-            <td><%= user.Prenom %></td>
-            <td><%= user.Email %></td>
-            <td><%= user.Telephone %></td>
-            <td><%= new Date(user.DateCreation).toLocaleDateString("fr-FR") %></td>
-            <td><%= user.StatutCompte %></td>
-            <td><%= user.TypeCompte %></td>
-            <td>
-                <form action="/users/profile" method="post" class="d-inline">
-                    <input type="hidden" name="userId" value="<%= user.Email %>">
-                    <button type="submit" class="btn btn-primary mb-2">Voir Profil</button>
-                </form>
-                <form action="/users/delete" method="post" class="d-inline">
-                    <input type="hidden" name="userId" value="<%= user.Email %>">
-                    <input type="hidden" name="search" value="<%= search %>">
-                    <input type="hidden" name="page" value="<%= currentPage %>">
-                    <button type="submit" class="btn btn-danger mb-2">Supprimer</button>
-                </form>
-                <% if (user.TypeCompte !== 'administrateur') { %>
-                    <form action="/users/make-admin" method="post" class="d-inline">
-                        <input type="hidden" name="userId" value="<%= user.Email %>">
-                        <input type="hidden" name="search" value="<%= search %>">
-                        <input type="hidden" name="page" value="<%= currentPage %>">
-                        <button type="submit" class="btn btn-warning mb-2">Promouvoir en Admin</button>
-                    </form>
-                <% } %>
-            </td>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Nom</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Prénom</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Email</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Téléphone</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Date de Création</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Statut du Compte</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Type de Compte</th>
+            <th class="tw-py-2 tw-px-4 tw-text-center">Action</th>
         </tr>
-    <% }); %>
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+        <% users.forEach(function(user) { %>
+            <tr class="hover:tw-bg-gray-100">
+                <td class="tw-py-2 tw-px-4"><%= user.Nom %></td>
+                <td class="tw-py-2 tw-px-4"><%= user.Prenom %></td>
+                <td class="tw-py-2 tw-px-4"><%= user.Email %></td>
+                <td class="tw-py-2 tw-px-4"><%= user.Telephone %></td>
+                <td class="tw-py-2 tw-px-4"><%= new Date(user.DateCreation).toLocaleDateString("fr-FR") %></td>
+                <td class="tw-py-2 tw-px-4"><%= user.StatutCompte %></td>
+                <td class="tw-py-2 tw-px-4"><%= user.TypeCompte %></td>
+                <td class="tw-py-2 tw-px-4 tw-text-center">
+                    <div class="tw-flex tw-flex-col md:tw-flex-row tw-space-y-2 md:tw-space-y-0 md:tw-space-x-2">
+                        <form action="/users/profile" method="post" class="tw-inline">
+                            <input type="hidden" name="userId" value="<%= user.Email %>">
+                            <button type="submit" class="tw-bg-blue-500 hover:tw-bg-blue-700 tw-text-white tw-px-4 tw-py-2 tw-rounded-md tw-whitespace-nowrap">Voir Profil</button>
+                        </form>
+                        <form action="/users/delete" method="post" class="tw-inline">
+                            <input type="hidden" name="userId" value="<%= user.Email %>">
+                            <input type="hidden" name="search" value="<%= search %>">
+                            <input type="hidden" name="page" value="<%= currentPage %>">
+                            <button type="submit" class="tw-bg-red-500 hover:tw-bg-red-700 tw-text-white tw-px-4 tw-py-2 tw-rounded-md tw-whitespace-nowrap">Supprimer</button>
+                        </form>
+                        <% if (user.TypeCompte !== 'administrateur') { %>
+                            <form action="/users/make-admin" method="post" class="tw-inline">
+                                <input type="hidden" name="userId" value="<%= user.Email %>">
+                                <input type="hidden" name="search" value="<%= search %>">
+                                <input type="hidden" name="page" value="<%= currentPage %>">
+                                <button type="submit" class="tw-bg-yellow-500 hover:tw-bg-yellow-700 tw-text-white tw-px-4 tw-py-2 tw-rounded-md tw-whitespace-nowrap">Promouvoir</button>
+                            </form>
+                        <% } %>
+                    </div>
+                </td>
+            </tr>
+        <% }); %>
+        </tbody>
+    </table>
+</div>
 <%- include('../pagination.ejs', { currentPage, totalPages, search }) %>

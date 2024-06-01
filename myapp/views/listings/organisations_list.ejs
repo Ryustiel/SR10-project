@@ -1,31 +1,33 @@
 <%- include('../search_pagination.ejs', { search, currentPage, totalPages }) %>
-<table class="table table-bordered">
-    <thead>
-    <tr>
-        <th>Numéro Siren</th>
-        <th>Nom</th>
-        <th>Type</th>
-        <th>Adresse Administrative</th>
-        <th>Statut</th>
-        <th>Action</th>
-    </tr>
-    </thead>
-    <tbody>
-    <% organisations.forEach(function(organisation) { %>
+<div class="tw-overflow-x-auto tw-bg-white tw-shadow-lg tw-rounded-lg">
+    <table class="tw-min-w-full tw-bg-white tw-mb-4">
+        <thead class="tw-bg-gray-200">
         <tr>
-            <td><%= organisation.NumeroSiren %></td>
-            <td><%= organisation.Nom %></td>
-            <td><%= organisation.Type %></td>
-            <td><%= organisation.AdresseAdministrative %></td>
-            <td><%= organisation.StatutOrganisation %></td>
-            <td>
-                <form action="/organizations/delete_organisation" method="post" class="d-inline">
-                    <input type="hidden" name="numeroSiren" value="<%= organisation.NumeroSiren %>">
-                    <button type="submit" class="btn btn-danger mb-2">Supprimer</button>
-                </form>
-            </td>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Numéro Siren</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Nom</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Type</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Adresse Administrative</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Statut</th>
+            <th class="tw-py-2 tw-px-4 tw-text-left">Action</th>
         </tr>
-    <% }); %>
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+        <% organisations.forEach(function(organisation) { %>
+            <tr class="hover:tw-bg-gray-100">
+                <td class="tw-py-2 tw-px-4"><%= organisation.NumeroSiren %></td>
+                <td class="tw-py-2 tw-px-4"><%= organisation.Nom %></td>
+                <td class="tw-py-2 tw-px-4"><%= organisation.Type %></td>
+                <td class="tw-py-2 tw-px-4"><%= organisation.AdresseAdministrative %></td>
+                <td class="tw-py-2 tw-px-4"><%= organisation.StatutOrganisation %></td>
+                <td class="tw-py-2 tw-px-4">
+                    <form action="/organizations/delete_organisation" method="post" class="tw-inline-block">
+                        <input type="hidden" name="numeroSiren" value="<%= organisation.NumeroSiren %>">
+                        <button type="submit" class="tw-bg-red-500 hover:tw-bg-red-700 tw-text-white tw-px-4 tw-py-2 tw-rounded-md">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+        <% }); %>
+        </tbody>
+    </table>
+</div>
 <%- include('../pagination.ejs', { currentPage, totalPages, search }) %>

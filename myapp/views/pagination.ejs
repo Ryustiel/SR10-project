@@ -1,8 +1,8 @@
-<nav aria-label="Page navigation">
-    <ul class="pagination">
+<nav aria-label="Page navigation" class="tw-mt-4">
+    <ul class="tw-inline-flex tw-space-x-2">
         <% for(let i = 1; i <= totalPages; i++) { %>
-            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                <a class="page-link" href="?page=<%= i %>&search=<%= search %>&showHistory=<%= typeof showHistory !== 'undefined' ? showHistory : 'false' %>"><%= i %></a>
+            <li class="<%= currentPage === i ? 'tw-bg-blue-500 tw-text-white' : 'tw-bg-white tw-text-gray-800' %> tw-border tw-border-gray-300 tw-rounded-md">
+                <a class="tw-block tw-px-4 tw-py-2 <%= currentPage === i ? '' : 'hover:tw-bg-gray-200' %>" href="?page=<%= i %>&search=<%= search %>&showHistory=<%= typeof showHistory !== 'undefined' ? showHistory : 'false' %>"><%= i %></a>
             </li>
         <% } %>
     </ul>

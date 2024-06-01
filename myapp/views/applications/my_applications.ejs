@@ -17,18 +17,18 @@
         }
     </style>
 </head>
-<body>
+<body class="tw-bg-gray-100 tw-font-sans tw-leading-normal tw-tracking-normal">
 <%- include('../navbar.ejs') %>
 <%- include('../message.ejs') %>
 
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <h1>Mes Candidatures</h1>
+<div class="tw-container tw-mt-5 tw-mx-auto">
+    <div class="tw-flex tw-justify-center">
+        <div class="tw-w-full sm:tw-w-3/4 lg:tw-w-1/2">
+            <h1 class="tw-mb-4 tw-text-4xl tw-font-bold tw-text-gray-800 tw-text-center">Mes Candidatures</h1>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
+    <div class="tw-flex tw-justify-center">
+        <div class="tw-w-full sm:tw-w-3/4 lg:tw-w-1/2">
             <%- include('../listings/outgoing_applications.ejs', { candidatures: candidatures }) %>
         </div>
     </div>
@@ -75,8 +75,8 @@
                 const hasChanges = newFilesCount > 0 || filesToDeleteInput.value.length > 0 || totalFiles !== initialFileCount;
 
                 submitButton.disabled = totalFiles < requiredFiles || !hasChanges;
-                submitButton.classList.toggle('btn-success', totalFiles >= requiredFiles && hasChanges);
-                submitButton.classList.toggle('btn-secondary', totalFiles < requiredFiles || !hasChanges);
+                submitButton.classList.toggle('tw-bg-green-500', totalFiles >= requiredFiles && hasChanges);
+                submitButton.classList.toggle('tw-bg-gray-500', totalFiles < requiredFiles || !hasChanges);
                 fileCount.innerText = `Pièces justificatives fournies : ${totalFiles}/${requiredFiles}`;
             }
 
@@ -102,3 +102,5 @@
 </script>
 </body>
 </html>
+
+
