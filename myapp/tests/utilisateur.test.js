@@ -4,6 +4,7 @@ const HistoriqueDemandes = require('../model/historiquedemandes');
 const Utilisateur = require('../model/utilisateur');
 const bcrypt = require('bcryptjs');
 const logger = require('../logger');
+const OffreEmploi = require("../model/offreemploi");
 
 jest.mock('../model/db', () => ({
     query: jest.fn(),
@@ -14,6 +15,7 @@ jest.mock('../model/candidature');
 jest.mock('../model/historiquedemandes');
 jest.mock('bcryptjs');
 jest.mock('../logger');
+jest.mock('../model/offreemploi');
 
 describe('Model Tests - Utilisateur', () => {
     beforeEach(() => {
@@ -130,53 +132,6 @@ describe('Model Tests - Utilisateur', () => {
 
         // Ensure the query method was not called since there are no valid fields to update
         expect(db.query).not.toHaveBeenCalled();
-    });
-
-    test('delete utilisateur successfully', async () => {
-        const email = 'jane.doe@example.com';
-        const mockCandidatures = [{ IdOffre: 1 }, { IdOffre: 2 }];
-
-        // Simuler les appels aux méthodes dépendantes
-        Candidature.getApplicationsCandidat.mockResolvedValueOnce(mockCandidatures);
-        Candidature.delete.mockResolvedValue();
-        HistoriqueDemandes.deleteRequests.mockResolvedValueOnce();
-        db.query.mockResolvedValueOnce(); // For START TRANSACTION
-        db.query.mockResolvedValueOnce(); // For DELETE query
-        db.query.mockResolvedValueOnce(); // For COMMIT
-
-        await Utilisateur.delete(email);
-
-        expect(db.query).toHaveBeenCalledTimes(3); // 1 for START TRANSACTION, 1 for DELETE, 1 for COMMIT
-        expect(db.query).toHaveBeenNthCalledWith(1, 'START TRANSACTION');
-        expect(db.query).toHaveBeenNthCalledWith(2, expect.stringContaining('DELETE FROM Utilisateur WHERE Email = ?;'), [email]);
-        expect(db.query).toHaveBeenNthCalledWith(3, 'COMMIT');
-
-        expect(Candidature.getApplicationsCandidat).toHaveBeenCalledWith(email);
-        expect(Candidature.delete).toHaveBeenCalledTimes(mockCandidatures.length);
-        for (const candidature of mockCandidatures) {
-            expect(Candidature.delete).toHaveBeenCalledWith(email, candidature.IdOffre);
-        }
-        expect(HistoriqueDemandes.deleteRequests).toHaveBeenCalledWith(email);
-    });
-
-    test('delete utilisateur rolls back on error', async () => {
-        const email = 'jane.doe@example.com';
-        const mockCandidatures = [{ IdOffre: 1 }, { IdOffre: 2 }];
-
-        // Simuler les appels aux méthodes dépendantes
-        Candidature.getApplicationsCandidat.mockResolvedValueOnce(mockCandidatures);
-        Candidature.delete.mockRejectedValueOnce(new Error('Candidature deletion failed'));
-        db.query.mockResolvedValueOnce(); // For START TRANSACTION
-        db.query.mockResolvedValueOnce(); // For ROLLBACK
-
-        await expect(Utilisateur.delete(email)).rejects.toThrow('Candidature deletion failed');
-
-        expect(db.query).toHaveBeenCalledTimes(2); // 1 for START TRANSACTION, 1 for ROLLBACK
-        expect(db.query).toHaveBeenNthCalledWith(1, 'START TRANSACTION');
-        expect(db.query).toHaveBeenNthCalledWith(2, 'ROLLBACK');
-
-        expect(Candidature.getApplicationsCandidat).toHaveBeenCalledWith(email);
-        expect(Candidature.delete).toHaveBeenCalledTimes(1); // Only the first delete call should have been made
     });
 
 
@@ -381,5 +336,60 @@ describe('Model Tests - Utilisateur', () => {
 
         expect(result).toEqual(mockUsers);
         expect(db.query).toHaveBeenCalledTimes(1);
+    });
+
+    test('delete utilisateur successfully', async () => {
+        const email = 'recruteur@example.com';
+        const mockCandidatures = [{ IdOffre: 1 }, { IdOffre: 2 }];
+        const mockUser = { Email: email, TypeCompte: 'recruteur' };
+
+        // Simuler les appels aux méthodes dépendantes
+        Utilisateur.read = jest.fn().mockResolvedValueOnce(mockUser);
+        Candidature.getApplicationsCandidat.mockResolvedValueOnce(mockCandidatures);
+        Candidature.delete.mockResolvedValue();
+        HistoriqueDemandes.deleteRequests.mockResolvedValueOnce();
+        OffreEmploi.deleteByRecruteur.mockResolvedValueOnce();
+        db.query.mockResolvedValueOnce(); // For START TRANSACTION
+        db.query.mockResolvedValueOnce(); // For DELETE query
+        db.query.mockResolvedValueOnce(); // For COMMIT
+
+        await Utilisateur.delete(email);
+
+        expect(db.query).toHaveBeenCalledTimes(3); // 1 for START TRANSACTION, 1 for DELETE, 1 for COMMIT
+        expect(db.query).toHaveBeenNthCalledWith(1, 'START TRANSACTION');
+        expect(db.query).toHaveBeenNthCalledWith(2, expect.stringContaining('DELETE FROM Utilisateur WHERE Email = ?;'), [email]);
+        expect(db.query).toHaveBeenNthCalledWith(3, 'COMMIT');
+
+        expect(Utilisateur.read).toHaveBeenCalledWith(email);
+        expect(Candidature.getApplicationsCandidat).toHaveBeenCalledWith(email);
+        expect(Candidature.delete).toHaveBeenCalledTimes(mockCandidatures.length);
+        for (const candidature of mockCandidatures) {
+            expect(Candidature.delete).toHaveBeenCalledWith(email, candidature.IdOffre);
+        }
+        expect(OffreEmploi.deleteByRecruteur).toHaveBeenCalledWith(email);
+        expect(HistoriqueDemandes.deleteRequests).toHaveBeenCalledWith(email);
+    });
+
+    test('delete utilisateur rolls back on error', async () => {
+        const email = 'recruteur@example.com';
+        const mockCandidatures = [{ IdOffre: 1 }, { IdOffre: 2 }];
+        const mockUser = { Email: email, TypeCompte: 'recruteur' };
+
+        // Simuler les appels aux méthodes dépendantes
+        Utilisateur.read = jest.fn().mockResolvedValueOnce(mockUser);
+        Candidature.getApplicationsCandidat.mockResolvedValueOnce(mockCandidatures);
+        Candidature.delete.mockRejectedValueOnce(new Error('Candidature deletion failed'));
+        db.query.mockResolvedValueOnce(); // For START TRANSACTION
+        db.query.mockResolvedValueOnce(); // For ROLLBACK
+
+        await expect(Utilisateur.delete(email)).rejects.toThrow('Candidature deletion failed');
+
+        expect(db.query).toHaveBeenCalledTimes(2); // 1 for START TRANSACTION, 1 for ROLLBACK
+        expect(db.query).toHaveBeenNthCalledWith(1, 'START TRANSACTION');
+        expect(db.query).toHaveBeenNthCalledWith(2, 'ROLLBACK');
+
+        expect(Utilisateur.read).toHaveBeenCalledWith(email);
+        expect(Candidature.getApplicationsCandidat).toHaveBeenCalledWith(email);
+        expect(Candidature.delete).toHaveBeenCalledTimes(1); // Only the first delete call should have been made
     });
 });

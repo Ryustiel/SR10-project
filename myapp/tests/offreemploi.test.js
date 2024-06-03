@@ -134,12 +134,31 @@ describe("Model Tests - OffreEmploi", () => {
 
     test("delete offers by recruteur successfully", async () => {
         const idRecruteur = 'recruteur@example.com';
+        const mockOffres = [{ IdOffre: 1 }, { IdOffre: 2 }];
 
-        db.query.mockResolvedValueOnce();
+        // Simuler la récupération des offres associées au recruteur
+        db.query.mockResolvedValueOnce([mockOffres, {}]);
+
+        // Simuler la suppression des candidatures et des offres d'emploi
+        db.query.mockResolvedValue([{}, {}]);
 
         await OffreEmploi.deleteByRecruteur(idRecruteur);
 
-        expect(db.query).toHaveBeenCalledWith(`DELETE FROM OffreEmploi WHERE IdRecruteur = ?`, [idRecruteur]);
+        // Vérifier que les candidatures associées à chaque offre ont été supprimées
+        expect(Candidature.deleteByOffre).toHaveBeenCalledWith(mockOffres[0].IdOffre);
+        expect(Candidature.deleteByOffre).toHaveBeenCalledWith(mockOffres[1].IdOffre);
+        expect(Candidature.deleteByOffre).toHaveBeenCalledTimes(mockOffres.length);
+
+        // Vérifier que chaque offre d'emploi a été supprimée
+        for (const offre of mockOffres) {
+            expect(db.query).toHaveBeenCalledWith(`DELETE FROM OffreEmploi WHERE IdOffre = ?`, [offre.IdOffre]);
+        }
+
+        // Vérifier que la requête pour récupérer les offres associées au recruteur a été appelée
+        expect(db.query).toHaveBeenCalledWith(`SELECT IdOffre FROM OffreEmploi WHERE IdRecruteur = ?`, [idRecruteur]);
+
+        // Vérifier que le nombre total d'appels de la fonction query est correct
+        expect(db.query).toHaveBeenCalledTimes(mockOffres.length + 1);
     });
 
     test("get offer name successfully", async () => {

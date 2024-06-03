@@ -234,8 +234,18 @@ const OffreEmploi = {
     },
 
     async deleteByRecruteur(idRecruteur) {
-        const query = `DELETE FROM OffreEmploi WHERE IdRecruteur = ?`;
-        await pool.query(query, [idRecruteur]);
+        // Récupérer toutes les offres d'emploi associées au recruteur
+        const [offres] = await pool.query(`SELECT IdOffre FROM OffreEmploi WHERE IdRecruteur = ?`, [idRecruteur]);
+
+        // Pour chaque offre d'emploi, supprimer les candidatures associées puis l'offre elle-même
+        for (const offre of offres) {
+            // Supprimer les candidatures associées à cette offre
+            await Candidature.deleteByOffre(offre.IdOffre);
+
+            // Supprimer l'offre d'emploi elle-même
+            const query = `DELETE FROM OffreEmploi WHERE IdOffre = ?`;
+            await pool.query(query, [offre.IdOffre]);
+        }
     },
 
     async listOffersForOrganisation(idOrganisation, search, limit, offset) {

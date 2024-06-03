@@ -260,7 +260,7 @@ router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req,
 router.get('/manage_requests', isLoggedIn, isAdmin, readMessage, async (req, res, next) => {
     const search = req.query.search || '';
     const page = parseInt(req.query.page) || 1;
-    const limit = 10; // Nombre de demandes par page
+    const limit = 8; // Nombre de demandes par page
     const offset = (page - 1) * limit;
     const placeholder = "Rechercher par email";
     const showHistory = req.query.showHistory === 'true';

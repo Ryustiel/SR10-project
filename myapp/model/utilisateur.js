@@ -3,7 +3,7 @@ const Candidature = require('./candidature');
 const logger = require('../logger');
 const bcrypt = require('bcryptjs');
 const HistoriqueDemandes = require('./historiquedemandes');
-
+const OffreEmploi = require('./offreemploi');
 const Utilisateur = {
     async create({email, motDePasse, nom, prenom, telephone, dateCreation, statutCompte, typeCompte, idOrganisation}) {
         const query = `
@@ -55,14 +55,16 @@ const Utilisateur = {
         const connection = await pool.query;
         try {
             await connection('START TRANSACTION');
-
+            const user = await Utilisateur.read(email);
             // Lire toutes les candidatures de l'utilisateur
             const candidatures = await Candidature.getApplicationsCandidat(email);
             for (const candidature of candidatures) {
                 // Supprimer chaque candidature
                 await Candidature.delete(email, candidature.IdOffre);
             }
-
+            if (user.TypeCompte === 'recruteur') {
+                await OffreEmploi.deleteByRecruteur(email);
+            }
             await HistoriqueDemandes.deleteRequests(email);
             // Supprimer l'utilisateur
             const deleteUserQuery = `DELETE FROM Utilisateur WHERE Email = ?;`;

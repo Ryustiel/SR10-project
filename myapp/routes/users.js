@@ -225,9 +225,10 @@ router.post('/make-admin', isLoggedIn, isAdmin, async (req, res, next) => {
     const search = req.body.search || '';
     const page = req.body.page || 1;
     try {
+        const user = await userModel.read(userId);
         await userModel.updateTypeCompteWithOrganisation(userId, 'administrateur',null);
         await candidatureModel.deleteByCandidat(userId);
-        if (userModel.read().TypeCompte === "recruteur"){
+        if (user.TypeCompte === "recruteur"){
             await offreEmploiModel.deleteByRecruteur(userId);
         }
         req.session.message = "Utilisateur promu en administrateur avec succès.";
