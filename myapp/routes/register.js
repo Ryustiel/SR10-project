@@ -25,7 +25,7 @@ router.post('/', [
     body('phone', 'Numéro de téléphone non valide').isMobilePhone('fr-FR'),
     body('password', 'Le mot de passe doit contenir au moins 12 caractères, incluant une majuscule, une minuscule, un chiffre et un caractère spécial.')
         .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/).trim().escape(),
-    body('confirmPassword', 'Les mots de passe ne correspondent pas')
+    body('confirmPassword', 'Les mots de passe ne correspondent pas').trim().escape()
         .custom((value, {req}) => value === req.body.password)
 ], async (req, res,next) => {
     const errors = validationResult(req);

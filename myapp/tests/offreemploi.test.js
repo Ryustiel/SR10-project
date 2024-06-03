@@ -132,6 +132,16 @@ describe("Model Tests - OffreEmploi", () => {
         expect(db.query).toHaveBeenCalledTimes(1);
     });
 
+    test("delete offers by recruteur successfully", async () => {
+        const idRecruteur = 'recruteur@example.com';
+
+        db.query.mockResolvedValueOnce();
+
+        await OffreEmploi.deleteByRecruteur(idRecruteur);
+
+        expect(db.query).toHaveBeenCalledWith(`DELETE FROM OffreEmploi WHERE IdRecruteur = ?`, [idRecruteur]);
+    });
+
     test("get offer name successfully", async () => {
         const idOffre = 1;
         const mockNom = { Intitule: "Software Engineer" };

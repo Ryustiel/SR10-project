@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userModel = require('../model/utilisateur');
 const candidatureModel = require('../model/candidature');
+const offreEmploiModel = require('../model/offreEmploi');
 const isLoggedIn = require("../middleware/isLoggedIn");
 const isAdmin = require("../middleware/isAdmin");
 const {canViewProfile, canEditProfile} = require("../middleware/profile_properties");
@@ -160,8 +161,8 @@ router.post('/reset-password', isLoggedIn, isAdmin, async (req, res,next) => {
 router.post('/update-password', isLoggedIn, [
     body('currentPassword', 'Votre mot de passe actuel est requis').notEmpty(),
     body('newPassword', 'Le nouveau mot de passe doit contenir au moins 12 caractères, incluant une majuscule, une minuscule, un chiffre et un caractère spécial.')
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/),
-    body('confirmPassword', 'Les mots de passe ne correspondent pas').custom((value, {req}) => value === req.body.newPassword)
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/).trim().escape(),
+    body('confirmPassword', 'Les mots de passe ne correspondent pas').custom((value, {req}) => value === req.body.newPassword).trim().escape()
 ], async (req, res,next) => {
     const errors = validationResult(req);
     const userId = req.session.userEmail;
@@ -224,8 +225,11 @@ router.post('/make-admin', isLoggedIn, isAdmin, async (req, res, next) => {
     const search = req.body.search || '';
     const page = req.body.page || 1;
     try {
-        await userModel.update(userId, {TypeCompte: 'administrateur'});
+        await userModel.updateTypeCompteWithOrganisation(userId, 'administrateur',null);
         await candidatureModel.deleteByCandidat(userId);
+        if (userModel.read().TypeCompte === "recruteur"){
+            await offreEmploiModel.deleteByRecruteur(userId);
+        }
         req.session.message = "Utilisateur promu en administrateur avec succès.";
         req.session.messageType = 'notification';
         logger.info(`Utilisateur promu en administrateur avec succès. Utilisateur : ${userId}.`);

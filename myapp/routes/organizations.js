@@ -232,7 +232,7 @@ router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req,
         // Supprimer l'entrée en attente de l'historique
 
         const organisation = await Organisation.read(user.IdOrganisation);
-        await Utilisateur.updateTypeCompte(userId, 'candidat');
+        await Utilisateur.updateTypeCompteWithOrganisation(userId, 'candidat', null);
         await HistoriqueDemandes.updateAction(organisation.NumeroSiren, userId, "refusée", req.session.userEmail);
         if (organisation && organisation.StatutOrganisation === 'en attente') {
             await Organisation.archiveOrganisationAndAssociations(user.IdOrganisation);
@@ -358,6 +358,9 @@ router.post('/reject_request', isLoggedIn, isAdmin, async (req, res, next) => {
         if (organisation && organisation.StatutOrganisation === 'en attente') {
             await Organisation.archiveOrganisationAndAssociations(user.IdOrganisation);
             logger.info("Organisation supprimée.");
+        }
+        else{
+            await Utilisateur.updateTypeCompteWithOrganisation(email, 'candidat', null);
         }
 
         req.session.message = "Demande rejetée et type de compte mis à jour en 'candidat'.";

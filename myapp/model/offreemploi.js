@@ -233,6 +233,11 @@ const OffreEmploi = {
         await pool.query(query, [idFiche]);
     },
 
+    async deleteByRecruteur(idRecruteur) {
+        const query = `DELETE FROM OffreEmploi WHERE IdRecruteur = ?`;
+        await pool.query(query, [idRecruteur]);
+    },
+
     async listOffersForOrganisation(idOrganisation, search, limit, offset) {
         const query = `
             SELECT O.IdOffre, F.Intitule, O.DateValidite, O.Etat 
