@@ -648,6 +648,9 @@ video {
 .tw-hidden {
   display: none;
 }
+.tw-h-12 {
+  height: 3rem;
+}
 .tw-h-16 {
   height: 4rem;
 }
@@ -665,6 +668,9 @@ video {
 }
 .tw-w-1\/5 {
   width: 20%;
+}
+.tw-w-12 {
+  width: 3rem;
 }
 .tw-w-2\/3 {
   width: 66.666667%;
@@ -1144,7 +1150,6 @@ html, body {
     }
 body {
         position: relative;
-        padding-right: 8px; /* Space for scrollbar */
     }
 .hover\:tw-scale-105:hover {
   --tw-scale-x: 1.05;

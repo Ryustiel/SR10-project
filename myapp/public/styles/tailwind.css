@@ -34,12 +34,9 @@
 
     body {
         position: relative;
-        padding-right: 8px; /* Space for scrollbar */
     }
 
     body.scrolling {
         --scrollbar-color: rgba(0, 0, 0, 0.5);
     }
-
-
 }
