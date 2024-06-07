@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Node.js app to Azure Web App - sr10project
 
 on:
@@ -14,7 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
@@ -22,18 +20,14 @@ jobs:
           node-version: '20.x'
 
       - name: npm install, build, and test
+        working-directory: myapp
         run: |
-          cd myapp
           npm install
           npm run build --if-present
           npm run test --if-present
-        working-directory: ./myapp
 
       - name: Zip artifact for deployment
-        run: |
-          cd myapp
-          zip -r ../release.zip ./*
-        working-directory: ./myapp
+        run: zip -r release.zip myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -64,4 +58,4 @@ jobs:
           app-name: 'sr10project'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_22659E805627417681AE8A0612E17EB7 }}
-          package: .
+          package: myapp
