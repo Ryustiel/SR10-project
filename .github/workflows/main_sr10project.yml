@@ -15,16 +15,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node.js version
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '20.x' # Utilise Node.js 20.x
+          node-version: '20.x'
+          cache: 'npm' # Ajout de la mise en cache de npm
 
       - name: Ensure uploads directory exists
         run: mkdir -p myapp/uploads
 
       - name: Install dependencies
         working-directory: myapp
-        run: npm install
+        run: npm ci # Utilisation de npm ci pour installer les dépendances avec un lockfile
 
       - name: Build and test
         working-directory: myapp
@@ -36,7 +37,7 @@ jobs:
         run: zip -r release.zip myapp
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4 # Mise à jour vers v4
+        uses: actions/upload-artifact@v4
         with:
           name: node-app
           path: release.zip
@@ -47,7 +48,7 @@ jobs:
 
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v4 # Mise à jour vers v4
+        uses: actions/download-artifact@v4
         with:
           name: node-app
 
@@ -55,7 +56,7 @@ jobs:
         run: unzip release.zip
 
       - name: Install dependencies on Azure
-        run: npm install --omit=dev
+        run: npm ci --omit=dev # Utilisation de npm ci pour installer les dépendances de production
         working-directory: myapp
 
       - name: Deploy to Azure Web App
