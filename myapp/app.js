@@ -6,8 +6,7 @@ const sessionMiddleware = require('./middleware/session');
 
 // Création de l'application Express
 const app = express();
-app.set('port', 8080);
-app.listen(app.get('port'));
+
 // Serveur de fichiers statiques
 app.use(express.static(path.join(__dirname, 'public')));
 
