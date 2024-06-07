@@ -46,22 +46,7 @@
                     <% } %>
                 </div>
             </div>
-            <% if (userRole === 'recruteur') { %>
-                <div class="tw-flex tw-items-center">
-                    <% if (space === 'candidat') { %>
-                        <a href="/dashboard/switch-to-recruiter-space"
-                           class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out tw-whitespace-nowrap tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white">
-                            Espace Recruteur
-                        </a>
-                    <% } else { %>
-                        <a href="/dashboard/switch-to-candidate-space"
-                           class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out tw-whitespace-nowrap tw-bg-green-500 tw-text-white hover:tw-bg-green-400">
-                            Espace Recruteur
-                        </a>
-                    <% } %>
-                </div>
-            <% } %>
-            <div class="tw-flex tw-items-center sm:tw-hidden">
+            <div class="tw-flex sm:tw-hidden tw-items-center tw-justify-between tw-w-full">
                 <button type="button"
                         class="tw-inline-flex tw-items-center tw-justify-center tw-p-2 tw-rounded-md tw-text-gray-400 hover:tw-text-white hover:tw-bg-blue-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-white"
                         aria-controls="mobile-menu" aria-expanded="false" id="mobile-menu-button">
@@ -81,7 +66,7 @@
         </div>
     </div>
     <!-- Mobile menu, show/hide based on menu state. -->
-    <div class="tw-hidden" id="mobile-menu">
+    <div class="tw-hidden sm:tw-hidden" id="mobile-menu">
         <div class="tw-px-2 tw-pt-2 tw-pb-3 tw-space-y-1">
             <% if (userRole) { %>
                 <% if (userRole === 'candidat' || userRole === 'recruteur en attente' || userRole === 'recruteur' || userRole === 'administrateur') { %>
@@ -108,18 +93,16 @@
                     <a href="/jobs/my_offers"
                        class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/my_offers') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Offres</a>
                 <% } %>
-                <% if (userRole === 'administrateur') { %>
-                    <a href="/organizations/manage_requests"
-                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/organizations/manage_requests') ? 'tw-bg-orange-400 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-orange-300 hover:tw-text-white' %>">Gérer</a>
-                    <a href="/users/userslist"
-                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/users/userslist') ? 'tw-bg-orange-400 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-orange-300 hover:tw-text-white' %>">Utilisateurs</a>
-                    <a href="/organizations/list_organisations"
-                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/organizations/list_organisations') ? 'tw-bg-orange-400 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-orange-300 hover:tw-text-white' %>">Organisations</a>
+                <% if (userRole === 'recruteur') { %>
+                    <a href="<%= space === 'candidat' ? '/dashboard/switch-to-recruiter-space' : '/dashboard/switch-to-candidate-space' %>"
+                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= space === 'candidat' ? 'tw-bg-green-500 tw-text-white hover:tw-bg-green-400' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">
+                      <%= space === 'candidat' ? 'Espace Recruteur' : 'Espace Candidat' %>
+                    </a>
                 <% } %>
             <% } %>
             <div class="tw-flex tw-items-center tw-pt-2">
                 <a href="/logout"
-                   class="tw-flex tw-items-center tw-justify-center tw-w-12 tw-h-12 tw-bg-red-500 tw-text-white tw-rounded-full hover:tw-bg-red-700">
+                   class="tw-flex tw-items-center tw-justify-center tw-w-full tw-h-12 tw-bg-red-500 tw-text-white tw-rounded-md hover:tw-bg-red-700">
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
             </div>
