@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
-    "start:prod": "NODE_ENV=production node ./bin/www",
-    "dev": "nodemon ./bin/www",
+    "start": "node ./bin/www debug",
+    "start:prod": "NODE_ENV=production node ./bin/www debug",
+    "dev": "nodemon ./bin/www debug",
     "test": "jest",
     "tailwind:css": "postcss public/styles/tailwind.css -o public/styles/style.css",
     "prepare": ""

@@ -27,11 +27,9 @@
                         <% } %>
                         <% if (userRole === 'recruteur' && space === 'recruteur') { %>
                             <a href="/jobs/add_job"
-                               class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/add_job') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Ajouter
-                                Poste</a>
+                               class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/add_job') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Ajouter Poste</a>
                             <a href="/jobs/add_offer"
-                               class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/add_offer') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Ajouter
-                                Offre</a>
+                               class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/add_offer') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Ajouter Offre</a>
                             <a href="/applications/incoming-applications"
                                class="tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/applications/incoming-applications') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Candidatures</a>
                             <a href="/jobs/my_offers"
@@ -63,34 +61,27 @@
                     <% } %>
                 </div>
             <% } %>
-            <div class="tw-flex tw-items-center tw-ml-4">
+            <div class="tw-flex tw-items-center tw-ml-4 sm:tw-hidden">
+                <button type="button"
+                        class="tw-inline-flex tw-items-center tw-justify-center tw-p-2 tw-rounded-md tw-text-gray-400 hover:tw-text-white hover:tw-bg-blue-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-white"
+                        aria-controls="mobile-menu" aria-expanded="false" id="mobile-menu-button">
+                    <span class="tw-sr-only">Open main menu</span>
+                    <svg class="tw-block tw-h-6 tw-w-6" xmlns="http://www.w3.org/2000/svg" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="tw-hidden sm:tw-flex tw-items-center tw-ml-4">
                 <a href="/logout"
                    class="tw-flex tw-items-center tw-justify-center tw-w-12 tw-h-12 tw-bg-red-500 tw-text-white tw-rounded-full hover:tw-bg-red-700">
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
             </div>
-            <div class="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center sm:tw-hidden">
-                <button type="button"
-                        class="tw-inline-flex tw-items-center tw-justify-center tw-p-2 tw-rounded-md tw-text-gray-400 hover:tw-text-white hover:tw-bg-blue-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-white"
-                        aria-controls="mobile-menu" aria-expanded="false">
-                    <span class="tw-sr-only">Open main menu</span>
-                    <svg class="tw-block tw-h-6 tw-w-6" xmlns="http://www.w3.org/2000/svg" fill="none"
-                         viewBox="0 0 24 24"
-                         stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M4 6h16M4 12h16m-7 6h7"/>
-                    </svg>
-                    <svg class="tw-hidden tw-h-6 tw-w-6" xmlns="http://www.w3.org/2000/svg" fill="none"
-                         viewBox="0 0 24 24"
-                         stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
         </div>
     </div>
     <!-- Mobile menu, show/hide based on menu state. -->
-    <div class="sm:tw-hidden" id="mobile-menu">
+    <div class="tw-hidden sm:tw-hidden" id="mobile-menu">
         <div class="tw-px-2 tw-pt-2 tw-pb-3 tw-space-y-1">
             <% if (userRole) { %>
                 <% if (userRole === 'candidat' || userRole === 'recruteur en attente' || userRole === 'recruteur' || userRole === 'administrateur') { %>
@@ -109,11 +100,9 @@
                 <% } %>
                 <% if (userRole === 'recruteur' && space === 'recruteur') { %>
                     <a href="/jobs/add_job"
-                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/add_job') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Ajouter
-                        Poste</a>
+                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/add_job') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Ajouter Poste</a>
                     <a href="/jobs/add_offer"
-                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/add_offer') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Ajouter
-                        Offre</a>
+                       class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/jobs/add_offer') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Ajouter Offre</a>
                     <a href="/applications/incoming-applications"
                        class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/applications/incoming-applications') ? 'tw-bg-green-500 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-green-400 hover:tw-text-white' %>">Candidatures</a>
                     <a href="/jobs/my_offers"
@@ -128,6 +117,20 @@
                        class="tw-block tw-px-3 tw-py-2 tw-rounded-md tw-text-base tw-font-medium tw-transition tw-duration-150 tw-ease-in-out <%= isActive('/organizations/list_organisations') ? 'tw-bg-orange-400 tw-text-white' : 'tw-text-gray-800 hover:tw-bg-orange-300 hover:tw-text-white' %>">Organisations</a>
                 <% } %>
             <% } %>
+            <div class="tw-flex tw-items-center tw-pt-2">
+                <a href="/logout"
+                   class="tw-flex tw-items-center tw-justify-center tw-w-12 tw-h-12 tw-bg-red-500 tw-text-white tw-rounded-full hover:tw-bg-red-700">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
         </div>
     </div>
 </nav>
+
+<script>
+    // Script pour le menu mobile
+    document.getElementById('mobile-menu-button').addEventListener('click', function () {
+        const menu = document.getElementById('mobile-menu');
+        menu.classList.toggle('tw-hidden');
+    });
+</script>
