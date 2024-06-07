@@ -17,7 +17,7 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: '20.x' // Ajustez selon votre choix, peut être '18.x'
 
       - name: Ensure uploads directory exists
         run: mkdir -p myapp/uploads
@@ -58,7 +58,7 @@ jobs:
         run: unzip release.zip
 
       - name: Install dependencies on Azure
-        run: npm install --production
+        run: npm install --omit=dev
         working-directory: myapp
 
       - name: Deploy to Azure Web App
