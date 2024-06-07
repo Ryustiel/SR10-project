@@ -1,5 +1,5 @@
 const db = require('../model/db');
-const HistoriqueDemandes = require('../model/historiqueDemandes');
+const HistoriqueDemandes = require('../model/historiquedemandes');
 const logger = require('../logger');
 
 jest.mock('../model/db', () => ({
