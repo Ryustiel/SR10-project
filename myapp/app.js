@@ -7,7 +7,7 @@ const sessionMiddleware = require('./middleware/session');
 // Création de l'application Express
 const app = express();
 
-const server = app.listen(8080, function () {
+const server = app.listen(80, function () {
     console.log('express server listening on port ' + server.address().port);
 });
 
