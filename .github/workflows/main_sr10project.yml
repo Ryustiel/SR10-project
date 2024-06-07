@@ -17,7 +17,7 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x' // Ajustez selon votre choix, peut être '18.x'
+          node-version: '20.x'  # Ou ajustez à '18.x' si vous utilisez Node.js 18
 
       - name: Ensure uploads directory exists
         run: mkdir -p myapp/uploads
