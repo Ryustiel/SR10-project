@@ -61,7 +61,7 @@
                     <% } %>
                 </div>
             <% } %>
-            <div class="tw-flex tw-items-center tw-ml-4 sm:tw-hidden">
+            <div class="tw-flex tw-items-center sm:tw-hidden">
                 <button type="button"
                         class="tw-inline-flex tw-items-center tw-justify-center tw-p-2 tw-rounded-md tw-text-gray-400 hover:tw-text-white hover:tw-bg-blue-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-white"
                         aria-controls="mobile-menu" aria-expanded="false" id="mobile-menu-button">
@@ -81,7 +81,7 @@
         </div>
     </div>
     <!-- Mobile menu, show/hide based on menu state. -->
-    <div class="tw-hidden sm:tw-hidden" id="mobile-menu">
+    <div class="tw-hidden" id="mobile-menu">
         <div class="tw-px-2 tw-pt-2 tw-pb-3 tw-space-y-1">
             <% if (userRole) { %>
                 <% if (userRole === 'candidat' || userRole === 'recruteur en attente' || userRole === 'recruteur' || userRole === 'administrateur') { %>
