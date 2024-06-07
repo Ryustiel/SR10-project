@@ -8,7 +8,7 @@
     "dev": "nodemon ./bin/www",
     "test": "jest",
     "tailwind:css": "postcss public/styles/tailwind.css -o public/styles/style.css",
-    "prepare": "npm run tailwind:css"
+    "prepare": ""
   },
   "jest": {
     "collectCoverage": true
