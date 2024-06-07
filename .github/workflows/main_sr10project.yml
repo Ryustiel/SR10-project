@@ -18,14 +18,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'npm' # Utilisation du cache npm pour accélérer les installations
 
       - name: Ensure uploads directory exists
         run: mkdir -p myapp/uploads
 
       - name: Install dependencies
         working-directory: myapp
-        run: npm install # Utilisez npm install si package-lock.json n'est pas encore généré
+        run: npm install
 
       - name: Build and test
         working-directory: myapp
@@ -56,8 +55,8 @@ jobs:
         run: unzip release.zip
 
       - name: Install dependencies on Azure
-        run: npm install --omit=dev # Utilisation de npm install en environnement de production
         working-directory: myapp
+        run: npm install --omit=dev # Utilisez npm install pour les dépendances de production
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
