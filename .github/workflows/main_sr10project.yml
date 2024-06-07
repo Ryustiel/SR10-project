@@ -1,4 +1,3 @@
-
 name: Build and deploy Node.js app to Azure Web App - sr10project
 
 on:
@@ -18,7 +17,7 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x' # Ou ajustez à '18.x' si vous utilisez Node.js 18
+          node-version: '20.x' # Utilise Node.js 20.x
 
       - name: Ensure uploads directory exists
         run: mkdir -p myapp/uploads
@@ -37,7 +36,7 @@ jobs:
         run: zip -r release.zip myapp
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4 # Mise à jour vers v4
         with:
           name: node-app
           path: release.zip
@@ -48,7 +47,7 @@ jobs:
 
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4 # Mise à jour vers v4
         with:
           name: node-app
 
