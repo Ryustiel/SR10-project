@@ -58,7 +58,7 @@ const Organisation = {
     },
 
     async readApproved() {
-        const query = 'SELECT * FROM Organisation WHERE StatutOrganisation = "approuvée"';
+        const query = 'SELECT * FROM Organisation WHERE StatutOrganisation = \'approuvée\'';
         const [results] = await pool.query(query);
         return results;
     },

@@ -194,7 +194,7 @@ describe('Model Tests - Organisation', () => {
 
         expect(result).toEqual(mockOrganisations);
         expect(db.query).toHaveBeenCalledTimes(1);
-        expect(db.query).toHaveBeenCalledWith(expect.stringContaining('SELECT * FROM Organisation WHERE StatutOrganisation = "approuvée"'));
+        expect(db.query).toHaveBeenCalledWith(expect.stringContaining('SELECT * FROM Organisation WHERE StatutOrganisation = \'approuvée\''));
     });
 
     test('readAllWithPagination returns paginated organisations and total count', async () => {
