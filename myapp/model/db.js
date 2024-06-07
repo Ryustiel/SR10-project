@@ -1,10 +1,10 @@
 const mysql = require('mysql2');
 const pool = mysql.createPool({
-    host: 'tuxa.sme.utc',
-    user: 'sr10p034',
-    password: 'qXI7eRiIn78q',
-    database: 'sr10p034',
-    port: 3306,
+    host: 'mysql-1f21b90f-jackjack26350-856e.k.aivencloud.com',
+    user: 'avnadmin',
+    password: 'AVNS_jKnlU0b_gi5SzBXW1Cn',
+    database: 'defaultdb',
+    port: 23346,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
