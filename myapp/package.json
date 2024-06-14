@@ -11,7 +11,8 @@
     "prepare": ""
   },
   "jest": {
-    "collectCoverage": true
+    "collectCoverage": true,
+    "setupFiles": ["<rootDir>/.jest/setEnvVars.js"]
   },
   "engines": {
     "node": ">=18.0.0"

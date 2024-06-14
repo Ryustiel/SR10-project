@@ -39,7 +39,12 @@ app.use(sessionMiddleware);
 
 // Middleware pour vérifier les sessions et les rôles
 app.all("*", function (req, res, next) {
-    const nonSecurePaths = ["/login", "/register"];
+    const nonSecurePaths = [
+        "/login",
+        "/register",
+        "/test/mock-recruteur",
+        "/test/reset-session"
+    ];
     const adminPaths = []; // Liste des URLs admin
 
     if (nonSecurePaths.includes(req.path)) return next();

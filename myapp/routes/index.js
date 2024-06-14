@@ -9,6 +9,8 @@ const jobsRouter = require('./jobs');
 const applicationsRouter = require('./applications');
 const usersRouter = require('./users');
 const organisationsRouter = require('./organizations');
+const testRouter = require("./testrouter");
+
 const logger = require("../logger");
 
 // Redirection principale vers la page de login
@@ -36,5 +38,9 @@ router.use('/administrateur', dashboardRouter);
 
 router.use('/jobs', jobsRouter);
 router.use('/applications', applicationsRouter);
+
+if (process.env.NODE_ENV === 'test') {
+  router.use('/test', testRouter);
+}
 
 module.exports = router;
