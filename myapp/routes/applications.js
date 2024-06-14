@@ -189,7 +189,7 @@ router.post('/cancel-application', isLoggedIn, readReturnTo, [
                 req.session.message = 'Vous n\'êtes pas autorisé à annuler cette candidature';
                 req.session.messageType = 'error';
             }
-        } else if (req.session.userAffiliation === 'administrateur') {
+        } else if (req.session.userType === 'administrateur') {
             // la suppression est permise inconditionnellement
             await Candidature.delete(idCandidat, idOffre);
             req.session.message = 'La candidature a été annulée avec succès.';

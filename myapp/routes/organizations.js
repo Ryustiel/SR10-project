@@ -35,6 +35,7 @@ router.post('/request-organisation-change', isLoggedIn, canEditProfile, [
     }
 
     logger.debug("Demande de changement d'organisation...");
+
     try {
         const userId = req.body.userId || req.session.userEmail;
         const {
@@ -48,7 +49,8 @@ router.post('/request-organisation-change', isLoggedIn, canEditProfile, [
         let errorMessage = null;
         let typeDemande = '';
         let organisationId = existingOrganisationEdit === 'new' ? newOrganisationSirenEdit : existingOrganisationEdit;
-
+        //Supprimer les offres d'emploi du recruteur de l'ancienne organisation
+        await OffreEmploi.deleteByRecruteur(userId);
         if (existingOrganisationEdit === 'new') {
             errorMessage = await validateNewOrganisation({
                 newOrganisationSiren: newOrganisationSirenEdit,
@@ -89,7 +91,9 @@ router.post('/request-organisation-change', isLoggedIn, canEditProfile, [
         }
 
         if (userId === req.session.userEmail) {
+            req.session.space = "candidat";
             req.session.userType = 'recruteur en attente';
+            req.session.userAffiliation = await Utilisateur.getOrganisationId(userId);
         }
 
         req.session.message = "Demande de changement d'organisation réussie.";
@@ -171,7 +175,6 @@ router.post('/request-recruiter', isLoggedIn, canEditProfile, [
             req.session.messageType = 'error';
             return res.redirect('/users/profile');
         }
-
         if (existingOrganisation === 'new') {
             logger.debug("Ajout d'une nouvelle organisation en attente...");
             await handleNewOrganisationRequest(userId, {
@@ -186,7 +189,9 @@ router.post('/request-recruiter', isLoggedIn, canEditProfile, [
         }
         // Mise à jour de la session
         if (userId === req.session.userEmail) {
+            req.session.space = "candidat";
             req.session.userType = 'recruteur en attente';
+            req.session.userAffiliation = await Utilisateur.getOrganisationId(userId);
         }
 
         req.session.message = "Demande de changement de type de compte et/ou d'ajout d'organisation réussie.";
@@ -222,11 +227,6 @@ router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req,
             throw new Error("Détails de l'utilisateur non trouvés.");
         }
 
-        // Mise à jour de la session si l'utilisateur est connecté
-        if (userId === req.session.userEmail) {
-            req.session.userType = 'candidat';
-        }
-
         logger.info("Type de compte mis à jour en 'candidat' et organisation dissociée.");
 
         // Supprimer l'entrée en attente de l'historique
@@ -239,6 +239,12 @@ router.post('/cancel-recruiter-request', isLoggedIn, canEditProfile, async (req,
             logger.info("Organisation supprimée.");
         }
 
+        // Mise à jour de la session si l'utilisateur est connecté
+        if (userId === req.session.userEmail) {
+            req.session.space = "candidat";
+            req.session.userType = 'candidat';
+            req.session.userAffiliation = await Utilisateur.getOrganisationId(userId);
+        }
 
         req.session.message = "Demande de changement de type de compte annulée avec succès.";
         req.session.messageType = 'notification';
