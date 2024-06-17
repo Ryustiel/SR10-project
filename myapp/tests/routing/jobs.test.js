@@ -9,6 +9,10 @@ describe('Test urls from the test router', () => {
         agent = request.agent(app);
     });
 
+    afterAll(() => {
+        agent = null;
+    });
+
     it('should grand access to reset-session', async () => {
         const res = await agent.get('/test/reset-session');
         expect(res.statusCode).toBe(200);
@@ -26,6 +30,10 @@ describe('ACCESSING WEBPAGES', () => {
 
     beforeAll(() => {
         agent = request.agent(app);
+    });
+
+    afterAll(() => {
+        agent = null;
     });
 
     it('unregistered users should not be redirected from the login page', async () => {

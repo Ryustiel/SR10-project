@@ -20,6 +20,7 @@ describe('POST /add_offer BAD REQUESTS', () => {
 
     afterAll(async () => {
         await agent.get('/test/reset-session'); // Clear the session after tests
+        agent = null;
     });
 
     it('should return validation errors with invalid inputs', async () => {
@@ -65,6 +66,7 @@ describe('POST /add_offer LEGIT REQUEST', () => {
 
     afterAll(async () => {
         await agent.get('/test/reset-session'); // Clear the session after tests
+        agent = null;
     });
 
     it('should add an offer successfully with valid inputs', async () => {

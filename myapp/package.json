@@ -12,7 +12,9 @@
   },
   "jest": {
     "collectCoverage": true,
-    "setupFiles": ["<rootDir>/.jest/setEnvVars.js"]
+    "setupFiles": [
+      "<rootDir>/.jest/setEnvVars.js"
+    ]
   },
   "engines": {
     "node": ">=18.0.0"
@@ -37,6 +39,7 @@
     "pg": "^8.11.3",
     "postcss": "^8.4.38",
     "postcss-cli": "^11.0.0",
+    "supertest": "^7.0.0",
     "winston": "^3.13.0"
   },
   "devDependencies": {
