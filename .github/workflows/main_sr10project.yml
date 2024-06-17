@@ -30,7 +30,7 @@ jobs:
         working-directory: myapp
         run: |
           npm run build --if-present
-          npm test tests/offreemploi.test.js tests/utilisateur.test.js tests/organisation.test.js tests/associationfichiers.test.js tests/candidature.test.js tests/ficheposte.test.js tests/historiquedemandes.test.js tests/routing/postes.test.js
+          npm test tests/offreemploi.test.js tests/utilisateur.test.js tests/organisation.test.js tests/associationfichiers.test.js tests/candidature.test.js tests/ficheposte.test.js tests/historiquedemandes.test.js tests/routing/jobs.test.js
 
       - name: Zip artifact for deployment
         run: zip -r release.zip myapp
