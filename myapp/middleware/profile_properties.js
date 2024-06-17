@@ -1,7 +1,7 @@
 // Import required modules
 const Utilisateur = require('../model/utilisateur');
 const Candidature = require('../model/candidature');
-const OffreEmploi = require('../model/offreEmploi');
+const OffreEmploi = require('../model/offreemploi');
 const logger = require('../logger');
 
 // Function to fetch user data and check if the target user exists

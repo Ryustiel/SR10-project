@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Utilisateur = require('../model/utilisateur');
 const Candidature = require('../model/candidature');
-const OffreEmploi = require('../model/offreEmploi');
+const OffreEmploi = require('../model/offreemploi');
 const Organisation = require('../model/organisation');
 const HistoriqueDemandes = require('../model/historiquedemandes');
 //import is admin, is logged and readMessage in functions from middleware folder
