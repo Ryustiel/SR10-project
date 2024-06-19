@@ -9,10 +9,10 @@ async function requireAffiliation(req, res, next) {
                 req.session.returnTo = req.originalUrl || '/'; // save current page
                 res.redirect('/login');
             }
-            else if (req.session.userType !== 'recruteur') {
+            else if (req.session.userType === 'recruteur') {
                 let error = new Error();
                 error.status = 500;
-                error.message = 'Erreur interne du serveur.';
+                error.message = 'Erreur interne du serveur : recruteur sans email';
                 next(error);
             } else {
                 let error = new Error();

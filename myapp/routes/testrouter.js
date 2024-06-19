@@ -9,6 +9,13 @@ router.get('/mock-recruteur', (req, res) => {
     res.send('ok');
 });
 
+router.get('/mock-candidat', (req, res) => {
+    req.session.userEmail = 'test@email.com';
+    req.session.userType = 'candidat';
+    req.session.userAffiliation = null;
+    res.send('ok');
+});
+
 router.get('/reset-session', (req, res) => {
     req.session.userEmail = null;
     req.session.userType = null;

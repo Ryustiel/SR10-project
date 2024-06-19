@@ -43,6 +43,7 @@ app.all("*", function (req, res, next) {
         "/login",
         "/register",
         "/test/mock-recruteur",
+        "/test/mock-candidat",
         "/test/reset-session"
     ];
     const adminPaths = []; // Liste des URLs admin

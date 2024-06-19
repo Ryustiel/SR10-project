@@ -13,19 +13,24 @@ describe('Test urls from the test router', () => {
         agent = null;
     });
 
-    it('should grand access to reset-session', async () => {
-        const res = await agent.get('/test/reset-session');
+    it('should grant access to mock-recruteur', async () => {
+        const res = await agent.get('/test/mock-recruteur');
         expect(res.statusCode).toBe(200);
     });
 
     it('should grant access to mock-recruteur', async () => {
-        const res = await agent.get('/test/mock-recruteur');
+        const res = await agent.get('/test/mock-candidat');
+        expect(res.statusCode).toBe(200);
+    });
+
+    it('should grand access to reset-session', async () => {
+        const res = await agent.get('/test/reset-session');
         expect(res.statusCode).toBe(200);
     });
 });
 
 // TESTS DE LOGIN (ET DE DROITS D'ACCES)
-describe('ACCESSING WEBPAGES', () => {
+describe('Testing Route access', () => {
     let agent;
 
     beforeAll(() => {
@@ -45,6 +50,12 @@ describe('ACCESSING WEBPAGES', () => {
         const res = await agent.get('/jobs/add_job');
         expect(res.statusCode).toBe(302);
         expect(res.headers.location).toBe('/login');
+    });
+
+    it('candidates should have receive a 500 error code denying illegal access', async () => {
+        await agent.get('/test/mock-candidat');
+        const res = await agent.get('/jobs/add_job');
+        expect(res.statusCode).toBe(403);
     });
 
     it('registered recruitors should have access to this page', async () => {
