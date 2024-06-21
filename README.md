@@ -3,7 +3,6 @@
 ## Etudiants :
 - Raphael Nguyen
 - Raphael Chauvier
-- Raphael Chauvier Chauvier
 
 ## Sommaire
 1. [Structure du GIT](#structure-du-git)
@@ -38,13 +37,15 @@
 ### Structure du Répertoire Principal
 
 #### Fichiers Directement dans le Répertoire Principal
-- `carte-site.png` : La carte du site.
+- `carte-site.pdf` : La carte du site.
 - `MCD.png` : Diagramme conceptuel de données sous forme d'image.
 - `mcd.pu` : Fichier source PlantUML contenant le modèle conceptuel de données.
 - `mld.txt` : Fichier texte décrivant le modèle logique de données.
-- `use-case.png` : Diagramme des cas d'utilisation.
+- `use-case.pdf` : Diagramme des cas d'utilisation.
 - `[U] SR10 Sécurité.pdf` : Document PDF sur la sécurité.
 - `[U] SR10 Tests.pdf` : Document PDF sur les tests.
+- `database.sql` : Modélisation MySQL de la base de données.
+- `README.md` : Fichier readme.
 
 ### Répertoire "Projet"
 #### Contenu du Répertoire "Projet"
@@ -158,7 +159,101 @@ Les directives du cours en matière de sécurité ont été respectées (bonne c
 
 Le détail de ces implémentations est expliqué dans le PDF sur la Sécurité, dans le cadre de l’attaque par violation de droits d’accès.
 
-### Téléchargement de Fichier/Création d’un PDF et génération d’un fichier ZIP pour le dossier du candidat
+## Téléchargement de Fichiers, Création d’un PDF, et Génération d’un Fichier ZIP pour le Dossier du Candidat
+
+Dans notre projet, nous avons mis en place une fonctionnalité très pratique pour gérer les candidatures. Cette fonctionnalité permet de télécharger les fichiers, de créer un PDF regroupant toutes les informations importantes, et de générer un fichier ZIP contenant l'ensemble du dossier de candidature. Voici comment cela fonctionne :
+
+### Route pour Télécharger le Dossier de Candidature d'un Candidat
+
+**Endpoint:** POST `/download-candidate-folder`
+
+**Description:**
+- Cette route permet aux recruteurs de télécharger le dossier complet d'un candidat pour une offre d'emploi spécifique.
+- Seuls les recruteurs authentifiés et membres de l'organisation liée à l'offre peuvent utiliser cette fonctionnalité.
+
+**Validations:**
+- `idCandidat`: L'identifiant du candidat, requis.
+- `idOffre`: L'identifiant de l'offre d'emploi, requis.
+
+**Fonctionnalités:**
+1. **Vérification des Permissions:**
+    - La route commence par vérifier que l'utilisateur a bien le droit d'accéder à cette information. On s'assure qu'il est recruteur et membre de l'organisation associée à l'offre d'emploi.
+
+2. **Récupération des Informations:**
+    - On récupère toutes les informations nécessaires comme les détails du candidat, de l'offre d'emploi, la candidature, et les fichiers associés.
+
+3. **Création du PDF:**
+    - Un fichier PDF est créé. Ce fichier contient toutes les informations importantes comme le nom du candidat, son email, son téléphone, la date de candidature, les détails de l'offre, etc.
+
+4. **Génération du Fichier ZIP:**
+    - On crée un fichier ZIP qui contient le PDF généré ainsi que toutes les pièces jointes liées à la candidature.
+
+5. **Téléchargement:**
+    - Une fois que le fichier ZIP est prêt, il est proposé au téléchargement pour le recruteur.
+
+**Exemple d'utilisation dans la route:**
+
+```javascript
+router.post('/download-candidate-folder', isLoggedIn, requireRecruitorStatus, [
+    body('idCandidat').notEmpty().withMessage('ID du candidat requis'),
+    body('idOffre').notEmpty().withMessage("ID de l'offre requis")
+], async function (req, res, next) {
+    // Code de validation et récupération des erreurs...
+
+    try {
+        const { idCandidat, idOffre } = req.body;
+
+        // Vérification des permissions...
+
+        // Récupération des informations nécessaires...
+
+        // Création du fichier ZIP
+        const zipFilePath = path.join(__dirname, '..', 'uploads', `dossier-${idCandidat}-${idOffre}.zip`);
+        const output = fs.createWriteStream(zipFilePath);
+        const archive = archiver('zip', { zlib: { level: 9 } });
+        
+        output.on('close', function () {
+            res.download(zipFilePath);
+        });
+
+        archive.on('error', function (err) {
+            throw err;
+        });
+
+        // Création du PDF
+        const doc = new PDFDocument();
+        const pdfPath = path.join(__dirname, '..', 'uploads', `dossier-${idCandidat}-${idOffre}.pdf`);
+        const pdfStream = fs.createWriteStream(pdfPath);
+
+        doc.pipe(pdfStream);
+        doc.fontSize(25).text(`Dossier de Candidature pour ${offre.Intitule}`, { align: 'center' });
+        doc.fontSize(16).text(`Nom: ${user.Prenom} ${user.Nom}`);
+        // Ajout de plus de champs personnalisés...
+        doc.end();
+
+        pdfStream.on('finish', async () => {
+            archive.file(pdfPath, { name: 'Dossier.pdf' });
+
+            for (const fichier of fichiers) {
+                const filePath = path.join(__dirname, '..', 'uploads', fichier.Fichier);
+                archive.file(filePath, { name: fichier.NomOriginal });
+            }
+
+            await archive.finalize();
+        });
+
+    } catch (error) {
+        // Gestion des erreurs
+        next(error);
+    }
+});
+```
+
+### Modules Utilisés
+- **Création PDF:** On utilise `PDFKit` pour générer un PDF contenant toutes les informations du candidat et de l'offre.
+- **Compression:** On utilise `archiver` pour créer un fichier ZIP avec le PDF et toutes les pièces jointes.
+
+Cette fonctionnalité permet ainsi de regrouper toutes les informations et fichiers de candidature en un seul fichier ZIP, ce qui facilite grandement le travail des recruteurs.
 
 ## Esthétique
 Pour améliorer l'esthétique et l'ergonomie de notre application web construite avec Express et Node.js, nous avons intégré Tailwind CSS (en général) ainsi que Bootstrap pour certaines fonctionnalités spécifiques, comme les modals. Voici comment nous avons procédé.
@@ -166,6 +261,7 @@ Pour améliorer l'esthétique et l'ergonomie de notre application web construite
 ### Intégration de Tailwind CSS
 #### Installation et Configuration
 Nous avons commencé par installer Tailwind CSS en tant que module npm. Voici la configuration dans le fichier `postcss.config.js` :
+
 ```javascript
 module.exports = {
     plugins: [
@@ -174,25 +270,10 @@ module.exports = {
     ]
 };
 ```
-## Esthétique
-Pour améliorer l'esthétique et l'ergonomie de notre application web construite avec Express et Node.js, nous avons intégré Tailwind CSS (en général) ainsi que Bootstrap pour certaines fonctionnalités spécifiques, comme les modals. Voici comment nous avons procédé.
-
-### Intégration de Tailwind CSS
-#### Installation et Configuration
-Nous avons commencé par installer Tailwind CSS en tant que module npm. Voici la configuration dans le fichier `postcss.config.js` :
-
-\```javascript
-module.exports = {
-    plugins: [
-        require('tailwindcss'),
-        require('autoprefixer'),
-    ]
-};
-\```
 
 Ensuite, nous avons configuré Tailwind dans le fichier `tailwind.config.js` pour qu'il prenne en charge les fichiers EJS utilisés dans le projet :
 
-\```javascript
+```javascript
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   prefix: 'tw-',
@@ -202,31 +283,31 @@ module.exports = {
   },
   plugins: [],
 };
-\```
+```
 
 #### Utilisation de Tailwind dans le CSS
 Nous avons défini les bases de Tailwind dans notre fichier `tailwind.css` avec les directives suivantes :
 
-\```css
+```css
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-\```
+```
 
 Nous avons également ajouté des styles personnalisés pour les scrollbars et pour assurer un rendu cohérent du texte (éviter un décalage trop prononcé de la navbar quand une page avec scrollbar était sélectionnée par exemple).
 
 #### Compilation et Utilisation
 La commande suivante dans `package.json` compile le fichier `tailwind.css` en `style.css`, le rendant indépendant :
 
-\```json
+```json
 "tailwind:css": "postcss public/styles/tailwind.css -o public/styles/style.css"
-\```
+```
 
 Cette feuille de style compilée est ensuite utilisée dans nos fichiers EJS pour appliquer les styles Tailwind, par exemple :
 
-\```html
+```html
 <body class="tw-bg-gray-100 tw-font-sans tw-leading-normal tw-tracking-normal">
-\```
+```
 
 Les classes Tailwind avec le préfixe `tw-` garantissent qu'elles n'entrent pas en conflit avec d'autres bibliothèques CSS, cela a été configuré dans le `tailwind.config.js`.
 
@@ -236,7 +317,7 @@ Pour les fonctionnalités modales, nous avons choisi d'utiliser Bootstrap car il
 #### Intégration des Modals Bootstrap
 Les modals sont définis dans des fichiers EJS avec la structure suivante, en utilisant à la fois des classes Tailwind pour la personnalisation esthétique et des classes Bootstrap pour le comportement :
 
-\```html
+```html
 <div class="modal fade" id="<%= modalId %>" tabindex="-1" aria-labelledby="<%= modalLabelId %>" aria-hidden="true">
     <div class="modal-dialog tw-w-auto tw-mx-auto">
         <div class="modal-content tw-bg-white tw-rounded-lg tw-shadow-lg">
@@ -254,7 +335,7 @@ Les modals sont définis dans des fichiers EJS avec la structure suivante, en ut
         </div>
     </div>
 </div>
-\```
+```
 
 ## Mise en place de l'hébergement sur Azure et CI/CD avec GitHub Actions et Docker
 Pour assurer un déploiement continu et fiable de notre application, nous avons mis en place une infrastructure d'hébergement sur Azure couplée à une intégration continue (CI) et un déploiement continu (CD) en utilisant GitHub Actions et Docker. Voici comment nous avons structuré ce processus.
@@ -273,48 +354,48 @@ Le job `build` s'exécute sur un environnement Ubuntu.
 
 ##### Checkout du Code
 Nous utilisons l'action `actions/checkout@v4` pour récupérer le code source depuis le dépôt GitHub :
-\```yaml
+```yaml
 - name: Checkout code
   uses: actions/checkout@v4
-\```
+```
 
 ##### Configuration de Node.js
 Nous configurons la version de Node.js à utiliser via l'action `actions/setup-node@v4` :
-\```yaml
+```yaml
 - name: Set up Node.js version
   uses: actions/setup-node@v4
   with:
     node-version: '20.x'
-\```
+```
 
 ##### Création du Répertoire de Téléchargements
 Nous nous assurons que le répertoire des uploads existe :
-\```yaml
+```yaml
 - name: Ensure uploads directory exists
   run: mkdir -p myapp/uploads
-\```
+```
 
 ##### Installation des Dépendances
 Nous installons les dépendances nécessaires à notre application en utilisant `npm install` :
-\```yaml
+```yaml
 - name: Install dependencies
   working-directory: myapp
   run: npm install
-\```
+```
 
 ##### Build et Tests
 Nous construisons l'application (si nécessaire) et exécutons les tests avec Jest :
-\```yaml
+```yaml
 - name: Build and test
   working-directory: myapp
   run: |
     npm run build --if-present
     npm test
-\```
+```
 
 ##### Zippage et Téléchargement de l'Artifact
 Nous préparons l'application pour le déploiement en créant un fichier zip et en téléchargeant l'artifact via `actions/upload-artifact@v4` :
-\```yaml
+```yaml
 - name: Zip artifact for deployment
   run: zip -r release.zip myapp
 
@@ -323,14 +404,14 @@ Nous préparons l'application pour le déploiement en créant un fichier zip et 
   with:
     name: node-app
     path: release.zip
-\```
+```
 
 #### Job de Déploiement
 Le job `deploy` dépend du job `build` et s'exécute également sur un environnement Ubuntu.
 
 ##### Téléchargement et Décompression de l'Artifact
 Nous récupérons l'artifact du job de build et le décompressons via `actions/download-artifact@v4` :
-\```yaml
+```yaml
 - name: Download artifact from build job
   uses: actions/download-artifact@v4
   with:
@@ -338,19 +419,19 @@ Nous récupérons l'artifact du job de build et le décompressons via `actions/d
 
 - name: Unzip artifact for deployment
   run: unzip release.zip
-\```
+```
 
 ##### Installation des Dépendances sur Azure
 Nous installons les dépendances de production sur Azure App Service :
-\```yaml
+```yaml
 - name: Install dependencies on Azure
   working-directory: myapp
   run: npm install --omit=dev
-\```
+```
 
 ##### Déploiement sur Azure App Service
 Nous utilisons l'action `azure/webapps-deploy@v2` pour déployer l'application sur Azure App Service :
-\```yaml
+```yaml
 - name: Deploy to Azure Web App
   id: deploy-to-webapp
   uses: azure/webapps-deploy@v2
@@ -359,6 +440,6 @@ Nous utilisons l'action `azure/webapps-deploy@v2` pour déployer l'application s
     slot-name: 'Production'
     publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_22659E805627417681AE8A0612E17EB7 }}
     package: myapp
-\```
+```
 
 L’application est ainsi déployée et accessible en ligne. Si un déploiement échoue, nous sommes notifiés, et le site reste disponible et sur la dernière version fonctionnelle jusqu’à ce qu’un nouveau déploiement réussi ait lieu.

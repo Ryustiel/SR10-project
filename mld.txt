@@ -1,0 +1,14 @@
+-- Table Organisation (#NumeroSiren: varchar, Nom: varchar, Type: varchar, AdresseAdministrative: varchar, StatutOrganisation: varchar) :
+
+-- Table Utilisateur (#Email: varchar, MotDePasse: varchar, Nom: varchar, Prenom: varchar, Telephone: varchar, DateCreation: timestamp, StatutCompte: varchar, TypeCompte: varchar, IdOrganisation=>Organisation.NumeroSiren: varchar) :
+
+-- Table FichePoste (#IdFiche: integer, Intitule: varchar, StatutPoste: varchar, ResponsableHierarchique: varchar, TypeMetier: varchar, LieuMission: varchar, Rythme: varchar, Salaire: integer, Description: varchar, IdOrganisation=>Organisation.NumeroSiren: varchar) :
+
+-- Table OffreEmploi (#IdOffre: integer, Etat: varchar, DateValidite: timestamp, ListePieces: varchar, NombrePieces: decimal, IdFiche=>FichePoste.IdFiche: integer, IdRecruteur=>Utilisateur.Email: varchar) :
+
+-- Table Candidature (#DateCandidature: timestamp, IdCandidat=>Utilisateur.Email: varchar, IdOffre=>OffreEmploi.IdOffre: integer) :
+
+-- Table AssociationFichiers (#IdCandidat=>Candidature.IdCandidat: varchar, #IdOffre=>Candidature.IdOffre: integer, Fichier: varchar, NomOriginal: varchar) :
+
+-- Table HistoriqueDemandes (#IdHistorique: integer, NumeroSiren=>Organisation.NumeroSiren: varchar, Action: varchar, TypeDemande: varchar, DateAction: timestamp, UserId=>Utilisateur.Email: varchar, AdministrateurEmail=>Utilisateur.Email: varchar) :
+

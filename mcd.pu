@@ -1,0 +1,121 @@
+@startuml = UML Site Internet
+
+enum StatutCompteUtilisateur {
+    actif
+    inactif
+}
+
+class Utilisateur {
+    email: Text
+    motDePasse: Text
+    nom: Text
+    prenom: Text
+    telephone: Numeric
+    dateCreation: Date
+    statutCompte: StatutCompteUtilisateur
+}
+
+enum StatutOrganisation {
+    approuvée
+    en attente
+    refusée
+}
+
+class Organisation {
+    numeroSiren: Numeric
+    nom: Text
+    type: Text
+    adresseAdministrative: Text
+    statutOrganisation: StatutOrganisation
+}
+
+class Recruteur {
+    organisation: Organisation [FK]
+}
+
+class Candidat {
+    
+}
+
+class Administrateur {
+    
+}
+
+enum EtatOffreEmploi {
+    publie
+    non publié
+    expiré
+}
+
+class OffreEmploi {
+    etat: EtatOffreEmploi
+    DateValidite: Date
+    ListePieces: Text
+    NombrePieces: Integer
+}
+
+class Candidature {
+    dateCandidature: Date
+}
+
+class FichePoste {
+    intitule: Text
+    statutPoste: Text
+    responsableHierarchique: Text
+    typeMetier: Text
+    LieuMission: Text
+    Rythme: Text
+    Salaire: Integer
+    Description: Text
+}
+
+class AssociationFichiers {
+    fichier: Path
+    nomOriginal: Text
+}
+
+enum ActionDemande {
+    approbation
+    en attente
+    refus
+}
+
+enum TypeDemande {
+    nouveau_recruteur_nouvelle_organisation
+    nouveau_recruteur_organisation_existante
+    recruteur_ajout_nouvelle_organisation
+    recruteur_changement_organisation_existante
+}
+
+class HistoriqueDemandes {
+    action: ActionDemande
+    typeDemande: TypeDemande
+    dateAction: Date
+}
+
+
+Candidat <|-- Utilisateur
+Recruteur <|-- Utilisateur
+Administrateur <|-- Utilisateur
+
+
+
+Recruteur "*" -- "1" Organisation: "Affilié"
+
+Candidature "*" -- "1" OffreEmploi: "Recoit"
+
+Candidature "*" -- "1" Candidat: "Dépose"
+Candidature "*" -- "1" Recruteur: "Dépose"
+
+OffreEmploi "*" -- "1" Recruteur: "Emet"
+
+FichePoste "*" -- "1" Organisation: "Concerne"
+OffreEmploi "*" -- "1" FichePoste: "Utilise"
+
+AssociationFichiers "*" -- "1" Candidature: "Repertorie"
+
+HistoriqueDemandes "*" -- "1" Organisation: "Concerne_Entite"
+HistoriqueDemandes "*" -- "1" Recruteur: "Concerne_Personne"
+HistoriqueDemandes "*" -- "1" Administrateur: "Approuve"
+
+@enduml
