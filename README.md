@@ -2,14 +2,8 @@
 
 ## Lien Utiles :
 
-<p align="center">
-  <a href="https://sr10project.azurewebsites.net" target="_blank">
-    <img src="https://img.shields.io/badge/Visit_SR10_Project_Demo_Website-Click_Here-brightgreen?style=for-the-badge&logo=appveyor" alt="Visit SR10 Project">
-  </a>
-  <a href="https://github.com/your_github_repo" target="_blank">
-    <img src="https://img.shields.io/badge/GitHub-View_Repository-blue?style=for-the-badge&logo=github" alt="GitHub Repository">
-  </a>
-</p>
+[![Website](https://img.shields.io/badge/website-visit-blue?style=for-the-badge&logo=firefox)](https://sr10project.azurewebsites.net) [![GitHub](https://img.shields.io/badge/GitHub-Project-blue?style=for-the-badge&logo=github)](https://github.com/Ryustiel/SR10-project)
+
 
 ## Etudiants :
 - Raphael Nguyen
