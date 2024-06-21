@@ -66,7 +66,11 @@
 - `uploads/` : Répertoire où sont stockés les fichiers uploadés par les utilisateurs.
 - `views/` : Répertoire contenant les vues ejs de l'application.
 
+<span style="color:red">Le contenu des répertoires model et tests correspond strictement à la consigne, nous ne le développons pas pour économiser de la place. La structure de views/ sera expliqué dans la section Templating, tandis que l’usage des middleware/ et des uploads/ seront développés dans la section Systèmes Supplémentaires et en particulier le PDF sur la sécurité pour les middlewares. (bien qu’ils ne servent pas qu’à ça)</span>
+
 ### Répertoire "routes"
+Le répertoire routes varie en termes de nommage par rapport à la consigne (qui ne spécifiait pas comment documenter le code et nommer les fichiers de manière standard). Nous développons donc et expliquons les fichiers de ce dossier spécifiquement.
+
 #### Détail des Fichiers dans "routes"
 - `applications.js` : Routes et logique liées à la gestion des candidatures (to apply en anglais).
 - `dashboard.js` : Routes et logique liées au tableau de bord.
@@ -77,6 +81,8 @@
 - `register.js` : Route et logique liées à l'inscription des utilisateurs.
 - `testrouter.js` : Routes de test, utilisées pour des expérimentations et des tests spécifiques. (voir le PDF sur les tests pour plus d’informations)
 - `users.js` : Routes et logique liées aux utilisateurs.
+
+Conformément à ce que nous indiquons dans la section nommage, nous avons préféré nommer les éléments de notre projet en anglais pour nous habituer aux standards internationaux.
 
 ## Choix de Programmation
 ### Nommage
@@ -135,8 +141,8 @@ Le répertoire "views" est organisé de manière à refléter la structure et la
 
 D’autres fichiers qui servent de composants sont placés à la racine du répertoire views : 
 
-- Répertoires "listings" et "forms" : Ces répertoires contiennent des modèles de pages destinés à afficher des listes itératives ou des formulaires respectivement. Les fichiers dans ces répertoires sont nommés d'après les fonctionnalités spécifiques qu'ils supportent, comme la gestion des offres d'emploi, des demandes d'application, etc.
-- Composants Globaux : Les fichiers qui ne sont pas placés dans un sous-répertoire spécifique ("listings" ou "forms") sont souvent des composants réutilisables ou des mises en page générales. Ils sont inclus dans différentes vues pour promouvoir la réutilisation du code et maintenir une cohérence visuelle à travers l'application.
+- **Répertoires "listings" et "forms"** : Ces répertoires contiennent des modèles de pages destinés à afficher des listes itératives ou des formulaires respectivement. Les fichiers dans ces répertoires sont nommés d'après les fonctionnalités spécifiques qu'ils supportent, comme la gestion des offres d'emploi, des demandes d'application, etc.
+- **Composants Globaux** : Les fichiers qui ne sont pas placés dans un sous-répertoire spécifique ("listings" ou "forms") sont souvent des composants réutilisables ou des mises en page générales. Ils sont inclus dans différentes vues pour promouvoir la réutilisation du code et maintenir une cohérence visuelle à travers l'application.
 
 ### Éléments d’Interface Communs
 Ces composants globaux peuvent dépendre de plusieurs fonctionnalités additionnelles :
