@@ -24,7 +24,7 @@
    2. [Éléments d’Interface Communs](#éléments-dinterface-communs)
 4. [Systèmes Supplémentaires](#systèmes-supplémentaires)
    1. [URLs d’action et Permissions](#urls-daction-et-permissions)
-   2. [Téléchargement de Fichier/Création d’un PDF et génération d’un fichier ZIP pour le dossier du candidat](#téléchargement-de-fichiercréation-dun-pdf-et-génération-dun-fichier-zip-pour-le-dossier-du-candidat)
+   2. [Téléchargement de Fichier, Création d’un PDF, et Génération d’un Fichier ZIP pour le Dossier du Candidat](#téléchargement-de-fichier-création-dun-pdf-et-génération-dun-fichier-zip-pour-le-dossier-du-candidat)
 5. [Esthétique](#esthétique)
    1. [Intégration de Tailwind CSS](#intégration-de-tailwind-css)
    2. [Utilisation de Bootstrap pour les Modals](#utilisation-de-bootstrap-pour-les-modals)
@@ -159,8 +159,7 @@ Les directives du cours en matière de sécurité ont été respectées (bonne c
 
 Le détail de ces implémentations est expliqué dans le PDF sur la Sécurité, dans le cadre de l’attaque par violation de droits d’accès.
 
-## Téléchargement de Fichiers, Création d’un PDF, et Génération d’un Fichier ZIP pour le Dossier du Candidat
-
+## Téléchargement de Fichier, Création d’un PDF, et Génération d’un Fichier ZIP pour le Dossier du Candidat
 Dans notre projet, nous avons mis en place une fonctionnalité très pratique pour gérer les candidatures. Cette fonctionnalité permet de télécharger les fichiers, de créer un PDF regroupant toutes les informations importantes, et de générer un fichier ZIP contenant l'ensemble du dossier de candidature. Voici comment cela fonctionne :
 
 ### Route pour Télécharger le Dossier de Candidature d'un Candidat
