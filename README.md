@@ -2,7 +2,7 @@
 
 ## Lien du Git :
 
-[![GitHub](https://img.shields.io/badge/GitHub-Repo-blue?logo=github)](https://github.com/Ryustiel/SR10-project)
+[![GitHub](https://img.shields.io/badge/GitHub-Repo-181717?style=for-the-badge&logo=github&logoColor=white&labelColor=blue&color=black)](https://github.com/Ryustiel/SR10-project)
 
 
 ## Etudiants :
