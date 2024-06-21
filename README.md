@@ -1,9 +1,15 @@
 # Site Internet de Recrutement
 
-## Lien du Git :
+## Lien Utiles :
 
-[![GitHub](https://img.shields.io/badge/GitHub-Repo-181717?style=for-the-badge&logo=github&logoColor=white&labelColor=blue&color=black)](https://github.com/Ryustiel/SR10-project)
-
+<p align="center">
+  <a href="https://sr10project.azurewebsites.net" target="_blank">
+    <img src="https://img.shields.io/badge/Visit_SR10_Project_Demo_Website-Click_Here-brightgreen?style=for-the-badge&logo=appveyor" alt="Visit SR10 Project">
+  </a>
+  <a href="https://github.com/your_github_repo" target="_blank">
+    <img src="https://img.shields.io/badge/GitHub-View_Repository-blue?style=for-the-badge&logo=github" alt="GitHub Repository">
+  </a>
+</p>
 
 ## Etudiants :
 - Raphael Nguyen
